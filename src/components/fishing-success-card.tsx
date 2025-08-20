@@ -6,17 +6,26 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SpeciesSelector } from "@/components/species-selector";
 import { getFishingForecastAction } from "@/app/actions";
 import type { Species } from "@/lib/types";
-import { MOCK_LOCATION, MOCK_CURRENT_CONDITIONS } from "@/lib/types";
+import { MOCK_LOCATION } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Wind } from "lucide-react";
-import { format } from "date-fns";
+import { FishBassIcon } from "./icons/fish-bass";
+import { FishBreamIcon } from "./icons/fish-bream";
+import { FishCarpIcon } from "./icons/fish-carp";
+import { ArrowUp, ArrowDown, Clock } from "lucide-react";
 
 type SuccessScoreResult = {
   successScore: number;
   recommendedTimeWindow: string;
 } | null;
+
+const speciesIcons: Record<Species, React.FC<React.SVGProps<SVGSVGElement>>> = {
+    Bream: FishBreamIcon,
+    Bass: FishBassIcon,
+    Carp: FishCarpIcon,
+};
+
 
 export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: any) => void }) {
   const [isPending, startTransition] = useTransition();
@@ -24,6 +33,7 @@ export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: 
   const [result, setResult] = useState<SuccessScoreResult>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const SpeciesIcon = speciesIcons[selectedSpecies];
 
   const handleGetScore = (species: Species) => {
     startTransition(async () => {
@@ -59,64 +69,72 @@ export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: 
   const score = result?.successScore ?? 0;
   
   const getScoreInfo = () => {
-    if (isPending && !result) return { label: 'Loading...'};
-    if (score >= 80) return { label: 'Excellent'};
-    if (score >= 60) return { label: 'Good'};
-    if (score >= 40) return { label: 'Fair'};
-    return { label: 'Poor'};
+    if (isPending && !result) return { label: 'Loading...', className: 'bg-muted text-muted-foreground' };
+    if (score >= 80) return { label: 'Excellent', className: 'bg-good/20 text-good' };
+    if (score >= 60) return { label: 'Good', className: 'bg-good/20 text-good' };
+    if (score >= 40) return { label: 'Fair', className: 'bg-fair/20 text-fair' };
+    return { label: 'Poor', className: 'bg-poor/20 text-poor' };
   }
 
-  const { label } = getScoreInfo();
-  const today = new Date();
+  const { label, className: badgeClassName } = getScoreInfo();
+  
+  // Mock factors for UI
+  const mockFactors = [
+      { label: "Rising Pressure", positive: true },
+      { label: "Overcast", positive: true },
+      { label: "Wind", positive: false },
+  ]
 
   return (
     <Card className="w-full shadow-card rounded-xl overflow-hidden border-0 gradient-fishing-panel text-white">
         <div className="p-4 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <p className="text-body opacity-90">{MOCK_CURRENT_CONDITIONS.condition}</p>
-                    <p className="text-numeric-xl font-bold">{MOCK_CURRENT_CONDITIONS.temperature}°</p>
-                    <p className="text-caption opacity-80">{format(today, 'EEEE, MMMM d')}</p>
-                    <div className="flex pt-2">
-                         <Badge variant="secondary" className="h-7 rounded-full bg-white/15 text-white border-0">
-                            <Wind className="w-4 h-4 mr-2"/>
-                            {MOCK_CURRENT_CONDITIONS.windSpeed} km/h
-                        </Badge>
-                    </div>
-                </div>
-                <div className="flex items-center justify-center">
-                    <div className="text-center space-y-2">
-                        {isPending && !result ? (
-                          <Skeleton className="h-12 w-24 mx-auto bg-white/20" />
-                        ) : (
-                          <div className="flex items-baseline justify-center gap-1">
-                            <span className="font-headline font-bold text-5xl">
-                              {result ? Math.round(result.successScore) : '--'}
-                            </span>
-                            <span className="font-headline font-bold text-2xl">%</span>
-                          </div>
-                        )}
-                        <Badge variant="secondary" className="bg-white/20 text-sm rounded-full border-0">
-                          {label}
-                        </Badge>
-                    </div>
-                </div>
+            <div className="flex items-center gap-3">
+                <SpeciesIcon className="w-8 h-8"/>
+                <h3 className="text-h3 font-headline font-semibold">{selectedSpecies} Fishing Success</h3>
             </div>
+            
+            <div className="flex items-center justify-between">
+                <div className="flex items-baseline gap-1">
+                    {isPending && !result ? (
+                        <Skeleton className="h-7 w-20 bg-white/20" />
+                    ) : (
+                        <>
+                            <span className="font-headline font-bold text-numeric-l">
+                            {result ? Math.round(result.successScore) : '--'}
+                            </span>
+                            <span className="font-headline font-bold text-body">%</span>
+                        </>
+                    )}
+                </div>
+                <Badge className={cn("h-6 rounded-md text-xs", badgeClassName)}>{label}</Badge>
+            </div>
+
+            <div className="flex items-center gap-2">
+                {mockFactors.map(factor => (
+                    <Badge key={factor.label} variant="secondary" className="h-6 rounded-md bg-white/15 text-white border-0 text-xs">
+                        {factor.positive ? <ArrowUp className="w-3 h-3 mr-1.5"/> : <ArrowDown className="w-3 h-3 mr-1.5"/>}
+                        {factor.label}
+                    </Badge>
+                ))}
+            </div>
+            
              <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} disabled={isPending} />
         </div>
 
-        { (isPending && !result) ? (
-            <div className="p-4 border-t border-white/20">
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-5 w-1/2 mt-2" />
-            </div>
-        ) : error ? (
-             <div className="p-4 border-t border-white/20 text-destructive-foreground font-medium bg-destructive/50">
-                <p>Could not load recommendation: {error}</p>
-              </div>
-        ) : result ? (
-             <RecommendedWindowCard timeWindow={result.recommendedTimeWindow} score={score} />
-        ) : null }
+        <div className="px-2 pb-2">
+            { (isPending && !result) ? (
+                <div className="p-4 h-[72px]">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-5 w-1/2 mt-2" />
+                </div>
+            ) : error ? (
+                <div className="p-4 rounded-xl text-destructive-foreground font-medium bg-destructive/50">
+                    <p>Could not load recommendation: {error}</p>
+                </div>
+            ) : result ? (
+                <RecommendedWindowCard timeWindow={result.recommendedTimeWindow} score={score} />
+            ) : null }
+        </div>
     </Card>
   );
 }
@@ -132,18 +150,18 @@ function RecommendedWindowCard({ timeWindow, score }: { timeWindow: string, scor
     const hasWindow = timeWindow && timeWindow.includes('-');
     
     return (
-      <div className="p-4 rounded-xl bg-card border shadow-inner-sm">
-          <div className="flex items-center justify-between">
+      <div className="h-[72px] p-4 rounded-xl bg-card text-card-foreground border shadow-inner flex items-center justify-between">
+          <div className="flex items-center gap-3">
+              <Clock className="w-5 h-5 text-muted-foreground"/>
               <div>
-                  <p className="text-caption text-muted-foreground font-medium">Recommended Window</p>
-                  <p className="font-headline text-numeric-l">{hasWindow ? timeWindow : 'No recommendation available.'}</p>
+                  <p className="font-headline text-numeric-l leading-tight">{hasWindow ? timeWindow : 'No ideal window'}</p>
               </div>
-              {hasWindow && (
-                <Badge className={cn("h-6 rounded-md text-xs", scoreInfo.className)}>
-                  {scoreInfo.label}
-                </Badge>
-              )}
           </div>
+          {hasWindow && (
+            <Badge className={cn("h-6 rounded-md text-xs", scoreInfo.className)}>
+              {scoreInfo.label}
+            </Badge>
+          )}
       </div>
     )
-  }
+}

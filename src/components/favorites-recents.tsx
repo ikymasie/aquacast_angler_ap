@@ -1,57 +1,56 @@
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, History, MoreVertical } from "lucide-react";
-import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Star } from "lucide-react";
 
 const favorites = [
-  { name: "Willow Creek Reservoir", species: "Bass" },
-  { name: "Tanglewood Lake", species: "Carp" },
-  { name: "Riverbend Park", species: "Bream" },
+  { name: "Willow Creek Reservoir", photo: "https://placehold.co/160x96.png", hint: "lake sunset" },
+  { name: "Tanglewood Lake", photo: "https://placehold.co/160x96.png", hint: "river forest" },
+  { name: "Riverbend Park", photo: "https://placehold.co/160x96.png", hint: "creek rocks" },
 ];
 
 const recents = [
-  { name: "Lake Harmony, PA", species: "Bass" },
-  { name: "Sunset Marina", species: "Bream" },
+    { name: "Lake Harmony, PA", photo: "https://placehold.co/160x96.png", hint: "mountain lake" },
+    { name: "Sunset Marina", photo: "https://placehold.co/160x96.png", hint: "marina boats" },
 ];
+
 
 export function FavoritesRecents() {
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col rounded-xl">
       <CardHeader>
-        <CardTitle className="font-headline text-xl">My Spots</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
-        <Tabs defaultValue="favorites" className="flex-1 flex flex-col">
+        <Tabs defaultValue="favorites" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="favorites"><Star className="w-4 h-4 mr-2" />Favorites</TabsTrigger>
-            <TabsTrigger value="recents"><History className="w-4 h-4 mr-2" />Recents</TabsTrigger>
+            <TabsTrigger value="favorites">Favorites</TabsTrigger>
+            <TabsTrigger value="recents">Recents</TabsTrigger>
           </TabsList>
-          <TabsContent value="favorites" className="flex-1 mt-4">
-            <div className="space-y-2">
-              {favorites.map((spot, i) => <SpotItem key={i} name={spot.name} species={spot.species} />)}
-            </div>
+          <TabsContent value="favorites" className="mt-4">
+            <SpotList spots={favorites} />
           </TabsContent>
-          <TabsContent value="recents" className="flex-1 mt-4">
-             <div className="space-y-2">
-              {recents.map((spot, i) => <SpotItem key={i} name={spot.name} species={spot.species} />)}
-            </div>
+          <TabsContent value="recents" className="mt-4">
+            <SpotList spots={recents} />
           </TabsContent>
         </Tabs>
-      </CardContent>
+      </CardHeader>
     </Card>
   );
 }
 
-function SpotItem({ name, species }: { name: string, species: string }) {
-  return (
-    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary">
-      <div>
-        <p className="font-semibold">{name}</p>
-        <p className="text-sm text-muted-foreground">{species}</p>
-      </div>
-      <Button variant="ghost" size="icon">
-        <MoreVertical className="h-5 w-5" />
-      </Button>
-    </div>
-  )
+function SpotList({ spots }: { spots: { name: string, photo: string, hint: string }[] }) {
+    return (
+        <div className="grid grid-cols-2 gap-3">
+            {spots.map((spot) => (
+                <div key={spot.name} className="relative rounded-lg overflow-hidden aspect-[16/10] group cursor-pointer">
+                    <Image src={spot.photo} layout="fill" objectFit="cover" alt={spot.name} data-ai-hint={spot.hint} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-0 left-0 p-2">
+                        <p className="text-white font-semibold text-sm drop-shadow-md">{spot.name}</p>
+                    </div>
+                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Star className="w-5 h-5 text-white fill-amber-400"/>
+                    </div>
+                </div>
+            ))}
+        </div>
+    )
 }
