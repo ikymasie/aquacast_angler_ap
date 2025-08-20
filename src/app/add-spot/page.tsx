@@ -30,6 +30,10 @@ export default function AddSpotPage() {
         }
     ), []);
 
+    const handleLocationSelect = (location: { lat: number; lng: number; }) => {
+        setSelectedLocation(location);
+    };
+    
     const handleSaveSpot = () => {
         if (!selectedLocation) {
             toast({
@@ -107,7 +111,7 @@ export default function AddSpotPage() {
               Use the map to find and select your fishing spot. Pan and zoom to find the exact location, then tap to place a pin.
             </p>
             <div className="aspect-video w-full bg-secondary rounded-lg overflow-hidden">
-                <LocationPickerMap onLocationSelect={setSelectedLocation} />
+                <LocationPickerMap onLocationSelect={handleLocationSelect} />
             </div>
           </CardContent>
         </Card>
