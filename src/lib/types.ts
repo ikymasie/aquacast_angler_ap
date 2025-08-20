@@ -72,15 +72,13 @@ export interface ScoredHour {
     temperature: number;
 }
 
-export type DaypartName = 'Morning' | 'Midday' | 'Afternoon' | 'Evening' | 'Night';
 export type ScoreStatus = "Poor" | "Bad" | "Fair" | "Great" | "Excellent";
 
-export interface DaypartScore {
-    name: DaypartName;
+export interface ThreeHourIntervalScore {
     label: string;
     score: number;
     status: ScoreStatus;
-    hasWindow: boolean;
+    condition: string;
     isCurrent: boolean;
 }
 

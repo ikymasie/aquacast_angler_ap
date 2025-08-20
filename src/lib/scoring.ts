@@ -1,8 +1,8 @@
 
 'use server';
 
-import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour, DaypartName, DaypartScore, ScoreStatus, OverallDayScore, RecommendedWindow } from './types';
-import { parseISO, isWithinInterval, addMinutes, subMinutes, format, getHours, getMinutes, differenceInMinutes, addHours, differenceInHours } from 'date-fns';
+import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour, ScoreStatus, OverallDayScore, RecommendedWindow, ThreeHourIntervalScore } from './types';
+import { parseISO, isWithinInterval, addMinutes, subMinutes, format, getHours, getMinutes, differenceInMinutes, addHours, differenceInHours, startOfHour, isSameHour } from 'date-fns';
 import speciesRules from './species-rules.json';
 
 type SpeciesKey = keyof typeof speciesRules;
@@ -237,101 +237,58 @@ export async function getScoreStatus(score: number): Promise<ScoreStatus> {
     return "Bad";
 }
 
-async function findBestSubWindow(hours: ScoredHour[]): Promise<{ start: string; end: string, status: ScoreStatus, score: number } | null> {
-    if (!hours || hours.length === 0) return null;
-    
-    const goodHours = hours.filter(h => h.score >= 60);
-    if (goodHours.length === 0) return null;
 
-    let bestRun: ScoredHour[] = [];
-    let currentRun: ScoredHour[] = [];
-
-    for (let i = 0; i < goodHours.length; i++) {
-        if (i === 0 || differenceInMinutes(parseISO(goodHours[i].time), parseISO(goodHours[i - 1].time)) <= 61) { // Allow 61 min for rounding
-            currentRun.push(goodHours[i]);
-        } else {
-            if (currentRun.length > bestRun.length) {
-                bestRun = currentRun;
-            }
-            currentRun = [goodHours[i]];
-        }
-    }
-    if (currentRun.length > bestRun.length) {
-        bestRun = currentRun;
+export async function calculate3HourIntervalScores(hourlyScores: ScoredHour[]): Promise<ThreeHourIntervalScore[]> {
+    if (!hourlyScores || hourlyScores.length === 0) {
+        return [];
     }
 
-    if (bestRun.length === 0 || differenceInMinutes(parseISO(bestRun[bestRun.length - 1].time), parseISO(bestRun[0].time)) < 45) {
-        return null;
-    }
-    
-    const avgScore = bestRun.reduce((sum, h) => sum + h.score, 0) / bestRun.length;
-
-    return {
-        start: bestRun[0].time,
-        end: bestRun[bestRun.length - 1].time,
-        status: await getScoreStatus(avgScore),
-        score: Math.round(avgScore)
-    };
-}
-
-
-export async function calculateDaypartScores(
-    hourlyScores: ScoredHour[],
-    sunriseISO: string,
-    sunsetISO: string
-): Promise<DaypartScore[]> {
-    const sunrise = parseISO(sunriseISO);
-    const sunset = parseISO(sunsetISO);
-    const solarNoon = new Date(sunrise.getTime() + (sunset.getTime() - sunrise.getTime()) / 2);
     const now = new Date();
+    const currentHour = startOfHour(now);
 
-    const daypartDefinitions: { name: DaypartName, label: string, start: Date; end: Date }[] = [
-        { name: 'Morning',   label: 'Morn',  start: subMinutes(sunrise, 60),      end: addMinutes(solarNoon, -120) },
-        { name: 'Midday',    label: 'Mid',   start: addMinutes(solarNoon, -120),  end: addMinutes(solarNoon, 120) },
-        { name: 'Afternoon', label: 'Aft',   start: addMinutes(solarNoon, 120),   end: subMinutes(sunset, -30) },
-        { name: 'Evening',   label: 'Eve',   start: addMinutes(sunset, -30),      end: addMinutes(sunset, 90) },
-        { name: 'Night',     label: 'Night', start: addMinutes(sunset, 90),       end: addHours(subMinutes(sunrise, 60), 24) }
-    ];
-    
-    const results: DaypartScore[] = [];
+    // Find the starting index in the hourlyScores array
+    const startIndex = hourlyScores.findIndex(h => isSameHour(parseISO(h.time), currentHour));
+    const relevantScores = startIndex !== -1 ? hourlyScores.slice(startIndex) : hourlyScores;
 
-    for (const part of daypartDefinitions) {
-        const { name, label, start, end } = part;
-        
-        const scoresInPart = hourlyScores.filter(h => {
-             const hTime = parseISO(h.time);
-             return isWithinInterval(hTime, {start, end});
-        });
+    const results: ThreeHourIntervalScore[] = [];
 
-        if (scoresInPart.length === 0) {
-             results.push({ name, label, score: 0, status: "Poor", hasWindow: false, isCurrent: false });
-             continue;
-        }
+    // Create at least 6 intervals (18 hours)
+    for (let i = 0; i < relevantScores.length && results.length < 6; i += 3) {
+        const chunk = relevantScores.slice(i, i + 3);
+        if (chunk.length === 0) continue;
 
-        const sortedScores = [...scoresInPart].sort((a, b) => b.score - a.score);
-        const top60PercentCount = Math.max(2, Math.ceil(sortedScores.length * 0.6));
-        const topScores = sortedScores.slice(0, top60PercentCount);
-        
-        const avgScore = Math.round(topScores.reduce((sum, h) => sum + h.score, 0) / topScores.length);
+        const avgScore = Math.round(chunk.reduce((sum, h) => sum + h.score, 0) / chunk.length);
         const status = await getScoreStatus(avgScore);
-        const bestWindow = await findBestSubWindow(scoresInPart);
+
+        // Find the most frequent condition in the chunk
+        const conditionCounts = chunk.reduce((acc, h) => {
+            acc[h.condition] = (acc[h.condition] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+        const mostFrequentCondition = Object.keys(conditionCounts).reduce((a, b) => conditionCounts[a] > conditionCounts[b] ? a : b);
+
+        let label = '';
+        if (i === 0) {
+            label = 'Now';
+        } else {
+            label = format(parseISO(chunk[0].time), 'ha').toLowerCase();
+        }
         
-        const isCurrent = isWithinInterval(now, { start, end });
+        const isCurrent = i === 0;
 
         results.push({
-            name,
             label,
             score: avgScore,
             status,
-            hasWindow: !!bestWindow,
-            isCurrent,
+            condition: mostFrequentCondition,
+            isCurrent
         });
     }
 
     return results;
 }
 
-export async function getOverallDayScore(daypartScores: DaypartScore[], hourlyScores: ScoredHour[]): Promise<OverallDayScore> {
+export async function getOverallDayScore(hourlyScores: ScoredHour[]): Promise<OverallDayScore> {
     if (!hourlyScores || hourlyScores.length === 0) {
         return {
             dayAvgScore: 0,

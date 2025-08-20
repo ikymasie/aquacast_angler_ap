@@ -1,9 +1,9 @@
 
 'use server';
 
-import type { Species, Location, ScoredHour, DaypartScore, OverallDayScore } from "@/lib/types";
+import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
-import { scoreHour, recommendWindows, calculateDaypartScores, getOverallDayScore } from "@/lib/scoring";
+import { scoreHour, recommendWindows, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
 import { format, parseISO, startOfDay, endOfDay, isWithinInterval } from "date-fns";
 
 interface GetScoreActionPayload {
@@ -71,20 +71,16 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         temperature: h.temperature
     }));
 
-    const daypartScores = await calculateDaypartScores(
-        scoredHours,
-        selectedDayData.sunrise,
-        selectedDayData.sunset
-    );
+    const threeHourScores: ThreeHourIntervalScore[] = await calculate3HourIntervalScores(scoredHours);
     
-    const overallDayScore = await getOverallDayScore(daypartScores, scoredHours);
+    const overallDayScore = await getOverallDayScore(scoredHours);
 
     return { 
       data: {
         successScore: currentScore,
         recommendedTimeWindow,
         hourlyChartData,
-        daypartScores,
+        threeHourScores,
         overallDayScore,
       }, 
       error: null 

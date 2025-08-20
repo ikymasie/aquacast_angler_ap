@@ -6,7 +6,7 @@ import { BottomNav } from '@/components/bottom-nav';
 import { Header } from '@/components/header';
 import { SpotHeaderCard } from '@/components/spot-header-card';
 import { MapCard } from '@/components/map-card';
-import type { Species, Location, WeatherApiResponse, DaypartScore, OverallDayScore, RecommendedWindow, HourlyForecastData } from '@/lib/types';
+import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, HourlyForecastData } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
 import { getCachedWeatherData } from '@/services/weather/client';
 import { getFishingForecastAction } from '../actions';
@@ -30,7 +30,7 @@ export default function SpotDetailsPage() {
     const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
     const [weatherData, setWeatherData] = useState<WeatherApiResponse | null>(null);
     const [recommendedWindow, setRecommendedWindow] = useState<RecommendedWindow | null>(null);
-    const [daypartScores, setDaypartScores] = useState<DaypartScore[] | null>(null);
+    const [threeHourScores, setThreeHourScores] = useState<ThreeHourIntervalScore[] | null>(null);
     const [overallDayScore, setOverallDayScore] = useState<OverallDayScore | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isForecastLoading, setIsForecastLoading] = useState(true);
@@ -64,11 +64,11 @@ export default function SpotDetailsPage() {
 
             if (forecastResult.data) {
                 setRecommendedWindow(forecastResult.data.recommendedTimeWindow || null);
-                setDaypartScores(forecastResult.data.daypartScores || null);
+                setThreeHourScores(forecastResult.data.threeHourScores || null);
                 setOverallDayScore(forecastResult.data.overallDayScore || null);
             } else {
                 setRecommendedWindow(null);
-                setDaypartScores(null);
+                setThreeHourScores(null);
                 setOverallDayScore(null);
             }
             setIsForecastLoading(false);
@@ -108,7 +108,7 @@ export default function SpotDetailsPage() {
                             />
                         )}
 
-                        {isForecastLoading || !daypartScores || !overallDayScore ? (
+                        {isForecastLoading || !threeHourScores || !overallDayScore ? (
                            <Skeleton className="h-[180px] w-full rounded-xl" />
                         ) : (
                            <DaypartScorePanel
@@ -117,7 +117,7 @@ export default function SpotDetailsPage() {
                                dayAvgScore={overallDayScore.dayAvgScore}
                                dayStatus={overallDayScore.dayStatus}
                                bestWindow={recommendedWindow ?? undefined}
-                               dayparts={daypartScores}
+                               intervals={threeHourScores}
                            />
                         )}
 

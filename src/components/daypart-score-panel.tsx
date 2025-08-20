@@ -5,12 +5,13 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { DaypartScore, RecommendedWindow, ScoreStatus, Species } from "@/lib/types";
-import { format, parseISO, isToday } from 'date-fns';
-import { Clock, Sun, Sunrise, Sunset, Moon, CloudSun, Dot } from "lucide-react";
+import type { ThreeHourIntervalScore, RecommendedWindow, ScoreStatus, Species } from "@/lib/types";
+import { format, parseISO } from 'date-fns';
+import { Clock, Dot } from "lucide-react";
 import { FishBreamIcon } from "./icons/fish-bream";
 import { FishBassIcon } from "./icons/fish-bass";
 import { FishCarpIcon } from "./icons/fish-carp";
+import { WeatherIcon } from "./weather-icon";
 
 const statusColors: Record<ScoreStatus, string> = {
     Poor: "var(--poor)",
@@ -26,14 +27,6 @@ const speciesIcons: Record<'bass' | 'bream' | 'carp', React.FC<any>> = {
     carp: FishCarpIcon,
 };
 
-const daypartIcons: Record<string, React.FC<any>> = {
-    morning: Sunrise,
-    midday: Sun,
-    afternoon: CloudSun,
-    evening: Sunset,
-    night: Moon,
-};
-
 
 interface DaypartScorePanelProps {
     speciesKey: 'bass' | 'bream' | 'carp';
@@ -41,7 +34,7 @@ interface DaypartScorePanelProps {
     dayAvgScore: number;
     dayStatus: ScoreStatus;
     bestWindow?: RecommendedWindow;
-    dayparts: DaypartScore[];
+    intervals: ThreeHourIntervalScore[];
 }
 
 function useElementWidth() {
@@ -62,7 +55,7 @@ export function DaypartScorePanel({
     dayAvgScore,
     dayStatus,
     bestWindow,
-    dayparts
+    intervals
 }: DaypartScorePanelProps) {
     const { ref: stripRef, width: stripWidth } = useElementWidth();
     const SpeciesIcon = speciesIcons[speciesKey];
@@ -117,25 +110,24 @@ export function DaypartScorePanel({
                     )}
                 </div>
 
-                {/* Right Column: Daypart Strip */}
+                {/* Right Column: 3-hour Interval Strip */}
                 <div className="flex-1 overflow-x-auto space-x-2 no-scrollbar" ref={stripRef}>
                     <div className="flex h-full items-stretch">
-                        {dayparts.map(part => {
-                            const DaypartIcon = daypartIcons[part.name.toLowerCase()] || Sun;
-                            const color = getStatusColor(part.status);
+                        {intervals.map(interval => {
+                            const color = getStatusColor(interval.status);
                             return (
                                 <div
-                                    key={part.name}
+                                    key={interval.label}
                                     style={{ width: cellStyle.width }}
                                     className={cn(
                                         "flex-shrink-0 flex flex-col items-center justify-between text-center p-2 rounded-lg",
-                                        part.isCurrent && "bg-white/18"
+                                        interval.isCurrent && "bg-white/18"
                                     )}
                                 >
-                                    <span className={cn("font-body text-white/85", cellStyle.label)}>{part.label}</span>
-                                    <DaypartIcon className="text-white" style={{ width: cellStyle.icon, height: cellStyle.icon, color: `hsl(${color})` }} />
-                                    <span className={cn("font-headline font-semibold text-white", cellStyle.score)}>{part.score}</span>
-                                    {part.hasWindow ? <Dot className="w-4 h-4" style={{ color: `hsl(${color})` }} /> : <div className="w-4 h-4"/>}
+                                    <span className={cn("font-body text-white/85", cellStyle.label)}>{interval.label}</span>
+                                    <WeatherIcon condition={interval.condition} className="text-white" style={{ width: cellStyle.icon, height: cellStyle.icon, color: `hsl(${color})` }} />
+                                    <span className={cn("font-headline font-semibold text-white", cellStyle.score)}>{interval.score}</span>
+                                    <div className="w-4 h-4"/>
                                 </div>
                             )
                         })}
