@@ -31,10 +31,16 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     const dayStart = startOfDay(selectedDay);
     const dayEnd = endOfDay(selectedDay);
 
-    const hoursForDay = weatherData.hourly.filter(h => 
+    let hoursForDay = weatherData.hourly.filter(h => 
         isWithinInterval(parseISO(h.t), { start: dayStart, end: dayEnd })
     );
 
+    // If no hours are found for today, it might be because the API returned only future hours.
+    // In this case, we can use the start of the hourly forecast as our data.
+    if (hoursForDay.length === 0 && isWithinInterval(new Date(), { start: dayStart, end: dayEnd })) {
+        hoursForDay = weatherData.hourly;
+    }
+    
     if (hoursForDay.length === 0) {
       return { data: null, error: "Could not retrieve future forecast data."};
     }
