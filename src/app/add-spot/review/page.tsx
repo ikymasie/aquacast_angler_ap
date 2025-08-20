@@ -1,16 +1,18 @@
 
 'use client';
 
-import { useState, useEffect, useRef, useTransition } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/header';
 import { BottomNav } from '@/components/bottom-nav';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Camera, Check, ArrowLeft, Video, VideoOff } from 'lucide-react';
+import { Camera, Check, VideoOff } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function ReviewSpotPage() {
     const searchParams = useSearchParams();
@@ -18,6 +20,7 @@ export default function ReviewSpotPage() {
     const { toast } = useToast();
     const spotId = searchParams.get('id');
     const [spot, setSpot] = useState<any>(null);
+    const [spotName, setSpotName] = useState('');
     const [isLoading, setIsLoading] = useState(true);
 
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -37,6 +40,7 @@ export default function ReviewSpotPage() {
             const currentSpot = allSpots.find((s: any) => s.id === spotId);
             if (currentSpot) {
                 setSpot(currentSpot);
+                setSpotName(currentSpot.name);
             } else {
                 toast({ variant: 'destructive', title: 'Spot not found' });
                 router.replace('/');
@@ -98,36 +102,37 @@ export default function ReviewSpotPage() {
     };
 
     const handleFinish = () => {
-        // Only update local storage if a new photo was actually taken.
-        // The spot with a placeholder image is already saved from the previous step.
-        if (photoData && spot) {
-            try {
-                 const allSpots = JSON.parse(localStorage.getItem('user-spots') || '[]');
-                 const spotIndex = allSpots.findIndex((s: any) => s.id === spot.id);
-                 if (spotIndex > -1) {
+        if (!spot) return;
+        
+        try {
+            const allSpots = JSON.parse(localStorage.getItem('user-spots') || '[]');
+            const spotIndex = allSpots.findIndex((s: any) => s.id === spot.id);
+            
+            if (spotIndex > -1) {
+                allSpots[spotIndex].name = spotName;
+                allSpots[spotIndex].notes = `Added on ${new Date().toLocaleDateString()}`; // Update notes
+                if (photoData) {
                     allSpots[spotIndex].image_url = photoData;
-                    localStorage.setItem('user-spots', JSON.stringify(allSpots));
-                    toast({
-                        title: "Photo Saved!",
-                        description: "Your spot's image has been updated.",
-                        variant: 'success'
-                    });
-                 }
-            } catch (e) {
-                console.error("Could not update spot with photo", e);
-                 toast({
-                    title: "Error Saving Photo",
-                    description: "Could not save the new image.",
-                    variant: 'destructive'
+                }
+                localStorage.setItem('user-spots', JSON.stringify(allSpots));
+                
+                toast({
+                    title: "Spot Saved!",
+                    description: "Your new spot is ready to use.",
+                    variant: 'success'
                 });
+            } else {
+                 throw new Error("Could not find spot to update.");
             }
-        } else {
+        } catch (e) {
+            console.error("Could not update spot", e);
              toast({
-                title: "Spot Saved!",
-                description: "Your new spot is ready to use.",
-                variant: 'success'
+                title: "Error Saving Spot",
+                description: "There was a problem saving your changes.",
+                variant: 'destructive'
             });
         }
+        
         router.push('/');
     };
     
@@ -148,12 +153,17 @@ export default function ReviewSpotPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="font-headline text-h2">Review Your New Spot</CardTitle>
-                        <CardDescription>Optionally, take a picture to remember this location.</CardDescription>
+                        <CardDescription>Give your spot a name and optionally, take a picture to remember this location.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div>
-                            <h4 className="font-semibold text-lg">{spot.name}</h4>
-                            <p className="text-muted-foreground">{spot.notes}</p>
+                        <div className="space-y-2">
+                            <Label htmlFor="spot-name">Spot Name</Label>
+                            <Input 
+                                id="spot-name"
+                                value={spotName}
+                                onChange={(e) => setSpotName(e.target.value)}
+                                placeholder="e.g., Secret Bass Cove"
+                            />
                         </div>
                         
                         <div className="relative aspect-video w-full bg-secondary rounded-lg overflow-hidden flex items-center justify-center">
