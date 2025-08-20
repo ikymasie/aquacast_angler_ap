@@ -5,6 +5,7 @@ import type { Species } from "@/lib/types";
 import { FishBassIcon } from "@/components/icons/fish-bass";
 import { FishBreamIcon } from "@/components/icons/fish-bream";
 import { FishCarpIcon } from "@/components/icons/fish-carp";
+import { cn } from "@/lib/utils";
 
 interface SpeciesSelectorProps {
   selectedSpecies: Species;
@@ -24,14 +25,18 @@ export function SpeciesSelector({ selectedSpecies, onSelectSpecies, disabled }: 
       {speciesOptions.map(({ name, icon: Icon }) => (
         <Button
           key={name}
-          variant={selectedSpecies === name ? "default" : "outline"}
-          size="lg"
+          variant="outline"
           onClick={() => onSelectSpecies(name)}
-          className={`flex-1 md:flex-initial transition-all duration-200 transform hover:scale-105 ${selectedSpecies === name ? 'shadow-lg' : ''}`}
+          className={cn(
+            "h-9 px-4 rounded-full border-line-300 text-ink-700 transition-colors duration-200",
+            "data-[state=active]:bg-teal-100 data-[state=active]:border-teal-100 data-[state=active]:text-teal-600 data-[state=active]:font-semibold",
+            "hover:bg-gray-100 dark:hover:bg-gray-800"
+          )}
+          data-state={selectedSpecies === name ? 'active' : 'inactive'}
           disabled={disabled}
         >
-          <Icon className="h-6 w-6 mr-2" />
-          <span className="text-base">{name}</span>
+          <Icon className="h-5 w-5 mr-2" />
+          <span className="text-sm">{name}</span>
         </Button>
       ))}
     </div>

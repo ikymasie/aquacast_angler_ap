@@ -19,7 +19,16 @@ export default {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Space Grotesk', 'sans-serif'],
-        code: ['monospace'],
+        code: ['var(--font-inter)', 'monospace'], // Using Inter for tabular nums
+      },
+      fontSize: {
+        'h1': ['24px', '32px'],
+        'h2': ['20px', '28px'],
+        'h3': ['18px', '26px'],
+        'body': ['16px', '24px'],
+        'caption': ['12px', '18px'],
+        'numeric-xl': ['32px', '36px'],
+        'numeric-l': ['24px', '28px'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -67,14 +76,37 @@ export default {
             background: 'hsl(var(--nav-background))',
             foreground: 'hsl(var(--nav-foreground))',
         },
-        success: 'hsl(var(--success))',
+        good: 'hsl(var(--success))',
         fair: 'hsl(var(--fair))',
         poor: 'hsl(var(--poor))',
+        alert: 'hsl(var(--destructive))',
+        panel: 'hsl(var(--nav-background))', // Alias for panel color
+        ink: {
+          '900': '#1C1F28',
+          '700': '#2C2C2C',
+          '500': '#6B7280',
+          '300': '#A0A4A8'
+        },
+        teal: {
+            '500': '#3CC7B7',
+            '600': '#2DB1A2',
+            '100': '#D9F1EE'
+        },
+        line: {
+            '200': '#E6E9EE',
+            '300': '#D6DAE1'
+        }
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        lg: 'var(--radius)', // 16px
+        xl: '1.25rem', // 20px
+        md: '0.75rem', // 12px
+        sm: 'calc(var(--radius) - 4px)', // fallback
+        full: '999px',
+      },
+      boxShadow: {
+        'card': '0 8px 24px rgba(28,31,40,0.08)',
+        'floating': '0 12px 32px rgba(28,31,40,0.14)',
       },
       keyframes: {
         'accordion-down': {

@@ -8,6 +8,9 @@ import { getFishingForecastAction } from "@/app/actions";
 import type { Species } from "@/lib/types";
 import { MOCK_LOCATION } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+
 
 type SuccessScoreResult = {
   successScore: number;
@@ -52,70 +55,89 @@ export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSpecies]);
 
-  const scoreColorClass = 
-    !result || isPending ? 'bg-muted' :
-    result.successScore >= 80 ? 'bg-success' : // Excellent
-    result.successScore >= 60 ? 'bg-primary' : // Good
-    result.successScore >= 40 ? 'bg-fair' : 'bg-poor';
+  const score = result?.successScore ?? 0;
   
-  const scoreTextColorClass =
-    !result || isPending ? 'text-muted-foreground' :
-    result.successScore >= 80 ? 'text-green-900' :
-    result.successScore >= 60 ? 'text-primary-foreground' :
-    result.successScore >= 40 ? 'text-amber-900' : 'text-red-900';
+  const getScoreInfo = () => {
+    if (isPending && !result) return { bgColor: 'bg-muted', textColor: 'text-muted-foreground', label: 'Loading...'};
+    if (score >= 80) return { bgColor: 'bg-good', textColor: 'text-white', label: 'Excellent'};
+    if (score >= 60) return { bgColor: 'bg-good', textColor: 'text-white', label: 'Good'};
+    if (score >= 40) return { bgColor: 'bg-fair', textColor: 'text-ink-900', label: 'Fair'};
+    return { bgColor: 'bg-poor', textColor: 'text-white', label: 'Poor'};
+  }
 
+  const { bgColor, textColor, label } = getScoreInfo();
 
   return (
-    <Card className="w-full shadow-lg border-2 border-primary/20 overflow-hidden">
-      <CardContent className="p-4 md:p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-4">
-            <CardHeader className="p-0">
-              <CardTitle className="font-headline text-2xl md:text-3xl tracking-tight">
-                Fishing Success Score for {MOCK_LOCATION.name}
-              </CardTitle>
-              <CardDescription className="text-base">
-                Select a species to get a tailored forecast.
-              </CardDescription>
-            </CardHeader>
-            <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} disabled={isPending} />
-            
-            <div className="pt-4">
-              {isPending && !result ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-6 w-3/4" />
-                   <Skeleton className="h-5 w-1/2" />
-                </div>
-              ) : error ? (
-                <div className="text-destructive font-medium">
-                  <p>Could not load recommendation: {error}</p>
-                </div>
-              ) : result ? (
-                <div>
-                  <h3 className="text-lg font-semibold font-headline text-primary">Recommended Window(s)</h3>
-                  <p className="text-lg">{result.recommendedTimeWindow}</p>
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center">
-            <div className={`relative flex items-center justify-center w-36 h-36 md:w-48 md:h-48 rounded-full transition-colors duration-500 ${scoreColorClass}`}>
-                <div className="absolute inset-2 rounded-full bg-background/50 backdrop-blur-sm" />
-                <div className="relative text-center">
-                  {isPending && !result ? (
-                    <Skeleton className="h-12 w-24" />
-                  ) : (
-                    <span className={`font-headline font-bold text-5xl md:text-6xl ${scoreTextColorClass}`}>
-                      {result ? Math.round(result.successScore) : '--'}
-                    </span>
-                  )}
-                  <p className={`font-semibold ${scoreTextColorClass}`}>Success Score</p>
-                </div>
-            </div>
+    <Card className="w-full shadow-card rounded-xl overflow-hidden border-0">
+      <div className="grid grid-cols-1 md:grid-cols-3">
+        <div className="md:col-span-2 p-6 space-y-4">
+          <CardHeader className="p-0">
+            <CardTitle className="font-headline text-h2 text-ink-900">
+              Fishing Success Score
+            </CardTitle>
+            <CardDescription className="text-body text-ink-500">
+              {MOCK_LOCATION.name}
+            </CardDescription>
+          </CardHeader>
+          <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} disabled={isPending} />
+          
+          <div className="pt-4">
+            {isPending && !result ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-3/4" />
+                 <Skeleton className="h-5 w-1/2" />
+              </div>
+            ) : error ? (
+              <div className="text-destructive font-medium">
+                <p>Could not load recommendation: {error}</p>
+              </div>
+            ) : result ? (
+              <RecommendedWindowCard timeWindow={result.recommendedTimeWindow} score={score} />
+            ) : null}
           </div>
         </div>
-      </CardContent>
+
+        <div className={cn("flex items-center justify-center p-6 text-white gradient-fishing-panel", bgColor)}>
+            <div className="relative text-center space-y-2">
+                {isPending && !result ? (
+                  <Skeleton className="h-12 w-24 mx-auto bg-white/20" />
+                ) : (
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="font-headline font-bold text-numeric-xl">
+                      {result ? Math.round(result.successScore) : '--'}
+                    </span>
+                    <span className="font-headline font-bold text-h2">%</span>
+                  </div>
+                )}
+                <Badge variant="secondary" className="bg-white/20 text-white text-sm rounded-full border-0">
+                  {label}
+                </Badge>
+            </div>
+        </div>
+      </div>
     </Card>
   );
+}
+
+
+function RecommendedWindowCard({ timeWindow, score }: { timeWindow: string, score: number }) {
+  const scoreInfo = 
+    score >= 80 ? { label: 'EXCELLENT', className: 'bg-good/10 text-good' } :
+    score >= 60 ? { label: 'GOOD', className: 'bg-good/10 text-good' } :
+    score >= 40 ? { label: 'FAIR', className: 'bg-fair/20 text-fair' } :
+    { label: 'POOR', className: 'bg-poor/10 text-poor' };
+
+  return (
+    <div className="p-4 rounded-xl bg-card border shadow-inner-sm">
+        <div className="flex items-center justify-between">
+            <div>
+                <p className="text-caption text-ink-500 font-medium">Recommended Window</p>
+                <p className="font-headline text-numeric-l text-ink-700">{timeWindow}</p>
+            </div>
+            <Badge className={cn("h-6 rounded-md text-xs", scoreInfo.className)}>
+              {scoreInfo.label}
+            </Badge>
+        </div>
+    </div>
+  )
 }
