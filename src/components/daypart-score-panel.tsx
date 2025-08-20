@@ -53,7 +53,7 @@ export function DaypartScorePanel(props: DaypartScorePanelProps) {
         return <div className="text-center p-4">Loading daypart scores...</div>
     }
 
-    const { speciesKey, spotName, successScore, dayStatus, bestWindow, dayparts } = props;
+    const { speciesKey, spotName, successScore, dayStatus, dayparts } = props;
     const SpeciesIcon = speciesIcons[speciesKey] || FishBreamIcon;
     
     return (
@@ -74,14 +74,6 @@ export function DaypartScorePanel(props: DaypartScorePanelProps) {
                 {/* Right Column: Daypart Strip */}
                 <div className="flex-1 overflow-x-auto no-scrollbar">
                     <div className="flex flex-nowrap items-center h-full gap-2">
-                       <DaypartCell 
-                           name={"Best"}
-                           isCurrent={false}
-                           hasWindow={!!bestWindow}
-                           score={bestWindow ? bestWindow.score : 0}
-                           status={bestWindow ? bestWindow.status : 'Poor'}
-                           windowTime={bestWindow ? `${format(parseISO(bestWindow.start), 'HH:mm')}-${format(parseISO(bestWindow.end), 'HH:mm')}` : '--:--'}
-                       />
                        {dayparts.map(part => (
                            <DaypartCell key={part.name} {...part} />
                        ))}
@@ -102,8 +94,8 @@ interface DaypartCellProps extends DaypartScore {
 
 
 function DaypartCell({ name, score, status, hasWindow, isCurrent, windowTime }: DaypartCellProps) {
-    const Icon = name === 'Best' ? Clock : daypartIcons[name] || Cloud;
-    const shortLabel = name === 'Best' ? 'Best' : name.substring(0, 4);
+    const Icon = daypartIcons[name] || Cloud;
+    const shortLabel = name.substring(0, 4);
 
     return (
         <div className={cn(
@@ -124,7 +116,7 @@ function DaypartCell({ name, score, status, hasWindow, isCurrent, windowTime }: 
              ) : (
                 <>
                     <Icon 
-                        className="w-5 h-5 text-white" 
+                        className="w-5 h-5" 
                         style={{ color: statusColors[status] }}
                     />
                     <span className="font-headline font-semibold text-base">{score}</span>

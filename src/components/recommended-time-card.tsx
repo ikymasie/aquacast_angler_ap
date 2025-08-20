@@ -43,4 +43,3 @@ export function RecommendedTimeCard({ window }: RecommendedTimeCardProps) {
         </Card>
     );
 }
-

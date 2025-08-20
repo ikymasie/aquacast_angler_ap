@@ -340,7 +340,6 @@ export async function calculateDaypartScores(
 export async function getOverallDayScore(daypartScores: DaypartScore[], hourlyScores: ScoredHour[]): Promise<OverallDayScore> {
     if (!daypartScores || daypartScores.length === 0) {
         return {
-            dayAvgScore: 0,
             dayStatus: "Poor",
             bestWindow: null
         };
@@ -351,5 +350,5 @@ export async function getOverallDayScore(daypartScores: DaypartScore[], hourlySc
     
     const bestWindow = findBestSubWindow(hourlyScores);
 
-    return { dayAvgScore, dayStatus, bestWindow };
+    return { dayStatus, bestWindow };
 }

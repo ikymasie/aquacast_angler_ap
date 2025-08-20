@@ -77,7 +77,6 @@ export interface DaypartScore {
 }
 
 export interface OverallDayScore {
-    dayAvgScore: number;
     dayStatus: ScoreStatus;
     bestWindow: {
         start: string;
