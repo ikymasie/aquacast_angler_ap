@@ -77,6 +77,7 @@ export type ScoreStatus = "Poor" | "Bad" | "Fair" | "Great" | "Excellent";
 
 export interface DaypartScore {
     name: DaypartName;
+    label: string;
     score: number;
     status: ScoreStatus;
     hasWindow: boolean;

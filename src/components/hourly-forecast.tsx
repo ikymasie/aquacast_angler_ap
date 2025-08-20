@@ -20,26 +20,11 @@ const statusColors: Record<ScoreStatus, string> = {
 
 export function HourlyForecast({ data }: { data: HourlyForecastData[] }) {
     const [now, setNow] = useState(new Date());
-    const [statuses, setStatuses] = useState<Record<string, ScoreStatus>>({});
 
     useEffect(() => {
         const timer = setInterval(() => setNow(new Date()), 60000); // Update every minute
         return () => clearInterval(timer);
     }, []);
-
-    useEffect(() => {
-        async function loadStatuses() {
-            const newStatuses: Record<string, ScoreStatus> = {};
-            for (const hour of data) {
-                newStatuses[hour.time] = await getScoreStatus(hour.success);
-            }
-            setStatuses(newStatuses);
-        }
-        if (data) {
-            loadStatuses();
-        }
-    }, [data]);
-
 
     // Find the current hour in the data, falling back to the first future hour
     const nowInHours = startOfHour(now);
@@ -66,7 +51,6 @@ export function HourlyForecast({ data }: { data: HourlyForecastData[] }) {
               key={hour.time} 
               hour={hour} 
               isNow={index === 0} // Simplification: Treat first item as 'Now'
-              status={statuses[hour.time] || 'Fair'}
             />
           ))}
         </div>
@@ -83,7 +67,15 @@ export function HourlyForecast({ data }: { data: HourlyForecastData[] }) {
   );
 }
 
-function ForecastItem({ hour, isNow, status }: { hour: HourlyForecastData, isNow: boolean, status: ScoreStatus }) {
+function ForecastItem({ hour, isNow }: { hour: HourlyForecastData, isNow: boolean }) {
+  const [status, setStatus] = useState<ScoreStatus>('Fair');
+
+  useEffect(() => {
+    async function loadStatus() {
+        setStatus(await getScoreStatus(hour.success));
+    }
+    loadStatus();
+  }, [hour.success]);
 
   return (
     <div className={cn(

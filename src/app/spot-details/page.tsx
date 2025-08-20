@@ -16,7 +16,7 @@ import { RecommendedTimeCard } from '@/components/recommended-time-card';
 import { DaySelector } from '@/components/day-selector';
 import { format, startOfToday } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { HourlyForecast } from '@/components/hourly-forecast';
+import { DaypartScorePanel } from '@/components/daypart-score-panel';
 
 // Find a spot by name, or return the first one as a fallback.
 function getSpotByName(name?: string | null) {
@@ -30,7 +30,8 @@ export default function SpotDetailsPage() {
     const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
     const [weatherData, setWeatherData] = useState<WeatherApiResponse | null>(null);
     const [recommendedWindow, setRecommendedWindow] = useState<RecommendedWindow | null>(null);
-    const [hourlyForecast, setHourlyForecast] = useState<HourlyForecastData[] | null>(null);
+    const [daypartScores, setDaypartScores] = useState<DaypartScore[] | null>(null);
+    const [overallDayScore, setOverallDayScore] = useState<OverallDayScore | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isForecastLoading, setIsForecastLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState(startOfToday());
@@ -63,10 +64,12 @@ export default function SpotDetailsPage() {
 
             if (forecastResult.data) {
                 setRecommendedWindow(forecastResult.data.recommendedTimeWindow || null);
-                setHourlyForecast(forecastResult.data.hourlyChartData as any || null);
+                setDaypartScores(forecastResult.data.daypartScores || null);
+                setOverallDayScore(forecastResult.data.overallDayScore || null);
             } else {
                 setRecommendedWindow(null);
-                setHourlyForecast(null);
+                setDaypartScores(null);
+                setOverallDayScore(null);
             }
             setIsForecastLoading(false);
         }
@@ -105,10 +108,17 @@ export default function SpotDetailsPage() {
                             />
                         )}
 
-                        {isForecastLoading || !hourlyForecast ? (
-                            <Skeleton className="h-[120px] w-full rounded-xl" />
+                        {isForecastLoading || !daypartScores || !overallDayScore ? (
+                           <Skeleton className="h-[180px] w-full rounded-xl" />
                         ) : (
-                            <HourlyForecast data={hourlyForecast} />
+                           <DaypartScorePanel
+                               speciesKey={selectedSpecies.toLowerCase() as any}
+                               spotName={spot.name}
+                               dayAvgScore={overallDayScore.dayAvgScore}
+                               dayStatus={overallDayScore.dayStatus}
+                               bestWindow={recommendedWindow ?? undefined}
+                               dayparts={daypartScores}
+                           />
                         )}
 
                        <div className="pt-3 space-y-3">

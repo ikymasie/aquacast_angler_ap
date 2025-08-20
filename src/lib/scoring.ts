@@ -285,18 +285,18 @@ export async function calculateDaypartScores(
     const solarNoon = new Date(sunrise.getTime() + (sunset.getTime() - sunrise.getTime()) / 2);
     const now = new Date();
 
-    const dayparts: Record<DaypartName, { start: Date; end: Date }> = {
-        Morning: { start: subMinutes(sunrise, 60), end: addMinutes(sunrise, 180) },
-        Midday: { start: addMinutes(sunrise, 180), end: subMinutes(solarNoon, 60) },
-        Afternoon: { start: subMinutes(solarNoon, 60), end: subMinutes(sunset, 120) },
-        Evening: { start: subMinutes(sunset, 90), end: addMinutes(sunset, 60) },
-        Night: { start: addMinutes(sunset, 60), end: subMinutes(addHours(sunrise, 24), 60) } 
-    };
+    const daypartDefinitions: { name: DaypartName, label: string, start: Date; end: Date }[] = [
+        { name: 'Morning',   label: 'Morn',  start: subMinutes(sunrise, 60),      end: addMinutes(solarNoon, -120) },
+        { name: 'Midday',    label: 'Mid',   start: addMinutes(solarNoon, -120),  end: addMinutes(solarNoon, 120) },
+        { name: 'Afternoon', label: 'Aft',   start: addMinutes(solarNoon, 120),   end: subMinutes(sunset, -30) },
+        { name: 'Evening',   label: 'Eve',   start: addMinutes(sunset, -30),      end: addMinutes(sunset, 90) },
+        { name: 'Night',     label: 'Night', start: addMinutes(sunset, 90),       end: addHours(subMinutes(sunrise, 60), 24) }
+    ];
     
     const results: DaypartScore[] = [];
 
-    for (const partName of Object.keys(dayparts) as DaypartName[]) {
-        const { start, end } = dayparts[partName];
+    for (const part of daypartDefinitions) {
+        const { name, label, start, end } = part;
         
         const scoresInPart = hourlyScores.filter(h => {
              const hTime = parseISO(h.time);
@@ -304,7 +304,7 @@ export async function calculateDaypartScores(
         });
 
         if (scoresInPart.length === 0) {
-             results.push({ name: partName, score: 0, status: "Poor", hasWindow: false, isCurrent: false });
+             results.push({ name, label, score: 0, status: "Poor", hasWindow: false, isCurrent: false });
              continue;
         }
 
@@ -319,7 +319,8 @@ export async function calculateDaypartScores(
         const isCurrent = isWithinInterval(now, { start, end });
 
         results.push({
-            name: partName,
+            name,
+            label,
             score: avgScore,
             status,
             hasWindow: !!bestWindow,
@@ -338,7 +339,12 @@ export async function getOverallDayScore(daypartScores: DaypartScore[], hourlySc
         };
     }
     
-    const dayAvgScore = Math.round(hourlyScores.reduce((sum, part) => sum + part.score, 0) / hourlyScores.length);
+    // Use a more robust mean of top scores to represent the day's potential
+    const sortedScores = [...hourlyScores].sort((a, b) => b.score - b.score);
+    const top70PercentCount = Math.ceil(sortedScores.length * 0.7);
+    const topScores = sortedScores.slice(0, top70PercentCount);
+    
+    const dayAvgScore = Math.round(topScores.reduce((sum, h) => sum + h.score, 0) / topScores.length);
     const dayStatus = await getScoreStatus(dayAvgScore);
     
     return { dayAvgScore, dayStatus };
