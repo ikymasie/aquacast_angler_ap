@@ -127,16 +127,21 @@ function RecommendedWindowCard({ timeWindow, score }: { timeWindow: string, scor
     score >= 40 ? { label: 'FAIR', className: 'bg-fair/20 text-fair' } :
     { label: 'POOR', className: 'bg-poor/10 text-poor' };
 
+  // Handle case where timeWindow is undefined or not a parsable string
+  const hasWindow = timeWindow && timeWindow.includes('-');
+  
   return (
     <div className="p-4 rounded-xl bg-card border shadow-inner-sm">
         <div className="flex items-center justify-between">
             <div>
                 <p className="text-caption text-ink-500 font-medium">Recommended Window</p>
-                <p className="font-headline text-numeric-l text-ink-700">{timeWindow}</p>
+                <p className="font-headline text-numeric-l text-ink-700">{timeWindow || 'No recommendation available.'}</p>
             </div>
-            <Badge className={cn("h-6 rounded-md text-xs", scoreInfo.className)}>
-              {scoreInfo.label}
-            </Badge>
+            {hasWindow && (
+              <Badge className={cn("h-6 rounded-md text-xs", scoreInfo.className)}>
+                {scoreInfo.label}
+              </Badge>
+            )}
         </div>
     </div>
   )
