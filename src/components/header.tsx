@@ -2,24 +2,29 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Bell, Menu } from "lucide-react";
-import { SidebarTrigger } from "./ui/sidebar";
+import { Bell, Menu, ArrowLeft } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePathname } from 'next/navigation';
+import Link from "next/link";
 
 export function Header() {
   const isMobile = useIsMobile();
+  const pathname = usePathname();
   const hasNotifications = true; // Set this based on actual notification state
+  const isDetailsPage = pathname.includes('/spot-details');
 
   return (
     <header className="sticky top-0 z-30 w-full border-b border-line-200 bg-background/95 backdrop-blur-sm">
        <div className="container mx-auto flex h-14 items-center px-4">
-        {isMobile ? (
-           <SidebarTrigger asChild>
-             <Button variant="ghost" size="icon" className="h-10 w-10">
-               <Menu className="h-6 w-6 text-ink-900" />
-             </Button>
-           </SidebarTrigger>
-        ) : <SidebarTrigger />}
+        {isDetailsPage ? (
+          <Button variant="ghost" size="icon" className="h-10 w-10" asChild>
+            <Link href="/">
+              <ArrowLeft className="h-6 w-6 text-ink-900" />
+            </Link>
+          </Button>
+        ) : (
+           <div className="h-10 w-10" /> // Placeholder to keep alignment
+        )}
        
         <div className="flex-1"></div>
 
