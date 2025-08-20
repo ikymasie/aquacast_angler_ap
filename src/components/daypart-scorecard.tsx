@@ -36,13 +36,12 @@ interface DaypartScorecardProps {
     speciesKey: 'bream' | 'bass' | 'carp';
     sunriseISO: string;
     sunsetISO: string;
-    hourly: { time: string; score: number }[];
     daypartScores: DaypartScore[];
 }
 
-export function DaypartScorecard({ daypartScores = [] }: DaypartScorecardProps) {
+export function DaypartScorecard({ daypartScores }: DaypartScorecardProps) {
     
-    if (daypartScores.length === 0) {
+    if (!daypartScores || daypartScores.length === 0) {
         return <div className="text-center p-4">Loading daypart scores...</div>
     }
     
@@ -130,6 +129,3 @@ function DaypartTile({ name, avgScore, status, bestWindow }: DaypartScore) {
         </div>
     );
 }
-
-
-    

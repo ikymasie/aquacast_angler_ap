@@ -14,6 +14,7 @@ import { getCachedWeatherData } from '@/services/weather/client';
 import { getFishingForecastAction } from '../actions';
 import { MOCK_LOCATION } from '@/lib/types';
 import { DaypartScorecard } from '@/components/daypart-scorecard';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Find a spot by name, or return the first one as a fallback.
 function getSpotByName(name?: string | null) {
@@ -27,7 +28,8 @@ export default function SpotDetailsPage() {
     const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
     const [weatherData, setWeatherData] = useState<WeatherApiResponse | null>(null);
     const [forecast, setForecast] = useState<{ hourly: ScoredHour[] } | null>(null);
-    const [daypartScores, setDaypartScores] = useState<DaypartScore[]>([]);
+    const [daypartScores, setDaypartScores] = useState<DaypartScore[] | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // In a real app, you'd get the spot name from the URL query params
@@ -39,6 +41,7 @@ export default function SpotDetailsPage() {
         };
 
         async function loadData() {
+            setIsLoading(true);
             const weather = await getCachedWeatherData(defaultSpotLocation);
             setWeatherData(weather);
 
@@ -51,16 +54,17 @@ export default function SpotDetailsPage() {
                 setForecast({ hourly: forecastResult.data.hourlyChartData.map(h => ({ time: h.time, score: h.success})) });
                 setDaypartScores(forecastResult.data.daypartScores);
             }
+            setIsLoading(false);
         }
 
         loadData();
-    }, [spot, selectedSpecies]);
+    }, [spot.name, spot.coordinates.lat, spot.coordinates.lon, selectedSpecies]);
 
 
     const speciesList = [
-        { id: 'Bass', name: 'Bass', imageUrl: '/icons/fish-bass-solid.svg' },
-        { id: 'Bream', name: 'Bream', imageUrl: '/icons/fish-bream-solid.svg' },
-        { id: 'Carp', name: 'Carp', imageUrl: '/icons/fish-carp-solid.svg' },
+        { id: 'Bass', name: 'Bass', imageUrl: '/icons/fish-bass.svg' },
+        { id: 'Bream', name: 'Bream', imageUrl: '/icons/fish-bream.svg' },
+        { id: 'Carp', name: 'Carp', imageUrl: '/icons/fish-carp.svg' },
     ];
      const mapThumbnails = [
         { id: 'map', imageUrl: 'https://placehold.co/100x100.png?text=Map', hint: 'map view' },
@@ -79,13 +83,14 @@ export default function SpotDetailsPage() {
                     weatherData={weatherData}
                     location={{ name: spot.name, latitude: spot.coordinates.lat, longitude: spot.coordinates.lon }}
                 />
-
-                {weatherData && forecast && (
+                
+                {isLoading || !weatherData || !daypartScores ? (
+                    <Skeleton className="h-64 w-full rounded-xl" />
+                ) : (
                     <DaypartScorecard
                         speciesKey={selectedSpecies.toLowerCase() as any}
                         sunriseISO={weatherData.daily.sunrise}
                         sunsetISO={weatherData.daily.sunset}
-                        hourly={forecast.hourly}
                         daypartScores={daypartScores}
                     />
                 )}
@@ -111,5 +116,3 @@ export default function SpotDetailsPage() {
     </div>
   );
 }
-
-    
