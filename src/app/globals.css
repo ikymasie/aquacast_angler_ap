@@ -34,8 +34,6 @@
     --input: 220 14% 88%; /* #D6DAE1 - line-300 */
     --ring: 173 58% 51%;
 
-    --radius: 1rem; /* 16px */
-
     --chart-1: 173 58% 51%;
     --chart-2: 215 28% 68%;
     --chart-3: 26 100% 63%;
@@ -44,14 +42,14 @@
 
     --panel: 228 14% 20%; /* #2A2E3F */
 
-    --score-bad: 0 80% 70%; /* Pale Red */
-    --score-fair: 30 90% 70%; /* Pale Orange */
-    --score-great: 60 90% 80%; /* Light Pale Yellow */
-    --score-excellent: 120 70% 80%; /* Light Pale Green */
-
-    --good: 145 63% 42%; /* #27AE60 */
-    --fair: 45 87% 62%; /* #F2C94C */
-    --poor: 0 81% 63%; /* #EB5757 */
+    /* 7-Tier Medical Palette */
+    --score-prime: 172 84% 27%; /* #0B7D6E */
+    --score-very-good: 151 70% 40%; /* #1FA971 */
+    --score-good: 170 66% 45%; /* #27BFA6 */
+    --score-fair: 45 87% 62%; /* #F2C94C */
+    --score-fair-slow: 28 87% 62%; /* #F2994A */
+    --score-poor: 4 78% 63%; /* #E5534B */
+    --score-very-poor: 210 11% 63%; /* #9AA5B1 */
   }
 
   .dark {
@@ -86,14 +84,14 @@
 
     --panel: 228 14% 20%;
     
-    --score-bad: 0 80% 70%; /* Pale Red */
-    --score-fair: 30 90% 70%; /* Pale Orange */
-    --score-great: 60 90% 80%; /* Light Pale Yellow */
-    --score-excellent: 120 70% 80%; /* Light Pale Green */
-
-    --good: 145 63% 42%;
-    --fair: 45 87% 62%;
-    --poor: 0 81% 63%;
+     /* 7-Tier Medical Palette */
+    --score-prime: 172 84% 27%;
+    --score-very-good: 151 70% 40%;
+    --score-good: 170 66% 45%;
+    --score-fair: 45 87% 62%;
+    --score-fair-slow: 28 87% 62%;
+    --score-poor: 4 78% 63%;
+    --score-very-poor: 210 11% 63%;
   }
 }
 

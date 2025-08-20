@@ -231,10 +231,13 @@ export async function recommendWindows(scores: ScoredHour[], threshold: number =
 // --- Daypart Scoring ---
 
 export async function getScoreStatus(score: number): Promise<ScoreStatus> {
-    if (score >= 80) return "Excellent";
-    if (score >= 60) return "Good";
-    if (score >= 40) return "Fair";
-    return "Poor";
+    if (score >= 95) return "Prime";
+    if (score >= 80) return "Very Good";
+    if (score >= 67) return "Good";
+    if (score >= 55) return "Fair";
+    if (score >= 45) return "Fair-Slow";
+    if (score >= 30) return "Poor";
+    return "Very Poor";
 }
 
 

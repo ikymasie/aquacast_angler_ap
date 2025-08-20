@@ -72,7 +72,7 @@ export interface ScoredHour {
     temperature: number;
 }
 
-export type ScoreStatus = "Poor" | "Fair" | "Good" | "Excellent";
+export type ScoreStatus = "Prime" | "Very Good" | "Good" | "Fair" | "Fair-Slow" | "Poor" | "Very Poor";
 
 export interface ThreeHourIntervalScore {
     label: string;

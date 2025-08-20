@@ -5,19 +5,20 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { ThreeHourIntervalScore, RecommendedWindow, ScoreStatus, Species } from "@/lib/types";
-import { format, parseISO } from 'date-fns';
-import { Clock } from "lucide-react";
+import type { ThreeHourIntervalScore, ScoreStatus } from "@/lib/types";
 import { FishBreamIcon } from "./icons/fish-bream";
 import { FishBassIcon } from "./icons/fish-bass";
 import { FishCarpIcon } from "./icons/fish-carp";
 import { WeatherIcon } from "./weather-icon";
 
 const statusColors: Record<ScoreStatus, string> = {
-    Poor: "var(--poor)",
-    Fair: "var(--fair)",
-    Good: "var(--good)",
-    Excellent: "var(--good)",
+    "Prime": "var(--score-prime)",
+    "Very Good": "var(--score-very-good)",
+    "Good": "var(--score-good)",
+    "Fair": "var(--score-fair)",
+    "Fair-Slow": "var(--score-fair-slow)",
+    "Poor": "var(--score-poor)",
+    "Very Poor": "var(--score-very-poor)",
 };
 
 const speciesIcons: Record<'bass' | 'bream' | 'carp', React.FC<any>> = {
@@ -65,7 +66,7 @@ export function DaypartScorePanel({
 
     const cellStyle = getCellStyle();
 
-    const getStatusColor = (status: ScoreStatus) => statusColors[status] || "var(--fair)";
+    const getStatusColor = (status: ScoreStatus) => statusColors[status] || "var(--score-fair)";
     
     return (
         <Card className="w-full rounded-xl shadow-floating border-0 gradient-fishing-panel text-white h-[180px] p-4" aria-live="polite">
