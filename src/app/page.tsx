@@ -13,7 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from 'react';
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState("all_spots");
+  const [activeTab, setActiveTab] = useState("recents");
 
   useEffect(() => {
     if ('geolocation' in navigator) {
