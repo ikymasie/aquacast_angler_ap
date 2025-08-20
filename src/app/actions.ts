@@ -1,32 +1,47 @@
 
 'use server';
 
-import type { Species, Location, ScoredHour, DaypartScore } from "@/lib/types";
+import type { Species, Location, ScoredHour, DaypartScore, OverallDayScore } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, recommendWindows, calculateDaypartScores, getOverallDayScore } from "@/lib/scoring";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, startOfDay, endOfDay, isWithinInterval } from "date-fns";
 
 interface GetScoreActionPayload {
   species: Species;
   location: Location;
+  date: string; // ISO string for the selected date
 }
 
 export async function getFishingForecastAction(payload: GetScoreActionPayload) {
   try {
-    const { species, location } = payload;
+    const { species, location, date } = payload;
     const weatherData = await fetchWeatherData(location);
 
-    const now = new Date();
-    // Filter to start from the current hour
-    const futureHours = weatherData.hourly.filter(h => parseISO(h.t) >= now);
+    const selectedDay = startOfDay(parseISO(date));
 
-    if (futureHours.length === 0) {
+    // Find the daily data for the selected day
+    const dayIndex = weatherData.daily.findIndex(d => startOfDay(parseISO(d.sunrise)) >= selectedDay);
+    const selectedDayData = weatherData.daily[dayIndex >= 0 ? dayIndex : 0];
+
+    if (!selectedDayData) {
+        return { data: null, error: "Could not retrieve daily forecast data for the selected date."};
+    }
+
+    // Filter hourly data for the selected 24-hour period
+    const dayStart = startOfDay(selectedDay);
+    const dayEnd = endOfDay(selectedDay);
+
+    const hoursForDay = weatherData.hourly.filter(h => 
+        isWithinInterval(parseISO(h.t), { start: dayStart, end: dayEnd })
+    );
+
+    if (hoursForDay.length === 0) {
       return { data: null, error: "Could not retrieve future forecast data."};
     }
 
-    const scoredHours: ScoredHour[] = await Promise.all(futureHours.map(async (hour) => ({
+    const scoredHours: ScoredHour[] = await Promise.all(hoursForDay.map(async (hour) => ({
       time: hour.t,
-      score: await scoreHour(species, hour, weatherData.daily, weatherData.recent),
+      score: await scoreHour(species, hour, selectedDayData, weatherData.recent),
     })));
     
     // Check if we have any scores to process
@@ -34,22 +49,25 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         return { data: null, error: "Not enough data to create a forecast." };
     }
 
-    const currentScore = scoredHours[0].score;
-    const recommendedTimeWindow = await recommendWindows(scoredHours.slice(0, 24)); // Recommend based on next 24h
+    const now = new Date();
+    const currentHourIndex = scoredHours.findIndex(h => parseISO(h.time) >= now);
+    const currentScore = currentHourIndex !== -1 ? scoredHours[currentHourIndex].score : scoredHours[0].score;
+
+    const recommendedTimeWindow = await recommendWindows(scoredHours);
 
     // Format hourly data for the chart, ensuring we have data
-    const hourlyChartData = scoredHours.slice(0, 24).map(h => ({
+    const hourlyChartData = scoredHours.map(h => ({
         time: format(parseISO(h.time), 'ha'),
         success: Math.round(h.score)
     }));
 
     const daypartScores = await calculateDaypartScores(
-        scoredHours.slice(0, 24),
-        weatherData.daily.sunrise,
-        weatherData.daily.sunset
+        scoredHours,
+        selectedDayData.sunrise,
+        selectedDayData.sunset
     );
     
-    const overallDayScore = await getOverallDayScore(daypartScores, scoredHours.slice(0, 24));
+    const overallDayScore = await getOverallDayScore(daypartScores, scoredHours);
 
     return { 
       data: {
@@ -122,5 +140,3 @@ export async function addSpotAction(payload: AddSpotPayload) {
         return { data: null, error: errorMessage };
     }
 }
-
-    

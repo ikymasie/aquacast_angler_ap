@@ -1,3 +1,4 @@
+
 import type { Location, HourPoint, DayContext, WeatherApiResponse, RecentWindow } from "@/lib/types";
 import { format, subDays } from "date-fns";
 
@@ -122,12 +123,12 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
         };
     });
 
-    const daily: DayContext = {
-        sunrise: forecastData.daily.sunrise[0],
-        sunset: forecastData.daily.sunset[0],
-        moonPhase: forecastData.daily.moon_phase ? forecastData.daily.moon_phase[0] : 0.5, // Use moon_phase if available, else default
-        uvMax: forecastData.daily.uv_index_max[0],
-    };
+    const daily: DayContext[] = forecastData.daily.time.map((t:string, i:number): DayContext => ({
+        sunrise: forecastData.daily.sunrise[i],
+        sunset: forecastData.daily.sunset[i],
+        moonPhase: 0.5, // Placeholder, as moon phase is not in free tier
+        uvMax: forecastData.daily.uv_index_max[i],
+    }));
     
     // Calculate recent window values from archive data
     const recentTemperatures = (archiveData.hourly?.temperature_2m?.filter((temp: number | null) => temp !== null) as number[]) || [];

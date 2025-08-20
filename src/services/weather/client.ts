@@ -1,6 +1,7 @@
+
 'use client';
 
-import type { Location, WeatherApiResponse } from "@/lib/types";
+import type { Location, WeatherApiResponse, DayContext } from "@/lib/types";
 import { format, subDays, isAfter } from "date-fns";
 
 const FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast";
@@ -82,12 +83,12 @@ async function fetchWeatherDataFromServer(location: Location): Promise<WeatherAp
                 windBeaufort: 0,
             },
         })),
-        daily: {
-            sunrise: forecastData.daily.sunrise[0],
-            sunset: forecastData.daily.sunset[0],
+        daily: forecastData.daily.time.map((t:string, i:number): DayContext => ({
+            sunrise: forecastData.daily.sunrise[i],
+            sunset: forecastData.daily.sunset[i],
             moonPhase: 0.5, // Placeholder
-            uvMax: forecastData.daily.uv_index_max[0],
-        },
+            uvMax: forecastData.daily.uv_index_max[i],
+        })),
         recent: { // Placeholder, server action will provide real values
             waterTempC: 15,
             stdTempPressure: 1,

@@ -6,7 +6,7 @@ import { BottomNav } from '@/components/bottom-nav';
 import { Header } from '@/components/header';
 import { SpotHeaderCard } from '@/components/spot-header-card';
 import { MapCard } from '@/components/map-card';
-import type { Species, Location, WeatherApiResponse, ScoredHour, DaypartScore, OverallDayScore, RecommendedWindow } from '@/lib/types';
+import type { Species, Location, WeatherApiResponse, DaypartScore, OverallDayScore, RecommendedWindow } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
 import { SearchBar } from '@/components/search-bar';
 import { getCachedWeatherData } from '@/services/weather/client';
@@ -14,8 +14,9 @@ import { getFishingForecastAction } from '../actions';
 import { DaypartScorePanel } from '@/components/daypart-score-panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SpeciesSelector } from '@/components/species-selector';
-import { getScoreStatus } from '@/lib/scoring';
 import { RecommendedTimeCard } from '@/components/recommended-time-card';
+import { DaySelector } from '@/components/day-selector';
+import { format, startOfToday } from 'date-fns';
 
 // Find a spot by name, or return the first one as a fallback.
 function getSpotByName(name?: string | null) {
@@ -34,6 +35,7 @@ export default function SpotDetailsPage() {
     const [overallDayScore, setOverallDayScore] = useState<OverallDayScore | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isForecastLoading, setIsForecastLoading] = useState(true);
+    const [selectedDate, setSelectedDate] = useState(startOfToday());
 
     const location = useMemo(() => ({
         name: spot.name,
@@ -58,6 +60,7 @@ export default function SpotDetailsPage() {
             const forecastResult = await getFishingForecastAction({
                 species: selectedSpecies,
                 location: location,
+                date: selectedDate.toISOString(),
             });
 
             if (forecastResult.data) {
@@ -74,7 +77,7 @@ export default function SpotDetailsPage() {
             setIsForecastLoading(false);
         }
         loadForecast();
-    }, [location, selectedSpecies, weatherData]);
+    }, [location, selectedSpecies, weatherData, selectedDate]);
 
 
      const mapThumbnails = [
@@ -91,10 +94,18 @@ export default function SpotDetailsPage() {
                 <SearchBar />
                 <SpotHeaderCard
                     spot={spot}
-                    weatherData={weatherData}
-                    isLoading={isLoading}
                 />
                 
+                {isLoading || !weatherData ? (
+                    <Skeleton className="h-12 w-full" />
+                ) : (
+                    <DaySelector 
+                        dailyData={weatherData.daily}
+                        selectedDate={selectedDate}
+                        onDateSelect={setSelectedDate}
+                    />
+                )}
+
                 {isForecastLoading || !daypartScores || !overallDayScore || successScore === null ? (
                     <Skeleton className="h-[180px] w-full rounded-xl" />
                 ) : (
@@ -102,8 +113,7 @@ export default function SpotDetailsPage() {
                         speciesKey={selectedSpecies.toLowerCase() as any}
                         spotName={spot.name}
                         successScore={successScore}
-                        dayStatus={getScoreStatusSync(successScore)}
-                        bestWindow={overallDayScore.bestWindow}
+                        overallScore={overallDayScore}
                         dayparts={daypartScores}
                     />
                 )}
@@ -129,12 +139,4 @@ export default function SpotDetailsPage() {
         <BottomNav />
     </div>
   );
-}
-
-// Synchronous version for use in non-async contexts if needed
-function getScoreStatusSync(score: number): ScoreStatus {
-    if (score >= 80) return "Excellent";
-    if (score >= 60) return "Good";
-    if (score >= 40) return "Fair";
-    return "Poor";
 }

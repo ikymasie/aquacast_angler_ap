@@ -56,7 +56,7 @@ export interface RecentWindow {
 
 export interface WeatherApiResponse {
     hourly: HourPoint[];
-    daily: DayContext;
+    daily: DayContext[];
     recent: RecentWindow;
 }
 

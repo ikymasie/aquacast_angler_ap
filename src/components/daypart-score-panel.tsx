@@ -39,11 +39,11 @@ const statusBadgeClasses: Record<ScoreStatus, string> = {
 };
 
 
-interface DaypartScorePanelProps extends Omit<OverallDayScore, 'dayAvgScore' | 'dayStatus'> {
+interface DaypartScorePanelProps {
     speciesKey: 'bream' | 'bass' | 'carp';
     spotName: string;
     successScore: number;
-    dayStatus: ScoreStatus;
+    overallScore: OverallDayScore;
     dayparts: DaypartScore[];
 }
 
@@ -53,8 +53,9 @@ export function DaypartScorePanel(props: DaypartScorePanelProps) {
         return <div className="text-center p-4">Loading daypart scores...</div>
     }
 
-    const { speciesKey, spotName, successScore, dayStatus, dayparts } = props;
+    const { speciesKey, spotName, successScore, overallScore, dayparts } = props;
     const SpeciesIcon = speciesIcons[speciesKey] || FishBreamIcon;
+    const dayStatus = overallScore.dayStatus;
     
     return (
        <Card className="w-full rounded-xl shadow-floating border-0 gradient-fishing-panel text-white h-[180px] p-4">
@@ -80,6 +81,7 @@ export function DaypartScorePanel(props: DaypartScorePanelProps) {
                     </div>
                 </div>
             </div>
+             <p className="absolute top-4 right-4 text-xs text-white/75 right-aligned">By time of day</p>
             <style jsx>{`
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
