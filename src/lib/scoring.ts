@@ -240,7 +240,7 @@ export async function getScoreStatus(score: number): Promise<ScoreStatus> {
     return "Poor";
 }
 
-function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string, status: ScoreStatus } | null {
+function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string, status: ScoreStatus, score: number } | null {
     if (!hours || hours.length === 0) return null;
     
     const goodHours = hours.filter(h => h.score >= 60);
@@ -273,6 +273,7 @@ function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string, s
         start: bestRun[0].time,
         end: bestRun[bestRun.length - 1].time,
         status: getScoreStatusSync(avgScore),
+        score: Math.round(avgScore)
     };
 }
 

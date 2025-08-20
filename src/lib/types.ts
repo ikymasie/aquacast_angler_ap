@@ -83,6 +83,7 @@ export interface OverallDayScore {
         start: string;
         end: string;
         status: ScoreStatus;
+        score: number;
     } | null;
 }
 

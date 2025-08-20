@@ -71,27 +71,17 @@ export function DaypartScorePanel(props: DaypartScorePanelProps) {
                     <p className="font-body text-xs text-white/80 mt-1.5 leading-tight" >{spotName.split(',')[0]}</p>
                 </div>
 
-                {/* Center Column: Best Window Pillar */}
-                <div className="flex-shrink-0 w-14 h-[148px] bg-white/20 rounded-lg flex flex-col items-center justify-center text-center p-1 space-y-1">
-                    <span className="font-body text-caption text-white/70">Best</span>
-                    <Clock className="w-5 h-5 text-white"/>
-                    <div className="font-body text-sm text-white/95 leading-tight">
-                         {bestWindow ? (
-                           <>
-                                <span>{format(parseISO(bestWindow.start), 'HH:mm')}</span>
-                                <span>-</span>
-                                <span>{format(parseISO(bestWindow.end), 'HH:mm')}</span>
-                           </>
-                        ) : (
-                           <span>--:--</span>
-                        )}
-                    </div>
-                    {bestWindow && <Badge className={cn("h-5 px-1.5 text-xs border-0", statusBadgeClasses[bestWindow.status])}>{bestWindow.status}</Badge>}
-                </div>
-                
                 {/* Right Column: Daypart Strip */}
                 <div className="flex-1 overflow-x-auto no-scrollbar">
                     <div className="flex flex-nowrap items-center h-full gap-2">
+                       <DaypartCell 
+                           name={"Best"}
+                           isCurrent={false}
+                           hasWindow={!!bestWindow}
+                           score={bestWindow ? bestWindow.score : 0}
+                           status={bestWindow ? bestWindow.status : 'Poor'}
+                           windowTime={bestWindow ? `${format(parseISO(bestWindow.start), 'HH:mm')}-${format(parseISO(bestWindow.end), 'HH:mm')}` : '--:--'}
+                       />
                        {dayparts.map(part => (
                            <DaypartCell key={part.name} {...part} />
                        ))}
@@ -106,9 +96,14 @@ export function DaypartScorePanel(props: DaypartScorePanelProps) {
     );
 }
 
-function DaypartCell({ name, score, status, hasWindow, isCurrent }: DaypartScore) {
-    const Icon = daypartIcons[name] || Cloud;
-    const shortLabel = name.substring(0, 4);
+interface DaypartCellProps extends DaypartScore {
+    windowTime?: string;
+}
+
+
+function DaypartCell({ name, score, status, hasWindow, isCurrent, windowTime }: DaypartCellProps) {
+    const Icon = name === 'Best' ? Clock : daypartIcons[name] || Cloud;
+    const shortLabel = name === 'Best' ? 'Best' : name.substring(0, 4);
 
     return (
         <div className={cn(
@@ -116,12 +111,26 @@ function DaypartCell({ name, score, status, hasWindow, isCurrent }: DaypartScore
             isCurrent && "bg-white/10"
         )}>
             <span className="font-body text-xs text-white/80">{shortLabel}</span>
-            <Icon 
-                className="w-5 h-5 text-white" 
-                style={{ color: statusColors[status] }}
-            />
-            <span className="font-headline font-semibold text-base">{score}</span>
-            <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: hasWindow ? statusColors[status] : 'transparent' }}/>
+             {windowTime ? (
+                 <>
+                    <Icon className="w-5 h-5 text-white"/>
+                    <div className="font-body text-sm text-white/95 leading-tight">
+                        <span>{windowTime.split('-')[0]}</span>
+                        <span>-</span>
+                        <span>{windowTime.split('-')[1]}</span>
+                    </div>
+                    {status && <Badge className={cn("h-5 px-1.5 text-xs border-0", statusBadgeClasses[status])}>{status}</Badge>}
+                 </>
+             ) : (
+                <>
+                    <Icon 
+                        className="w-5 h-5 text-white" 
+                        style={{ color: statusColors[status] }}
+                    />
+                    <span className="font-headline font-semibold text-base">{score}</span>
+                    <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: hasWindow ? statusColors[status] : 'transparent' }}/>
+                </>
+             )}
         </div>
     );
 }
