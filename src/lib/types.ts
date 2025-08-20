@@ -87,6 +87,12 @@ export interface OverallDayScore {
     } | null;
 }
 
+export interface RecommendedWindow {
+    start: string;
+    end: string;
+    avgScore: number;
+}
+
 
 // Mock data for fallback or initial state
 export const MOCK_LOCATION: Location = {

@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour, DaypartName, DaypartScore, ScoreStatus, OverallDayScore } from './types';
+import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour, DaypartName, DaypartScore, ScoreStatus, OverallDayScore, RecommendedWindow } from './types';
 import { parseISO, isWithinInterval, addMinutes, subMinutes, format, getHours, getMinutes, differenceInMinutes, addHours } from 'date-fns';
 import speciesRules from './species-rules.json';
 
@@ -170,26 +170,18 @@ export async function scoreHour(species: Species, h: HourPoint, ctx: DayContext,
   return Math.max(0, Math.min(100, Math.round(total)));
 }
 
-export async function recommendWindows(scores: ScoredHour[], threshold: number = 60): Promise<string> {
-    if (!scores || scores.length === 0) return "Not enough data.";
-
-    const smoothedScores = scores.map((val, i) => {
-        if (i > 0 && i < scores.length - 1) {
-            return { t: val.time, score: (scores[i - 1].score + val.score + scores[i + 1].score) / 3 };
-        }
-        return { t: val.time, score: val.score };
-    });
+export async function recommendWindows(scores: ScoredHour[], threshold: number = 60): Promise<RecommendedWindow | null> {
+    if (!scores || scores.length === 0) return null;
 
     const goodRuns: { start: string; end: string; scores: number[] }[] = [];
     let currentRun: { start: string; end: string; scores: number[] } | null = null;
 
-    smoothedScores.forEach(({ time, score }, i) => {
-        const isoTime = scores[i].time; // use original unsmoothed time
+    scores.forEach(({ time, score }) => {
         if (score >= threshold) {
             if (!currentRun) {
-                currentRun = { start: isoTime, end: isoTime, scores: [score] };
+                currentRun = { start: time, end: time, scores: [score] };
             } else {
-                currentRun.end = isoTime;
+                currentRun.end = time;
                 currentRun.scores.push(score);
             }
         } else {
@@ -202,8 +194,7 @@ export async function recommendWindows(scores: ScoredHour[], threshold: number =
     if (currentRun) goodRuns.push(currentRun);
 
     if (goodRuns.length === 0) {
-        const bestHour = scores.reduce((prev, current) => (prev.score > current.score) ? prev : current);
-        return `Best chance around ${format(parseISO(bestHour.time), 'p')}, though conditions aren't ideal.`;
+        return null;
     }
 
     const mergedRuns = goodRuns.reduce((acc, run) => {
@@ -222,12 +213,17 @@ export async function recommendWindows(scores: ScoredHour[], threshold: number =
         return acc;
     }, [] as typeof goodRuns);
     
-    const topRuns = mergedRuns
+    const topRun = mergedRuns
       .map(run => ({ ...run, avgScore: run.scores.reduce((a, b) => a + b, 0) / run.scores.length }))
-      .sort((a, b) => b.avgScore - a.avgScore)
-      .slice(0, 2);
+      .sort((a, b) => b.avgScore - a.avgScore)[0];
+    
+    if (!topRun) return null;
 
-    return topRuns.map(run => `${format(parseISO(run.start), 'p')} - ${format(parseISO(run.end), 'p')}`).join(" & ");
+    return {
+        start: topRun.start,
+        end: topRun.end,
+        avgScore: Math.round(topRun.avgScore)
+    };
 }
 
 
