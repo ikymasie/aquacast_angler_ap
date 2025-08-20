@@ -50,7 +50,10 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
     });
     const forecastUrl = `${FORECAST_API_URL}?${forecastParams.toString()}`;
     const forecastResponse = await fetch(forecastUrl);
-    if (!forecastResponse.ok) throw new Error("Failed to fetch forecast data");
+    if (!forecastResponse.ok) {
+        const errorData = await forecastResponse.json();
+        throw new Error(`Failed to fetch forecast data: ${errorData.reason}`);
+    }
     const forecastData = await forecastResponse.json();
 
     // Fetch archive data for trends
@@ -66,16 +69,19 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
     });
     const archiveUrl = `${ARCHIVE_API_URL}?${archiveParams.toString()}`;
     const archiveResponse = await fetch(archiveUrl);
-    if (!archiveResponse.ok) throw new Error("Failed to fetch archive data");
+     if (!archiveResponse.ok) {
+        const errorData = await archiveResponse.json();
+        throw new Error(`Failed to fetch archive data: ${errorData.reason}`);
+    }
     const archiveData = await archiveResponse.json();
 
     // Combine and normalize data
     const fullHourlyData = [
-        ...archiveData.hourly.time.map((t: string, i: number) => ({
+        ...(archiveData.hourly?.time?.map((t: string, i: number) => ({
             t,
             tempC: archiveData.hourly.temperature_2m[i],
             pressureHpa: archiveData.hourly.pressure_msl[i],
-        })),
+        })) || []),
         ...forecastData.hourly.time.map((t: string, i: number) => ({
             t,
             tempC: forecastData.hourly.temperature_2m[i],
@@ -123,8 +129,8 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
     };
     
     // Calculate recent window values from archive data
-    const recentTemperatures = archiveData.hourly.temperature_2m.filter((t: number | null) => t !== null) as number[];
-    const recentPressures = archiveData.hourly.pressure_msl.filter((p: number | null) => p !== null) as number[];
+    const recentTemperatures = (archiveData.hourly?.temperature_2m.filter((t: number | null) => t !== null) as number[]) || [];
+    const recentPressures = (archiveData.hourly?.pressure_msl.filter((p: number | null) => p !== null) as number[]) || [];
 
     const waterTempC = recentTemperatures.length > 0 
         ? calculateEMA(recentTemperatures, 72) * 0.8 + calculateEMA(recentTemperatures.slice(-12), 12) * 0.2

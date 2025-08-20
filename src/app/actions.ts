@@ -16,6 +16,7 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     const weatherData = await fetchWeatherData(location);
 
     const now = new Date();
+    // Filter to start from the current hour
     const futureHours = weatherData.hourly.filter(h => parseISO(h.t) >= now);
 
     if (futureHours.length === 0) {
@@ -27,10 +28,15 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
       score: await scoreHour(species, hour, weatherData.daily, weatherData.recent),
     })));
     
+    // Check if we have any scores to process
+    if (scoredHours.length === 0) {
+        return { data: null, error: "Not enough data to create a forecast." };
+    }
+
     const currentScore = scoredHours[0].score;
     const recommendedTimeWindow = await recommendWindows(scoredHours.slice(0, 24)); // Recommend based on next 24h
 
-    // Format hourly data for the chart
+    // Format hourly data for the chart, ensuring we have data
     const hourlyChartData = scoredHours.slice(0, 24).map(h => ({
         time: format(parseISO(h.time), 'ha'),
         success: Math.round(h.score)
@@ -46,7 +52,7 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     };
   } catch (err) {
     console.error(err);
-    const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+    const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while fetching weather data.";
     return { data: null, error: errorMessage };
   }
 }
