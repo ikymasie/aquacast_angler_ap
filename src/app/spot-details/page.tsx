@@ -9,6 +9,7 @@ import { MapCard } from '@/components/map-card';
 import { SpeciesVerticalSelector } from '@/components/species-vertical-selector';
 import type { Species } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
+import { FishingSuccessCard } from '@/components/fishing-success-card';
 
 
 export default function SpotDetailsPage() {
@@ -35,31 +36,10 @@ export default function SpotDetailsPage() {
         <main className="flex-1 p-4 md:p-6 space-y-4 pb-24">
             <Suspense fallback={<div>Loading...</div>}>
                <SpotHeaderCard spot={spot} />
-                <div className="mt-2 text-right">
-                    <p className="text-sm text-muted-foreground">
-                        Rain possibility: <span className="text-primary font-semibold">20%</span>
-                    </p>
-                </div>
-
-                <div className="mt-3 flex flex-col md:flex-row gap-3">
-                    <div className="md:w-[112px] flex-shrink-0">
-                         <SpeciesVerticalSelector 
-                            items={speciesList}
-                            selectedId={selectedSpecies}
-                            onSelect={(id) => setSelectedSpecies(id as Species)}
-                        />
-                    </div>
-                    <div className="flex-1 min-h-[260px]">
-                        <MapCard 
-                            center={{ lat: spot.coordinates.lat, lng: spot.coordinates.lon }}
-                            thumbnails={mapThumbnails}
-                        />
-                    </div>
-                </div>
+               <FishingSuccessCard />
             </Suspense>
         </main>
         <BottomNav />
     </div>
   );
 }
-

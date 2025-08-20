@@ -6,10 +6,10 @@ import { Card } from "@/components/ui/card";
 import { WeatherIcon } from "./weather-icon";
 import { format, parseISO } from 'date-fns';
 import { Skeleton } from "./ui/skeleton";
-import { getCachedWeatherData } from "@/services/weather/client";
 import type { Location, WeatherApiResponse } from "@/lib/types";
 import { MOCK_LOCATION } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { getCachedWeatherData } from "@/services/weather/client";
 
 // Custom hook to measure an element's width
 function useElementWidth() {
@@ -75,7 +75,7 @@ function transformWeatherData(apiData: WeatherApiResponse, location: Location) {
 }
 
 
-export function ConditionsPanel() {
+export function ConditionsPanel({location = MOCK_LOCATION}: {location?: Location}) {
     const [data, setData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const { ref: hourlyStripRef, width: stripWidth } = useElementWidth();
@@ -84,8 +84,8 @@ export function ConditionsPanel() {
         async function fetchData() {
             setIsLoading(true);
             try {
-                const apiResponse = await getCachedWeatherData(MOCK_LOCATION);
-                const transformedData = transformWeatherData(apiResponse, MOCK_LOCATION);
+                const apiResponse = await getCachedWeatherData(location);
+                const transformedData = transformWeatherData(apiResponse, location);
                 setData(transformedData);
             } catch (error) {
                 console.error("Failed to load weather data for ConditionsPanel:", error);
@@ -95,7 +95,7 @@ export function ConditionsPanel() {
             }
         }
         fetchData();
-    }, []);
+    }, [location]);
 
     const getHourItemStyle = () => {
         if (stripWidth <= 220) return { iconSize: 18, tempClass: 'text-[13px]/[18px]', timeClass: 'text-[11px]/[14px]', windArrowSize: 12, gaps: 'gap-y-[3px]' };
@@ -210,7 +210,3 @@ function ConditionsSkeleton() {
         </Card>
     )
 }
-
-    
-
-    

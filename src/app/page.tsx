@@ -2,15 +2,14 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { ConditionsPanel } from '@/components/conditions-panel';
 import { LocationsRail } from '@/components/locations-rail';
 import { BottomNav } from '@/components/bottom-nav';
 import { SearchBar } from '@/components/search-bar';
 import { SectionHeader } from '@/components/section-header';
-import { AquaCastLogo } from '@/components/aqua-cast-logo';
 import { FavoritesRecents } from '@/components/favorites-recents';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from 'react';
+import { FishingSuccessCard } from '@/components/fishing-success-card';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState("recents");
@@ -35,18 +34,14 @@ function AppContent() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-1 space-y-4 pb-24"> {/* Add padding to bottom to avoid overlap with nav */}
-        <div className="mt-3 space-y-3 px-4">
-          <GreetingBlock />
-          <SearchBar />
-        </div>
+      <main className="flex-1 space-y-4 p-4 pb-24">
+        <GreetingBlock />
+        <SearchBar />
         
-        <div className="px-4">
-          <ConditionsPanel />
-        </div>
+        <FishingSuccessCard />
 
-        <div className="space-y-3">
-            <div className="px-4">
+        <div className="space-y-3 pt-4">
+            <div>
                 <SectionHeader title="My Locations" />
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-2">
                   <TabsList className="bg-transparent p-0 justify-start gap-2 h-auto">
@@ -56,13 +51,13 @@ function AppContent() {
                   </TabsList>
                 </Tabs>
             </div>
-            <div className="px-4">
+            <div>
                 <FavoritesRecents tab={activeTab as any} />
             </div>
         </div>
 
         <div className="space-y-3">
-          <div className="px-4">
+          <div>
             <SectionHeader title="Popular Locations" />
           </div>
           <LocationsRail />
@@ -77,8 +72,7 @@ function GreetingBlock() {
     return (
         <div>
              <h1 className="font-headline text-h1 font-bold text-ink-900">Hello John</h1>
-             <p className="font-body text-body text-ink-700">It’s a little <span className="text-primary">cloudy</span> today.</p>
-             <p className="font-body text-sm text-muted-foreground mt-2">Search for the best fishing spots</p>
+             <p className="font-body text-body text-ink-700">Here's your personalized fishing forecast.</p>
         </div>
     )
 }
