@@ -1,7 +1,7 @@
 
 'use client';
 
-import { format, isSameDay, addDays, startOfToday } from 'date-fns';
+import { format, isSameDay, addDays, startOfToday, isToday, isTomorrow } from 'date-fns';
 import { Card } from './ui/card';
 import { cn } from '@/lib/utils';
 import type { DayContext } from '@/lib/types';
@@ -16,6 +16,12 @@ interface DaySelectorProps {
 export function DaySelector({ dailyData, selectedDate, onDateSelect }: DaySelectorProps) {
   
   const days = Array.from({ length: 7 }, (_, i) => addDays(startOfToday(), i));
+  
+  const getDayLabel = (day: Date): string => {
+    if (isToday(day)) return "Today";
+    if (isTomorrow(day)) return "2moro";
+    return format(day, 'EEE');
+  }
 
   return (
     <div className="overflow-x-auto -mx-4 px-4 pb-2">
@@ -36,7 +42,7 @@ export function DaySelector({ dailyData, selectedDate, onDateSelect }: DaySelect
                   : "bg-card hover:bg-secondary"
               )}
             >
-              <p className="font-semibold text-[11px]">{format(day, 'EEE')}</p>
+              <p className="font-semibold text-[11px]">{getDayLabel(day)}</p>
               <p className="text-base font-bold mt-0.5">{format(day, 'd')}</p>
               {dayData && (
                 <div className="flex items-center gap-1 text-xs opacity-80 mt-1">
