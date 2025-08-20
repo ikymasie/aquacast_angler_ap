@@ -1,5 +1,5 @@
 import type { Location, HourPoint, DayContext, WeatherApiResponse, RecentWindow } from "@/lib/types";
-import { format, subDays, addDays } from "date-fns";
+import { format, subDays } from "date-fns";
 
 const FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast";
 const ARCHIVE_API_URL = "https://archive-api.open-meteo.com/v1/archive";
@@ -11,7 +11,7 @@ const HOURLY_FORECAST_VARS = [
 ].join(",");
 
 const DAILY_FORECAST_VARS = [
-    "sunrise", "sunset", "uv_index_max", "moon_phase"
+    "sunrise", "sunset", "uv_index_max"
 ].join(",");
 
 const HOURLY_ARCHIVE_VARS = [
@@ -124,12 +124,12 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
     const daily: DayContext = {
         sunrise: forecastData.daily.sunrise[0],
         sunset: forecastData.daily.sunset[0],
-        moonPhase: forecastData.daily.moon_phase[0],
+        moonPhase: 0.5, // Default value as API does not provide it in daily forecast
         uvMax: forecastData.daily.uv_index_max[0],
     };
     
     // Calculate recent window values from archive data
-    const recentTemperatures = (archiveData.hourly?.temperature_2m.filter((t: number | null) => t !== null) as number[]) || [];
+    const recentTemperatures = (archiveData.hourly?.temperature_2m.filter((temp: number | null) => temp !== null) as number[]) || [];
     const recentPressures = (archiveData.hourly?.pressure_msl.filter((p: number | null) => p !== null) as number[]) || [];
 
     const waterTempC = recentTemperatures.length > 0 
