@@ -2,48 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: var(--font-inter), sans-serif;
-}
-
 @layer base {
   :root {
-    --background: 210 20% 98%; /* #F5F7FA */
+    --background: 220 29% 98%; /* #F5F7FA */
     --foreground: 224 15% 17%; /* #2C2C2C - ink-700 */
-    
+
     --card: 0 0% 100%;
     --card-foreground: 224 15% 17%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 15% 17%;
-    
+    --popover: 225 7% 11%; /* ink-900 */
+    --popover-foreground: 0 0% 98%;
+
     --primary: 173 58% 51%; /* #3CC7B7 */
     --primary-foreground: 0 0% 100%; /* White for contrast */
-    
-    --secondary: 220 20% 96%; /* Lighter gray for secondary states */
+
+    --secondary: 220 20% 96%;
     --secondary-foreground: 224 15% 17%;
 
     --muted: 220 17% 65%; /* #A0A4A8 - ink-300 */
     --muted-foreground: 220 17% 45%; /* ink-500 #6B7280 */
-    
+
     --accent: 173 66% 93%; /* #D9F1EE - teal-100 */
     --accent-foreground: 174 65% 37%; /* #2DB1A2 - teal-600 */
 
     --destructive: 26 100% 63%; /* #FF8C42 - alert */
     --destructive-foreground: 0 0% 100%;
-    
+
     --border: 220 20% 94%; /* #E6E9EE - line-200 */
     --input: 220 14% 88%; /* #D6DAE1 - line-300 */
     --ring: 173 58% 51%;
-    
+
     --radius: 1rem; /* 16px */
-    
+
     --chart-1: 173 58% 51%;
     --chart-2: 215 28% 68%;
     --chart-3: 26 100% 63%;
     --chart-4: 45 87% 62%;
     --chart-5: 145 63% 42%;
-    
+
     --nav-background: 228 14% 20%; /* #2A2E3F - panel */
     --nav-foreground: 0 0% 98%;
 
@@ -51,17 +47,17 @@ body {
     --fair: 45 87% 62%; /* #F2C94C */
     --poor: 0 81% 63%; /* #EB5757 */
   }
- 
+
   .dark {
     --background: 224 15% 11%;
     --foreground: 210 20% 98%;
-    
+
     --card: 228 14% 20%; /* panel */
     --card-foreground: 210 20% 98%;
-    
+
     --popover: 224 15% 11%;
     --popover-foreground: 210 20% 98%;
-    
+
     --primary: 173 58% 51%;
     --primary-foreground: 0 0% 100%;
 
@@ -76,20 +72,20 @@ body {
 
     --destructive: 26 100% 63%;
     --destructive-foreground: 0 0% 100%;
-    
+
     --border: 228 14% 25%;
     --input: 220 14% 28%;
     --ring: 173 58% 51%;
-    
+
     --nav-background: 228 14% 20%;
     --nav-foreground: 0 0% 98%;
-    
+
     --success: 145 63% 42%;
     --fair: 45 87% 62%;
     --poor: 0 81% 63%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;

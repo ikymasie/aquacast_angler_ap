@@ -9,14 +9,14 @@ import { WeatherIcon } from "./weather-icon";
 export function HourlyForecast() {
   const data = MOCK_HOURLY_FORECAST;
   return (
-    <Card>
+    <Card className="rounded-xl">
       <CardHeader>
-        <CardTitle className="font-headline text-xl">Hourly Mini-Forecast</CardTitle>
+        <CardTitle className="font-headline text-xl">Hourly Forecast</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex overflow-x-auto space-x-4 pb-2 -mb-2">
-          {data.map((hour) => (
-            <ForecastItem key={hour.time} hour={hour} />
+        <div className="flex overflow-x-auto space-x-2 pb-2 -mb-2">
+          {data.map((hour, index) => (
+            <ForecastItem key={hour.time} hour={hour} isNow={index === 0} />
           ))}
         </div>
       </CardContent>
@@ -24,13 +24,11 @@ export function HourlyForecast() {
   );
 }
 
-function ForecastItem({ hour }: { hour: HourlyForecastData }) {
-  const isNow = hour.time === 'Now';
+function ForecastItem({ hour, isNow }: { hour: HourlyForecastData, isNow: boolean }) {
   return (
-    <div className={`flex flex-col items-center justify-between space-y-2 p-3 rounded-lg min-w-[80px] transition-colors ${isNow ? 'bg-primary/10 border border-primary/20' : 'bg-secondary'}`}>
+    <div className={`flex flex-col items-center justify-between space-y-2 p-3 rounded-lg min-w-[72px] transition-colors ${isNow ? 'bg-primary/10 border border-primary/20' : 'bg-secondary'}`}>
       <div className="text-sm font-semibold text-muted-foreground relative">
-        {hour.time}
-        {isNow && <Badge className="absolute -top-5 -right-5 scale-90 bg-primary">Now</Badge>}
+        {isNow ? 'Now' : hour.time}
       </div>
       <WeatherIcon condition={hour.condition} className="h-8 w-8 text-accent-foreground" />
       <div className="text-xl font-bold">{hour.temperature}°</div>

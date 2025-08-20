@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useTransition, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SpeciesSelector } from "@/components/species-selector";
 import { getFishingForecastAction } from "@/app/actions";
 import type { Species } from "@/lib/types";
-import { MOCK_LOCATION } from "@/lib/types";
+import { MOCK_LOCATION, MOCK_CURRENT_CONDITIONS } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-
+import { Wind } from "lucide-react";
+import { format } from "date-fns";
 
 type SuccessScoreResult = {
   successScore: number;
@@ -58,63 +59,64 @@ export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: 
   const score = result?.successScore ?? 0;
   
   const getScoreInfo = () => {
-    if (isPending && !result) return { bgColor: 'bg-muted', textColor: 'text-muted-foreground', label: 'Loading...'};
-    if (score >= 80) return { bgColor: 'bg-good', textColor: 'text-white', label: 'Excellent'};
-    if (score >= 60) return { bgColor: 'bg-good', textColor: 'text-white', label: 'Good'};
-    if (score >= 40) return { bgColor: 'bg-fair', textColor: 'text-card-foreground', label: 'Fair'};
-    return { bgColor: 'bg-poor', textColor: 'text-white', label: 'Poor'};
+    if (isPending && !result) return { label: 'Loading...'};
+    if (score >= 80) return { label: 'Excellent'};
+    if (score >= 60) return { label: 'Good'};
+    if (score >= 40) return { label: 'Fair'};
+    return { label: 'Poor'};
   }
 
-  const { bgColor, textColor, label } = getScoreInfo();
+  const { label } = getScoreInfo();
+  const today = new Date();
 
   return (
-    <Card className="w-full shadow-card rounded-xl overflow-hidden border-0">
-      <div className="grid grid-cols-1 md:grid-cols-3">
-        <div className="md:col-span-2 p-4 space-y-4">
-          <CardHeader className="p-0">
-            <CardTitle className="font-headline text-h1">
-              Fishing Success Score
-            </CardTitle>
-            <CardDescription className="text-body text-muted-foreground">
-              {MOCK_LOCATION.name}
-            </CardDescription>
-          </CardHeader>
-          <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} disabled={isPending} />
-          
-          <div className="pt-4">
-            {isPending && !result ? (
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-3/4" />
-                 <Skeleton className="h-5 w-1/2" />
-              </div>
-            ) : error ? (
-              <div className="text-destructive font-medium">
-                <p>Could not load recommendation: {error}</p>
-              </div>
-            ) : result ? (
-              <RecommendedWindowCard timeWindow={result.recommendedTimeWindow} score={score} />
-            ) : null}
-          </div>
+    <Card className="w-full shadow-card rounded-xl overflow-hidden border-0 gradient-fishing-panel text-white">
+        <div className="p-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <p className="text-body opacity-90">{MOCK_CURRENT_CONDITIONS.condition}</p>
+                    <p className="text-numeric-xl font-bold">{MOCK_CURRENT_CONDITIONS.temperature}°</p>
+                    <p className="text-caption opacity-80">{format(today, 'EEEE, MMMM d')}</p>
+                    <div className="flex pt-2">
+                         <Badge variant="secondary" className="h-7 rounded-full bg-white/15 text-white border-0">
+                            <Wind className="w-4 h-4 mr-2"/>
+                            {MOCK_CURRENT_CONDITIONS.windSpeed} km/h
+                        </Badge>
+                    </div>
+                </div>
+                <div className="flex items-center justify-center">
+                    <div className="text-center space-y-2">
+                        {isPending && !result ? (
+                          <Skeleton className="h-12 w-24 mx-auto bg-white/20" />
+                        ) : (
+                          <div className="flex items-baseline justify-center gap-1">
+                            <span className="font-headline font-bold text-5xl">
+                              {result ? Math.round(result.successScore) : '--'}
+                            </span>
+                            <span className="font-headline font-bold text-2xl">%</span>
+                          </div>
+                        )}
+                        <Badge variant="secondary" className="bg-white/20 text-sm rounded-full border-0">
+                          {label}
+                        </Badge>
+                    </div>
+                </div>
+            </div>
+             <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} disabled={isPending} />
         </div>
 
-        <div className={cn("flex items-center justify-center p-4 text-white gradient-fishing-panel", bgColor)}>
-            <div className="relative text-center space-y-2">
-                {isPending && !result ? (
-                  <Skeleton className="h-12 w-24 mx-auto bg-white/20" />
-                ) : (
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="font-headline font-bold text-numeric-xl">
-                      {result ? Math.round(result.successScore) : '--'}
-                    </span>
-                    <span className="font-headline font-bold text-h2">%</span>
-                  </div>
-                )}
-                <Badge variant="secondary" className={cn("bg-white/20 text-sm rounded-full border-0", textColor)}>
-                  {label}
-                </Badge>
+        { (isPending && !result) ? (
+            <div className="p-4 border-t border-white/20">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-5 w-1/2 mt-2" />
             </div>
-        </div>
-      </div>
+        ) : error ? (
+             <div className="p-4 border-t border-white/20 text-destructive-foreground font-medium bg-destructive/50">
+                <p>Could not load recommendation: {error}</p>
+              </div>
+        ) : result ? (
+             <RecommendedWindowCard timeWindow={result.recommendedTimeWindow} score={score} />
+        ) : null }
     </Card>
   );
 }
