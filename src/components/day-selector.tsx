@@ -29,19 +29,19 @@ export function DaySelector({ dailyData, selectedDate, onDateSelect }: DaySelect
               key={day.toString()}
               onClick={() => onDateSelect(day)}
               className={cn(
-                "flex-shrink-0 w-16 h-20 p-2 flex flex-col items-center justify-center rounded-lg cursor-pointer transition-all",
+                "flex-shrink-0 w-14 h-[72px] p-1 flex flex-col items-center justify-center rounded-lg cursor-pointer transition-all",
                 "border shadow-sm",
                 isSelected
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card hover:bg-secondary"
               )}
             >
-              <p className="font-semibold text-xs">{format(day, 'EEE')}</p>
-              <p className="text-lg font-bold">{format(day, 'd')}</p>
+              <p className="font-semibold text-[11px]">{format(day, 'EEE')}</p>
+              <p className="text-base font-bold mt-0.5">{format(day, 'd')}</p>
               {dayData && (
                 <div className="flex items-center gap-1 text-xs opacity-80 mt-1">
                     <WeatherIcon condition="clear" className="w-3 h-3" />
-                    <span>{Math.round(dayData.uvMax)}</span>
+                    <span className="text-[11px]">{Math.round(dayData.uvMax)}</span>
                 </div>
               )}
             </Card>
