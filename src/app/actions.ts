@@ -68,7 +68,7 @@ export async function addSpotAction(payload: AddSpotPayload) {
         const { lat, lng } = payload;
 
         // Construct the URL for our new API route.
-        // We assume our app is running on localhost:3000 for server-side fetch.
+        // We assume our app is running on localhost:9002 for server-side fetch.
         // In a production environment, this should be an absolute URL.
         const apiUrl = process.env.NODE_ENV === 'production'
             ? `https://YOUR_PRODUCTION_DOMAIN/api/place-from-latlng?lat=${lat}&lng=${lng}`
