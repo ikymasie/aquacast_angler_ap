@@ -61,7 +61,7 @@ export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: 
     if (isPending && !result) return { bgColor: 'bg-muted', textColor: 'text-muted-foreground', label: 'Loading...'};
     if (score >= 80) return { bgColor: 'bg-good', textColor: 'text-white', label: 'Excellent'};
     if (score >= 60) return { bgColor: 'bg-good', textColor: 'text-white', label: 'Good'};
-    if (score >= 40) return { bgColor: 'bg-fair', textColor: 'text-ink-900', label: 'Fair'};
+    if (score >= 40) return { bgColor: 'bg-fair', textColor: 'text-card-foreground', label: 'Fair'};
     return { bgColor: 'bg-poor', textColor: 'text-white', label: 'Poor'};
   }
 
@@ -72,10 +72,10 @@ export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: 
       <div className="grid grid-cols-1 md:grid-cols-3">
         <div className="md:col-span-2 p-6 space-y-4">
           <CardHeader className="p-0">
-            <CardTitle className="font-headline text-h2 text-ink-900">
+            <CardTitle className="font-headline text-h1">
               Fishing Success Score
             </CardTitle>
-            <CardDescription className="text-body text-ink-500">
+            <CardDescription className="text-body text-muted-foreground">
               {MOCK_LOCATION.name}
             </CardDescription>
           </CardHeader>
@@ -109,7 +109,7 @@ export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: 
                     <span className="font-headline font-bold text-h2">%</span>
                   </div>
                 )}
-                <Badge variant="secondary" className="bg-white/20 text-white text-sm rounded-full border-0">
+                <Badge variant="secondary" className={cn("bg-white/20 text-sm rounded-full border-0", textColor)}>
                   {label}
                 </Badge>
             </div>
@@ -121,28 +121,28 @@ export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: 
 
 
 function RecommendedWindowCard({ timeWindow, score }: { timeWindow: string, score: number }) {
-  const scoreInfo = 
-    score >= 80 ? { label: 'EXCELLENT', className: 'bg-good/10 text-good' } :
-    score >= 60 ? { label: 'GOOD', className: 'bg-good/10 text-good' } :
-    score >= 40 ? { label: 'FAIR', className: 'bg-fair/20 text-fair' } :
-    { label: 'POOR', className: 'bg-poor/10 text-poor' };
-
-  // Handle case where timeWindow is undefined or not a parsable string
-  const hasWindow = timeWindow && timeWindow.includes('-');
+    const scoreInfo = 
+      score >= 80 ? { label: 'EXCELLENT', className: 'bg-good/10 text-good' } :
+      score >= 60 ? { label: 'GOOD', className: 'bg-good/10 text-good' } :
+      score >= 40 ? { label: 'FAIR', className: 'bg-fair/20 text-fair' } :
+      { label: 'POOR', className: 'bg-poor/10 text-poor' };
   
-  return (
-    <div className="p-4 rounded-xl bg-card border shadow-inner-sm">
-        <div className="flex items-center justify-between">
-            <div>
-                <p className="text-caption text-ink-500 font-medium">Recommended Window</p>
-                <p className="font-headline text-numeric-l text-ink-700">{timeWindow || 'No recommendation available.'}</p>
-            </div>
-            {hasWindow && (
-              <Badge className={cn("h-6 rounded-md text-xs", scoreInfo.className)}>
-                {scoreInfo.label}
-              </Badge>
-            )}
-        </div>
-    </div>
-  )
-}
+    const hasWindow = timeWindow && timeWindow.includes('-');
+    
+    return (
+      <div className="p-4 rounded-lg bg-card border">
+          <div className="flex items-center justify-between">
+              <div>
+                  <p className="text-caption text-muted-foreground font-medium">Recommended Window</p>
+                  <p className="font-headline text-numeric-l">{hasWindow ? timeWindow : 'No recommendation available.'}</p>
+              </div>
+              {hasWindow && (
+                <Badge className={cn("h-6 rounded-md text-xs", scoreInfo.className)}>
+                  {scoreInfo.label}
+                </Badge>
+              )}
+          </div>
+      </div>
+    )
+  }
+  

@@ -13,19 +13,19 @@ export function CurrentConditionsCard() {
     data.pressureTrend === 'falling' ? TrendingDown : Minus;
 
   return (
-    <Card className="shadow-md">
+    <Card className="shadow-card">
       <CardHeader>
-        <CardTitle className="font-headline text-xl">Current Conditions</CardTitle>
+        <CardTitle className="font-headline text-h2">Current Conditions</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-4">
           <div className="flex items-center gap-3">
-            <div className="bg-accent/50 p-2 rounded-full">
+            <div className="bg-accent p-2 rounded-full">
               <WeatherIcon condition={data.condition} className="h-6 w-6 text-accent-foreground" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{data.temperature}°C</p>
-              <p className="text-sm text-muted-foreground">{data.condition}</p>
+              <p className="text-numeric-l font-bold">{data.temperature}°C</p>
+              <p className="text-body text-muted-foreground">{data.condition}</p>
             </div>
           </div>
           <InfoItem icon={Wind} label="Wind" value={`${data.windSpeed} km/h ${data.windDirection}`} />
@@ -51,8 +51,8 @@ function InfoItem({ icon: Icon, label, value, trendIcon: TrendIcon }: InfoItemPr
         <Icon className="h-6 w-6 text-secondary-foreground" />
       </div>
       <div>
-        <p className="font-semibold">{value}</p>
-        <p className="text-sm text-muted-foreground flex items-center gap-1">
+        <p className="font-semibold text-body">{value}</p>
+        <p className="text-caption text-muted-foreground flex items-center gap-1">
           {label}
           {TrendIcon && <TrendIcon className="h-4 w-4" />}
         </p>

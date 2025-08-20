@@ -19,7 +19,7 @@ export default {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Space Grotesk', 'sans-serif'],
-        code: ['var(--font-inter)', 'monospace'], // Using Inter for tabular nums
+        code: ['Inter', 'monospace'], // Using Inter for tabular nums
       },
       fontSize: {
         'h1': ['24px', '32px'],
@@ -72,7 +72,6 @@ export default {
           '5': 'hsl(var(--chart-5))',
         },
         nav: {
-            DEFAULT: 'hsl(var(--nav-background))',
             background: 'hsl(var(--nav-background))',
             foreground: 'hsl(var(--nav-foreground))',
         },
@@ -80,22 +79,7 @@ export default {
         fair: 'hsl(var(--fair))',
         poor: 'hsl(var(--poor))',
         alert: 'hsl(var(--destructive))',
-        panel: 'hsl(var(--nav-background))', // Alias for panel color
-        ink: {
-          '900': '#1C1F28',
-          '700': '#2C2C2C',
-          '500': '#6B7280',
-          '300': '#A0A4A8'
-        },
-        teal: {
-            '500': '#3CC7B7',
-            '600': '#2DB1A2',
-            '100': '#D9F1EE'
-        },
-        line: {
-            '200': '#E6E9EE',
-            '300': '#D6DAE1'
-        }
+        panel: 'hsl(var(--nav-background))',
       },
       borderRadius: {
         lg: 'var(--radius)', // 16px
