@@ -162,7 +162,7 @@ export default function SpotDetailsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
         <Header/>
-        <main className="flex-1 p-4 md:p-6 space-y-4">
+        <main className="flex-1 p-4 md:p-6 space-y-4 pb-24">
             <SpotHeaderCard />
             <div className="mt-4">
                 <SpeciesSelector selectedSpecies="Bass" onSelectSpecies={() => {}} />
