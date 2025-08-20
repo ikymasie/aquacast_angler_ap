@@ -15,9 +15,8 @@ import { WeatherIcon } from "./weather-icon";
 
 const statusColors: Record<ScoreStatus, string> = {
     Poor: "var(--poor)",
-    Bad: "var(--poor)",
     Fair: "var(--fair)",
-    Great: "var(--good)",
+    Good: "var(--good)",
     Excellent: "var(--good)",
 };
 
@@ -33,7 +32,6 @@ interface DaypartScorePanelProps {
     spotName: string;
     dayAvgScore: number;
     dayStatus: ScoreStatus;
-    bestWindow?: RecommendedWindow;
     intervals: ThreeHourIntervalScore[];
 }
 
@@ -54,7 +52,6 @@ export function DaypartScorePanel({
     spotName,
     dayAvgScore,
     dayStatus,
-    bestWindow,
     intervals
 }: DaypartScorePanelProps) {
     const { ref: stripRef, width: stripWidth } = useElementWidth();
@@ -90,24 +87,6 @@ export function DaypartScorePanel({
                     <span className="font-body text-xs text-white/80 mt-1.5 truncate">
                         Next 24h • {spotName.split(',')[0]}
                     </span>
-                </div>
-
-                {/* Center Column: Best Window Pill */}
-                 <div className="flex-shrink-0 w-14 h-[148px] bg-white/20 rounded-lg flex flex-col items-center justify-evenly text-center p-1">
-                    <span className="font-body text-xs text-white/70">Best</span>
-                    <Clock className="w-5 h-5 text-white"/>
-                    {bestWindow ? (
-                        <>
-                            <span className="font-headline font-semibold text-sm leading-tight">
-                                {format(parseISO(bestWindow.start), 'HH:mm')}-{format(parseISO(bestWindow.end), 'HH:mm')}
-                            </span>
-                            <Badge className="h-5 rounded-md text-xs" style={{ backgroundColor: `hsla(${getStatusColor(dayStatus)}, 0.16)`, color: `hsl(${getStatusColor(dayStatus)})` }}>
-                                {dayStatus}
-                            </Badge>
-                        </>
-                    ) : (
-                        <span className="font-headline font-semibold text-sm leading-tight">--</span>
-                    )}
                 </div>
 
                 {/* Right Column: 3-hour Interval Strip */}

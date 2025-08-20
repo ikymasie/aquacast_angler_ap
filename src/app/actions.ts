@@ -3,7 +3,7 @@
 
 import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
-import { scoreHour, recommendWindows, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
+import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
 import { format, parseISO, startOfDay, endOfDay, isWithinInterval } from "date-fns";
 
 interface GetScoreActionPayload {
@@ -57,12 +57,6 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         return { data: null, error: "Not enough data to create a forecast." };
     }
 
-    const now = new Date();
-    const currentHourIndex = scoredHours.findIndex(h => parseISO(h.time) >= now);
-    const currentScore = currentHourIndex !== -1 ? scoredHours[currentHourIndex].score : scoredHours[0].score;
-
-    const recommendedTimeWindow = await recommendWindows(scoredHours);
-
     // Format hourly data for the chart, ensuring we have data
     const hourlyChartData = scoredHours.map(h => ({
         time: format(parseISO(h.time), 'ha'),
@@ -77,8 +71,6 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
 
     return { 
       data: {
-        successScore: currentScore,
-        recommendedTimeWindow,
         hourlyChartData,
         threeHourScores,
         overallDayScore,
