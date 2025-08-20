@@ -12,6 +12,7 @@ const HOURLY_FORECAST_VARS = [
 
 const DAILY_FORECAST_VARS = [
     "sunrise", "sunset", "uv_index_max"
+    // moon_phase is not available in the free tier of the daily forecast, will be handled separately.
 ].join(",");
 
 const HOURLY_ARCHIVE_VARS = [
@@ -58,7 +59,7 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
 
     // Fetch archive data for trends
     const endDate = subDays(today, 1);
-    const startDate = subDays(endDate, 3);
+    const startDate = subDays(endDate, 3); // 72 hours of history
     const archiveParams = new URLSearchParams({
         latitude: latitude.toString(),
         longitude: longitude.toString(),
@@ -124,21 +125,23 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
     const daily: DayContext = {
         sunrise: forecastData.daily.sunrise[0],
         sunset: forecastData.daily.sunset[0],
-        moonPhase: 0.5, // Default value as API does not provide it in daily forecast
+        moonPhase: forecastData.daily.moon_phase ? forecastData.daily.moon_phase[0] : 0.5, // Use moon_phase if available, else default
         uvMax: forecastData.daily.uv_index_max[0],
     };
     
     // Calculate recent window values from archive data
-    const recentTemperatures = (archiveData.hourly?.temperature_2m.filter((temp: number | null) => temp !== null) as number[]) || [];
-    const recentPressures = (archiveData.hourly?.pressure_msl.filter((p: number | null) => p !== null) as number[]) || [];
+    const recentTemperatures = (archiveData.hourly?.temperature_2m?.filter((temp: number | null) => temp !== null) as number[]) || [];
+    const recentPressures = (archiveData.hourly?.pressure_msl?.filter((p: number | null) => p !== null) as number[]) || [];
 
     const waterTempC = recentTemperatures.length > 0 
         ? calculateEMA(recentTemperatures, 72) * 0.8 + calculateEMA(recentTemperatures.slice(-12), 12) * 0.2
         : 15; // fallback
-    const stdTempPressure = recentTemperatures.length > 0 && recentPressures.length > 0 
-        ? calculateStdDev([...recentTemperatures, ...recentPressures]) 
-        : 1; // fallback
-    
+        
+    const stdTemp = calculateStdDev(recentTemperatures);
+    const stdPressure = calculateStdDev(recentPressures);
+    // Simple combination of stability metrics for the scoring model
+    const stdTempPressure = Math.sqrt(stdTemp*stdTemp + stdPressure*stdPressure); 
+
     const recent: RecentWindow = {
         waterTempC,
         stdTempPressure,
