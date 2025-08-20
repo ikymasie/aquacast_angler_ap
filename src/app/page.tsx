@@ -5,7 +5,6 @@ import { Header } from '@/components/header';
 import { ConditionsPanel } from '@/components/conditions-panel';
 import { LocationsRail } from '@/components/locations-rail';
 import {
-  SidebarProvider,
   Sidebar,
   SidebarInset,
   SidebarContent,
@@ -17,6 +16,7 @@ import { Home, Star, Map, Settings } from 'lucide-react';
 import { BottomNav } from '@/components/bottom-nav';
 import { SearchBar } from '@/components/search-bar';
 import { SectionHeader } from '@/components/section-header';
+import Link from 'next/link';
 
 function GreetingBlock() {
     return (
@@ -30,40 +30,28 @@ function GreetingBlock() {
 
 export default function HomePage() {
   return (
-    <SidebarProvider>
+    <>
       <Sidebar>
         <SidebarContent className="p-2">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton tooltip={{ children: 'Home' }} isActive>
-                <Home />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Home
-                </span>
+              <SidebarMenuButton tooltip={{ children: 'Home' }} isActive asChild>
+                <Link href="/"><Home /></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton tooltip={{ children: 'Favorites' }}>
                 <Star />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Favorites
-                </span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton tooltip={{ children: 'Maps' }}>
                 <Map />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Maps
-                </span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton tooltip={{ children: 'Settings' }}>
                 <Settings />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Settings
-                </span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -92,6 +80,6 @@ export default function HomePage() {
           <BottomNav />
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </>
   );
 }

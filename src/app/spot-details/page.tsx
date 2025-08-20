@@ -21,7 +21,7 @@ import { ForecastGraphs } from '@/components/forecast-graphs';
 import { FishingSuccessCard } from '@/components/fishing-success-card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { SidebarProvider, Sidebar, SidebarInset, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import { Sidebar, SidebarInset, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { Home, Star, Map, Settings } from 'lucide-react';
 import { BottomNav } from '@/components/bottom-nav';
 import { Header } from '@/components/header';
@@ -162,7 +162,7 @@ function DailyAccordion() {
 
 export default function SpotDetailsPage() {
   return (
-    <SidebarProvider>
+    <>
         <Sidebar>
             <SidebarContent className="p-2">
                 <SidebarMenu>
@@ -223,6 +223,6 @@ export default function SpotDetailsPage() {
                 <BottomNav />
             </div>
         </SidebarInset>
-    </SidebarProvider>
+    </>
   );
 }
