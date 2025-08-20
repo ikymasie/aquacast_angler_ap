@@ -51,6 +51,7 @@ export default function AddSpotPage() {
             });
 
             if (error) {
+                console.log(error)
                 toast({
                     variant: 'destructive',
                     title: 'Failed to Save Spot',
