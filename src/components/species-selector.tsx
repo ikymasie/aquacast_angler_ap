@@ -29,9 +29,9 @@ export function SpeciesSelector({ selectedSpecies, onSelectSpecies, disabled }: 
           onClick={() => onSelectSpecies(name)}
           className={cn(
             "h-9 px-4 rounded-full border-white/30 text-white transition-colors duration-200 backdrop-blur-sm",
-            "bg-white/10 hover:bg-white/20",
+            "bg-white/10 hover:bg-white/20 active:bg-white/25",
             "data-[state=active]:bg-white/25 data-[state=active]:border-white/50 data-[state=active]:font-semibold",
-            "disabled:bg-white/10 disabled:text-white/50"
+            "disabled:bg-white/10 disabled:text-white/50 disabled:opacity-40"
           )}
           data-state={selectedSpecies === name ? 'active' : 'inactive'}
           disabled={disabled}

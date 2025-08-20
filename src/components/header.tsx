@@ -26,10 +26,9 @@ export function Header() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="relative rounded-full h-10 w-10 bg-teal-100 hover:bg-teal-100/80">
+            <Button variant="ghost" size="icon" className="relative rounded-full h-10 w-10 bg-teal-100 hover:bg-teal-100/80 active:bg-teal-100/90" aria-label="Notifications">
                 <Bell className="h-5 w-5 text-teal-600" />
                 {hasNotifications && <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-alert" />}
-                <span className="sr-only">Notifications</span>
             </Button>
         </div>
       </div>

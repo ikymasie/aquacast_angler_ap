@@ -9,15 +9,15 @@ export function SearchBar() {
       <Input
         type="search"
         placeholder="Search for the best fishing spots"
-        className="h-12 w-full rounded-md border-input pl-12 pr-12 text-sm"
+        className="h-12 w-full rounded-md border-input pl-12 pr-12 text-sm focus-visible:ring-offset-4"
       />
       <Button
         variant="default"
         size="icon"
+        aria-label="Use current location"
         className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-primary"
       >
         <Locate className="h-5 w-5 text-primary-foreground" />
-        <span className="sr-only">Use current location</span>
       </Button>
     </div>
   );
