@@ -7,8 +7,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, MapPin, Save } from 'lucide-react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { useMemo } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AddSpotPage() {
+
+    const LocationPickerMap = useMemo(() => dynamic(
+        () => import('@/components/location-picker-map'),
+        { 
+            loading: () => <Skeleton className="w-full aspect-video bg-secondary rounded-lg" />,
+            ssr: false 
+        }
+    ), []);
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
@@ -34,8 +46,8 @@ export default function AddSpotPage() {
             <p className="text-muted-foreground mb-4">
               Use the map to find and select your fishing spot. Pan and zoom to find the exact location, then tap to place a pin.
             </p>
-            <div className="aspect-video w-full bg-secondary rounded-lg flex items-center justify-center">
-                <p className="text-muted-foreground">Map Placeholder</p>
+            <div className="aspect-video w-full bg-secondary rounded-lg overflow-hidden">
+                <LocationPickerMap />
             </div>
           </CardContent>
         </Card>
