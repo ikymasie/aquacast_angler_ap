@@ -1,55 +1,39 @@
+
 'use server';
 
 import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour } from './types';
-import { parseISO, isWithinInterval, addMinutes, subMinutes, format } from 'date-fns';
+import { parseISO, isWithinInterval, addMinutes, subMinutes, format, getMinutes, getHours } from 'date-fns';
 import speciesRules from './species-rules.json';
 
 type SpeciesKey = keyof typeof speciesRules;
 
 // --- Curve Functions ---
 
-function gauss(x: number, mu: number, sigma: number): number {
-  if (sigma === 0) return x === mu ? 100 : 0;
-  return 100 * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+function gaussian(x: number, mu: number, sigma: number, maxScore: number = 100): number {
+  if (sigma === 0) return x === mu ? maxScore : 0;
+  return maxScore * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
 }
 
-function penalty(value: number, breaks: number[], scores: number[]): number {
-  for (let i = 0; i < breaks.length; i++) {
-    if (value < breaks[i]) {
-      return scores[i];
+function piecewiseLinear(x: number, pointsX: number[], pointsY: number[]): number {
+  if (x <= pointsX[0]) return pointsY[0];
+  if (x >= pointsX[pointsX.length - 1]) return pointsY[pointsY.length - 1];
+
+  for (let i = 0; i < pointsX.length - 1; i++) {
+    if (x >= pointsX[i] && x <= pointsX[i + 1]) {
+      const t = (x - pointsX[i]) / (pointsX[i + 1] - pointsX[i]);
+      return pointsY[i] * (1 - t) + pointsY[i + 1] * t;
     }
   }
-  return scores[scores.length - 1];
+  return 75; // Should not be reached
 }
 
-function plateau(value: number, ranges: number[][], score: number): number {
-  for (const range of ranges) {
-    if (value >= range[0] && value <= range[1]) {
-      return score;
+function bucketPenalty(value: number, breaks: number[], scores: number[]): number {
+    for (let i = 1; i < breaks.length; i++) {
+        if (value < breaks[i]) {
+            return scores[i];
+        }
     }
-  }
-  return 100 - score; // Simplified penalty outside range
-}
-
-function trend(value: number, riseBonus: number = 0, fallPenalty: number = 0, preFrontDropBonus: number = 0): number {
-  let score = 75; // baseline
-  if (value > 0.5) score += riseBonus;
-  if (value < -0.5 && value > -2.0) score += preFrontDropBonus;
-  if (value < -2.0) score += fallPenalty;
-  return Math.max(0, Math.min(100, score));
-}
-
-function twilightBoost(t: string, dawn: number, dusk: number, ctx: DayContext): number {
-  const time = parseISO(t);
-  const sunrise = parseISO(ctx.sunrise);
-  const sunset = parseISO(ctx.sunset);
-
-  const dawnWindow = { start: subMinutes(sunrise, 60), end: addMinutes(sunrise, 90) };
-  const duskWindow = { start: subMinutes(sunset, 90), end: addMinutes(sunset, 60) };
-
-  if (isWithinInterval(time, dawnWindow)) return 80 + dawn;
-  if (isWithinInterval(time, duskWindow)) return 80 + dusk;
-  return 50; // Midday baseline
+    return scores[scores.length - 1];
 }
 
 function step(value: number, mm: number[], scores: number[]): number {
@@ -61,27 +45,49 @@ function step(value: number, mm: number[], scores: number[]): number {
   return scores[scores.length - 1];
 }
 
-function phase(value: number, full: number, newMoon: number, q1q3: number): number {
-    let score = 75; // baseline
-    if (value > 0.95 || value < 0.05) score += full; // full or new
-    else if (value > 0.2 && value < 0.3) score += q1q3; // q1
-    else if (value > 0.7 && value < 0.8) score += q1q3; // q3
-    return Math.max(0, Math.min(100, score));
+function twilightBoost(t: string, ctx: DayContext, params: any): number {
+  const time = parseISO(t);
+  const sunrise = parseISO(ctx.sunrise);
+  const sunset = parseISO(ctx.sunset);
+
+  const dawnStart = addMinutes(sunrise, params.dawn_window_min);
+  const dawnEnd = addMinutes(sunrise, params.dawn_window_max);
+  const duskStart = addMinutes(sunset, params.dusk_window_min);
+  const duskEnd = addMinutes(sunset, params.dusk_window_max);
+
+  if (isWithinInterval(time, { start: dawnStart, end: dawnEnd })) return 90;
+  if (isWithinInterval(time, { start: duskStart, end: duskEnd })) return 85;
+
+  const hour = getHours(time);
+  if (hour < getHours(dawnStart) || hour > getHours(duskEnd)) return params.night_penalty;
+  
+  return params.midday_penalty;
 }
 
-function inverseVar(value: number, stdBreaks: number[], scores: number[]): number {
-  return penalty(value, stdBreaks, scores);
+function phaseBonus(value: number, bonuses: {phase: string, score: number}[]): number {
+    // A simple mapping for now. A more complex implementation could be added.
+    if (value > 0.95 || value < 0.05) { // full or new
+        const bonus = bonuses.find(b => b.phase === 'new' || b.phase === 'full');
+        return bonus ? bonus.score : 75;
+    } else if (value > 0.45 && value < 0.55) { // quarter
+        const bonus = bonuses.find(b => b.phase === 'quarter');
+        return bonus ? bonus.score : 75;
+    }
+    return 75;
 }
 
-const curveFunctions = {
-  gauss,
-  penalty,
-  plateau,
-  trend,
-  twilightBoost,
+function inverseStd(value: number, breaks: number[], scores: number[]): number {
+  return bucketPenalty(value, breaks, scores);
+}
+
+const curveFunctions: Record<string, Function> = {
+  gaussian,
+  piecewise_linear: piecewiseLinear,
+  bucket_penalty: bucketPenalty,
   step,
-  phase,
-  inverseVar,
+  twilight_boost: twilightBoost,
+  phase_bonus: phaseBonus,
+  inverse_std: inverseStd,
 };
 
 // --- Main Scoring Flow ---
@@ -95,54 +101,70 @@ export async function scoreHour(species: Species, h: HourPoint, ctx: DayContext,
 
   const subScores: Record<string, number> = {};
 
-  for (const [key, curveParams] of Object.entries(cfg.curves)) {
-    const { type, ...params } = curveParams as any;
-    let value: number | string | DayContext;
+  for (const [key, curveParams] of Object.entries(cfg.curves as any)) {
+    const { type, params, uses, missing_score } = curveParams as any;
+    let value: any;
+    const inputKey = (uses as string[])[0];
 
     // Map the hour point data to the correct key for the curve function
-    switch (key) {
-        case 'waterTempComfort': value = recent.waterTempC; break;
-        case 'airTempComfort': value = h.tempC; break;
-        case 'wind': value = h.windKph; break;
-        case 'cloud': value = h.cloudPct; break;
-        case 'pressureTrend': value = h.derived.pressureTrend3h; break;
-        case 'timeOfDay': value = h.t; break;
-        case 'precip': value = h.precipMm; break;
-        case 'moon': value = ctx.moonPhase; break;
-        case 'stability': value = recent.stdTempPressure; break;
-        default: value = 75; continue; // Skip unknown keys
+    switch (inputKey) {
+        case 'water_temp_c': value = recent.waterTempC; break;
+        case 'air_temp_c': value = h.tempC; break;
+        case 'wind_speed_kph': value = h.windKph; break;
+        case 'pressure_trend_hpa_per_3h': value = h.derived.pressureTrend3h; break;
+        case 'cloud_cover_pct': value = h.cloudPct; break;
+        case 'time_ts': value = h.t; break;
+        case 'precip_mm_per_h': value = h.precipMm; break;
+        case 'moon_phase_0_new_05_full': value = ctx.moonPhase; break;
+        case 'stability_index': value = recent.stdTempPressure; break;
+        default: value = null;
     }
     
-    // Call the appropriate curve function based on its type
-    if (type === 'twilightBoost') {
-        subScores[key] = curveFunctions[type](value as string, params.dawn, params.dusk, ctx);
-    } else if (type === 'trend') {
-        subScores[key] = curveFunctions[type](value as number, params.riseBonus, params.fallPenalty, params.preFrontDropBonus);
-    } else if (type === 'phase') {
-        subScores[key] = curveFunctions[type](value as number, params.full, params.new, params.q1q3);
-    } else if (type === 'gauss') {
-        subScores[key] = curveFunctions[type](value as number, params.mu, params.sigma);
-    } else if (type === 'penalty' || type === 'inverseVar') {
-        subScores[key] = curveFunctions[type](value as number, params.breaks, params.scores);
-    } else if (type === 'plateau') {
-        subScores[key] = curveFunctions[type](value as number, params.ranges, params.score);
-    } else if (type === 'step') {
-        subScores[key] = curveFunctions[type](value as number, params.mm, params.scores);
+    if (value === null || value === undefined) {
+        subScores[key] = missing_score ?? 72; // Use missing score or default
+        continue;
+    }
+
+    const curveFunc = curveFunctions[type];
+    if (curveFunc) {
+      if (type === 'twilight_boost') {
+          subScores[key] = curveFunc(value, ctx, params);
+      } else if (type === 'piecewise_linear') {
+          subScores[key] = curveFunc(value, params.x, params.y);
+      } else if (type === 'bucket_penalty') {
+          subScores[key] = curveFunc(value, params.breaks_kph, params.scores);
+      } else if (type === 'step') {
+          subScores[key] = curveFunc(value, params.mm_per_h, params.scores);
+      } else if (type === 'gaussian') {
+          subScores[key] = curveFunc(value, params.mu, params.sigma, params.max_score);
+      } else if (type === 'phase_bonus') {
+           subScores[key] = curveFunc(value, params.bonuses);
+      } else if (type === 'inverse_std') {
+           subScores[key] = curveFunc(value, params.std_breaks, params.scores);
+      } else {
+        subScores[key] = 75;
+      }
     } else {
-        subScores[key] = 75; // Default for unknown types
+      subScores[key] = 75; // Default for unknown types
     }
   }
 
-  // Add placeholder for levelFlow if it's in weights but not curves
-  if (cfg.weights.levelFlow && !subScores.levelFlow) {
-    subScores.levelFlow = 75;
+  // Add placeholder for factors not calculated in this simplified loop
+   if (cfg.weights.level_flow && !subScores.level_flow) {
+    subScores.level_flow = 75;
+  }
+  if (cfg.weights.light_level && !subScores.light_level) {
+    subScores.light_level = 75;
   }
   
+  const totalWeight = Object.values(cfg.weights).reduce((sum, w) => sum + (w as number), 0);
+
   const total = Object.entries(cfg.weights)
     .reduce((acc, [key, w]) => {
         const weight = w as number;
         const score = subScores[key] ?? 75; // Default score if not calculated
-        return acc + weight * score;
+        // Normalize weight
+        return acc + (weight / totalWeight) * score;
     }, 0);
 
   return Math.max(0, Math.min(100, Math.round(total)));
