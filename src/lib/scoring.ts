@@ -272,11 +272,11 @@ function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string } 
 }
 
 
-export function calculateDaypartScores(
+export async function calculateDaypartScores(
     hourlyScores: ScoredHour[],
     sunriseISO: string,
     sunsetISO: string
-): DaypartScore[] {
+): Promise<DaypartScore[]> {
     const sunrise = parseISO(sunriseISO);
     const sunset = parseISO(sunsetISO);
     const solarNoon = new Date(sunrise.getTime() + (sunset.getTime() - sunrise.getTime()) / 2);
@@ -326,5 +326,3 @@ export function calculateDaypartScores(
 
     return results;
 }
-
-    
