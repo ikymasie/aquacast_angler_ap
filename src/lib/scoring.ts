@@ -1,8 +1,9 @@
 
+
 'use server';
 
 import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour, DaypartName, DaypartScore, ScoreStatus, OverallDayScore, RecommendedWindow } from './types';
-import { parseISO, isWithinInterval, addMinutes, subMinutes, format, getHours, getMinutes, differenceInMinutes, addHours } from 'date-fns';
+import { parseISO, isWithinInterval, addMinutes, subMinutes, format, getHours, getMinutes, differenceInMinutes, addHours, differenceInHours } from 'date-fns';
 import speciesRules from './species-rules.json';
 
 type SpeciesKey = keyof typeof speciesRules;
@@ -170,59 +171,60 @@ export async function scoreHour(species: Species, h: HourPoint, ctx: DayContext,
   return Math.max(0, Math.min(100, Math.round(total)));
 }
 
-export async function recommendWindows(scores: ScoredHour[], threshold: number = 60): Promise<RecommendedWindow | null> {
-    if (!scores || scores.length === 0) return null;
+export async function recommendWindows(scores: ScoredHour[], threshold: number = 60, preferredDuration: number = 4, maxDuration: number = 8): Promise<RecommendedWindow | null> {
+    if (!scores || scores.length < preferredDuration) return null;
 
-    const goodRuns: { start: string; end: string; scores: number[] }[] = [];
-    let currentRun: { start: string; end: string; scores: number[] } | null = null;
+    let bestWindow: ScoredHour[] | null = null;
+    let maxAvgScore = -1;
 
-    scores.forEach(({ time, score }) => {
-        if (score >= threshold) {
-            if (!currentRun) {
-                currentRun = { start: time, end: time, scores: [score] };
-            } else {
-                currentRun.end = time;
-                currentRun.scores.push(score);
-            }
-        } else {
-            if (currentRun) {
-                goodRuns.push(currentRun);
-                currentRun = null;
-            }
+    // 1. Find the best continuous 4-hour window
+    for (let i = 0; i <= scores.length - preferredDuration; i++) {
+        const window = scores.slice(i, i + preferredDuration);
+        const avgScore = window.reduce((sum, h) => sum + h.score, 0) / preferredDuration;
+        if (avgScore > maxAvgScore) {
+            maxAvgScore = avgScore;
+            bestWindow = window;
         }
-    });
-    if (currentRun) goodRuns.push(currentRun);
+    }
 
-    if (goodRuns.length === 0) {
+    if (!bestWindow || maxAvgScore < threshold) {
+        // Fallback if no window meets the average threshold
         return null;
     }
 
-    const mergedRuns = goodRuns.reduce((acc, run) => {
-        const lastRun = acc[acc.length - 1];
-        if (lastRun) {
-            const lastEnd = parseISO(lastRun.end);
-            const currentStart = parseISO(run.start);
-            // Merge if gap is 1 hour or less
-            if ((currentStart.getTime() - lastEnd.getTime()) / (1000 * 60 * 60) <= 1) {
-                lastRun.end = run.end;
-                lastRun.scores.push(...run.scores);
-                return acc;
-            }
+    // 2. Expand this window outwards up to 8 hours, as long as scores are above threshold
+    let startIndex = scores.indexOf(bestWindow[0]);
+    let endIndex = scores.indexOf(bestWindow[bestWindow.length - 1]);
+
+    // Expand backwards
+    let currentStartIndex = startIndex;
+    while (currentStartIndex > 0) {
+        const nextHour = scores[currentStartIndex - 1];
+        if (nextHour.score >= threshold && (endIndex - (currentStartIndex - 1)) < maxDuration) {
+            currentStartIndex--;
+        } else {
+            break;
         }
-        acc.push(run);
-        return acc;
-    }, [] as typeof goodRuns);
+    }
+
+    // Expand forwards
+    let currentEndIndex = endIndex;
+    while (currentEndIndex < scores.length - 1) {
+        const nextHour = scores[currentEndIndex + 1];
+        if (nextHour.score >= threshold && ((currentEndIndex + 1) - currentStartIndex) < maxDuration) {
+            currentEndIndex++;
+        } else {
+            break;
+        }
+    }
     
-    const topRun = mergedRuns
-      .map(run => ({ ...run, avgScore: run.scores.reduce((a, b) => a + b, 0) / run.scores.length }))
-      .sort((a, b) => b.avgScore - a.avgScore)[0];
-    
-    if (!topRun) return null;
+    const finalWindow = scores.slice(currentStartIndex, currentEndIndex + 1);
+    const finalAvgScore = finalWindow.reduce((sum, h) => sum + h.score, 0) / finalWindow.length;
 
     return {
-        start: topRun.start,
-        end: topRun.end,
-        avgScore: Math.round(topRun.avgScore)
+        start: finalWindow[0].time,
+        end: finalWindow[finalWindow.length - 1].time,
+        avgScore: Math.round(finalAvgScore),
     };
 }
 
@@ -337,18 +339,17 @@ export async function calculateDaypartScores(
     return results;
 }
 
-export async function getOverallDayScore(daypartScores: DaypartScore[], hourlyScores: ScoredHour[]): Promise<OverallDayScore> {
+export async function getOverallDayScore(daypartScores: DaypartScore[]): Promise<OverallDayScore> {
     if (!daypartScores || daypartScores.length === 0) {
         return {
+            dayAvgScore: 0,
             dayStatus: "Poor",
-            bestWindow: null
         };
     }
     
     const dayAvgScore = Math.round(daypartScores.reduce((sum, part) => sum + part.score, 0) / daypartScores.length);
     const dayStatus = await getScoreStatus(dayAvgScore);
     
-    const bestWindow = findBestSubWindow(hourlyScores);
-
-    return { dayStatus, bestWindow };
+    return { dayAvgScore, dayStatus };
 }
+

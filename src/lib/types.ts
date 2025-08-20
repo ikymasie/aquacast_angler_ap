@@ -1,4 +1,5 @@
 
+
 export type Species = 'Bream' | 'Bass' | 'Carp';
 
 export interface Location {
@@ -77,13 +78,8 @@ export interface DaypartScore {
 }
 
 export interface OverallDayScore {
+    dayAvgScore: number;
     dayStatus: ScoreStatus;
-    bestWindow: {
-        start: string;
-        end: string;
-        status: ScoreStatus;
-        score: number;
-    } | null;
 }
 
 export interface RecommendedWindow {
