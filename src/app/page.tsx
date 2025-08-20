@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Home, Star, Map, Settings } from "lucide-react";
 import { BottomNav } from "@/components/bottom-nav";
+import { SearchBar } from "@/components/search-bar";
 
 export default function HomePage() {
   return (
@@ -50,7 +51,8 @@ export default function HomePage() {
       <SidebarInset>
         <div className="flex flex-col min-h-screen bg-background">
           <Header />
-          <main className="flex-1 p-4 md:p-6">
+          <main className="flex-1 p-4 md:p-6 space-y-4">
+            <SearchBar />
             <HomeContent />
           </main>
           <BottomNav />
