@@ -1,0 +1,93 @@
+
+[
+  {
+    "name": "Gaborone Dam",
+    "region": "south",
+    "waterbody_type": "reservoir (Notwane River)",
+    "nearest_town": "Gaborone",
+    "coordinates": {"lat": -24.718299, "lon": 25.907478},
+    "representative_species": ["bass", "bream/tilapia", "catfish"],
+    "notes": "Popular bank & boat fishing; local rules/permits apply."
+  },
+  {
+    "name": "Bokaa Dam",
+    "region": "south",
+    "waterbody_type": "reservoir (Metsimotlhabe River)",
+    "nearest_town": "Bokaa / Mochudi",
+    "coordinates": {"lat": -24.452154, "lon": 25.997764},
+    "representative_species": ["bream/tilapia", "catfish"],
+    "notes": "Accessible day spot; check seasonal water levels and access rules."
+  },
+  {
+    "name": "Nnywane Dam",
+    "region": "south",
+    "waterbody_type": "reservoir (Nnywane River)",
+    "nearest_town": "Lobatse",
+    "coordinates": {"lat": -25.114670, "lon": 25.682370},
+    "representative_species": ["bream/tilapia", "catfish"],
+    "notes": "Smaller dam; confirm access and permits."
+  },
+  {
+    "name": "Letsibogo Dam",
+    "region": "south",
+    "waterbody_type": "reservoir (Motloutse River)",
+    "nearest_town": "Mmadinare / Selebi-Phikwe",
+    "coordinates": {"lat": -21.828357, "lon": 27.713013},
+    "representative_species": ["largemouth bass", "bream/tilapia", "catfish"],
+    "notes": "Known bass venue; tourism promoted incl. fishing—respect local rules."
+  },
+  {
+    "name": "Lotsane Dam",
+    "region": "south",
+    "waterbody_type": "reservoir (Lotsane River)",
+    "nearest_town": "Maunatlala / Palapye",
+    "coordinates": {"lat": -22.591976, "lon": 27.614430},
+    "representative_species": ["bream/tilapia", "catfish"],
+    "notes": "Irrigation/storage dam; verify access with local authorities."
+  },
+  {
+    "name": "Okavango Panhandle (Shakawe reach)",
+    "region": "north",
+    "waterbody_type": "main Okavango River channel",
+    "nearest_town": "Shakawe",
+    "coordinates": {"lat": -18.365400, "lon": 21.842200},
+    "representative_species": ["tigerfish", "nembwe", "bream/tilapia", "catfish"],
+    "notes": "Prime sport fishery; peak action during the barbel run (late winter–spring); permits/guides recommended."
+  },
+  {
+    "name": "Chobe River (Kasane)",
+    "region": "north",
+    "waterbody_type": "border river",
+    "nearest_town": "Kasane",
+    "coordinates": {"lat": -17.816700, "lon": 25.150000},
+    "representative_species": ["tigerfish", "bream/tilapia", "catfish"],
+    "notes": "Popular guided tigerfishing area; observe park boundaries & local permits."
+  },
+  {
+    "name": "Thamalakane River (Maun)",
+    "region": "north",
+    "waterbody_type": "river (southern Okavango outflow)",
+    "nearest_town": "Maun",
+    "coordinates": {"lat": -20.133300, "lon": 23.383300},
+    "representative_species": ["bream/tilapia", "catfish", "tigerfish (seasonal)"],
+    "notes": "Urban-accessible stretches; water level dependent."
+  },
+  {
+    "name": "Boteti River (Khumaga stretch)",
+    "region": "north",
+    "waterbody_type": "river (Okavango outflow toward Makgadikgadi)",
+    "nearest_town": "Khumaga (Xhumaga)",
+    "coordinates": {"lat": -20.471050, "lon": 24.510460},
+    "representative_species": ["bream/tilapia", "catfish"],
+    "notes": "Scenic banks; respect Makgadikgadi NP rules and seasonal flows."
+  },
+  {
+    "name": "Lake Ngami",
+    "region": "north",
+    "waterbody_type": "endorheic lake",
+    "nearest_town": "Sehitwa",
+    "coordinates": {"lat": -20.500000, "lon": 22.666700},
+    "representative_species": ["catfish (sharp-tooth)", "bream/tilapia"],
+    "notes": "Water levels vary by year; notable for big catfish in flood years."
+  }
+]
