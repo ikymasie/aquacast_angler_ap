@@ -68,6 +68,7 @@ export default function LocationPickerMap() {
           streetViewControl: false,
           mapTypeControl: false,
           fullscreenControl: false,
+          mapId: "9b6563cf95e73ca085e3f4d1"
         }}
       >
         {markerPosition && <Marker position={markerPosition} />}
