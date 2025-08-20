@@ -61,11 +61,12 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
 interface AddSpotPayload {
     lat: number;
     lng: number;
+    name: string;
 }
 
 export async function addSpotAction(payload: AddSpotPayload) {
     try {
-        const { lat, lng } = payload;
+        const { lat, lng, name } = payload;
 
         // Construct the URL for our new API route.
         // We assume our app is running on localhost:9002 for server-side fetch.
@@ -88,19 +89,19 @@ export async function addSpotAction(payload: AddSpotPayload) {
             throw new Error("Could not find location information for the selected spot.");
         }
 
-        const name = data.place?.displayName?.text || data.geocode?.formattedAddress || "Unnamed Spot";
-        const nearestTown = name.split(',')[0];
+        const generatedName = data.place?.displayName?.text || data.geocode?.formattedAddress || "Unnamed Spot";
+        const nearestTown = generatedName.split(',')[0];
         
         const newSpot = {
             id: data.place?.id || `spot_${new Date().getTime()}`,
-            name: name,
+            name: name || generatedName,
             region: "custom",
             waterbody_type: "user-added",
             nearest_town: nearestTown,
             coordinates: { lat, lon: lng },
             representative_species: ["bass", "bream/tilapia", "catfish"],
             notes: `Added on ${new Date().toLocaleDateString()}`,
-            image_url: `https://placehold.co/400x300.png?text=${encodeURIComponent(name)}`,
+            image_url: `https://placehold.co/400x300.png?text=${encodeURIComponent(name || generatedName)}`,
             isFavorite: false,
             isRecent: true,
         };

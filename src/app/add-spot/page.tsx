@@ -5,7 +5,7 @@ import { Header } from '@/components/header';
 import { BottomNav } from '@/components/bottom-nav';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, MapPin, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Save, Loader2, Edit } from 'lucide-react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useMemo, useState, useTransition } from 'react';
@@ -14,11 +14,24 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { addSpotAction } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast";
 import type { LatLngLiteral } from 'leaflet';
-import allSpotsData from "@/lib/locations.json";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function AddSpotPage() {
     const [selectedLocation, setSelectedLocation] = useState<LatLngLiteral | null>(null);
     const [isPending, startTransition] = useTransition();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [spotName, setSpotName] = useState('');
     const router = useRouter();
     const { toast } = useToast();
 
@@ -43,15 +56,20 @@ export default function AddSpotPage() {
             });
             return;
         }
+        setIsDialogOpen(true);
+    }
 
-        startTransition(async () => {
+    const handleConfirmSave = () => {
+         if (!selectedLocation) return;
+         
+         startTransition(async () => {
             const { data: newSpot, error } = await addSpotAction({
                 lat: selectedLocation.lat,
                 lng: selectedLocation.lng,
+                name: spotName
             });
 
             if (error) {
-                console.log(error)
                 toast({
                     variant: 'destructive',
                     title: 'Failed to Save Spot',
@@ -65,10 +83,11 @@ export default function AddSpotPage() {
                     localStorage.setItem('user-spots', JSON.stringify(updatedSpots));
                     
                     toast({
+                        variant: 'success',
                         title: 'Spot Added!',
                         description: `${newSpot.name} has been saved.`,
                     });
-                    router.push(`/add-spot/review?id=${newSpot.id}`);
+                    router.push(`/`);
 
                 } catch (storageError) {
                     console.error("Failed to save to local storage:", storageError);
@@ -79,45 +98,73 @@ export default function AddSpotPage() {
                     });
                 }
             }
+            setIsDialogOpen(false);
+            setSpotName('');
         });
     }
 
+
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <Header />
-      <main className="flex-1 p-4 md:p-6 space-y-4 pb-24">
-        <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-            </Link>
-            <Button onClick={handleSaveSpot} disabled={!selectedLocation || isPending}>
-                {isPending ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                    <Save className="w-4 h-4 mr-2" />
-                )}
-                Save & Continue
-            </Button>
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-h2 flex items-center gap-2">
-                <MapPin className="w-6 h-6 text-primary"/>
-                Add a New Fishing Spot
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              Use the map to find and select your fishing spot. Pan and zoom to find the exact location, then tap to place a pin.
-            </p>
-            <div className="aspect-video w-full bg-secondary rounded-lg overflow-hidden">
-                <LocationPickerMap onLocationSelect={handleLocationSelect} />
-            </div>
-          </CardContent>
-        </Card>
-      </main>
-      <BottomNav />
-    </div>
+    <>
+      <div className="flex flex-col min-h-screen bg-background">
+        <Header />
+        <main className="flex-1 p-4 md:p-6 space-y-4 pb-24">
+          <div className="flex items-center justify-between">
+              <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Home
+              </Link>
+              <Button onClick={handleSaveSpot} disabled={!selectedLocation || isPending}>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Spot
+              </Button>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline text-h2 flex items-center gap-2">
+                  <MapPin className="w-6 h-6 text-primary"/>
+                  Add a New Fishing Spot
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Use the map to find and select your fishing spot. Pan and zoom to find the exact location, then tap to place a pin.
+              </p>
+              <div className="aspect-video w-full bg-secondary rounded-lg overflow-hidden">
+                  <LocationPickerMap onLocationSelect={handleLocationSelect} />
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+        <BottomNav />
+      </div>
+
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <AlertDialogContent>
+              <AlertDialogHeader>
+                  <AlertDialogTitle>Name Your Spot</AlertDialogTitle>
+                  <AlertDialogDescription>
+                      Give your new fishing spot a memorable name. You can change this later.
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="grid gap-2 py-2">
+                  <Label htmlFor="spot-name">Spot Name</Label>
+                  <Input 
+                      id="spot-name" 
+                      value={spotName}
+                      onChange={(e) => setSpotName(e.target.value)}
+                      placeholder="e.g., Secret Bass Cove"
+                  />
+              </div>
+              <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleConfirmSave} disabled={isPending || !spotName}>
+                      {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                      Save
+                  </AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
