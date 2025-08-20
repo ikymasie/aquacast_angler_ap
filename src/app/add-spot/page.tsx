@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { addSpotAction } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast";
 import type { LatLngLiteral } from 'leaflet';
+import allSpotsData from "@/lib/locations.json";
 
 export default function AddSpotPage() {
     const [selectedLocation, setSelectedLocation] = useState<LatLngLiteral | null>(null);
@@ -40,7 +41,7 @@ export default function AddSpotPage() {
         }
 
         startTransition(async () => {
-            const { data, error } = await addSpotAction({
+            const { data: newSpot, error } = await addSpotAction({
                 lat: selectedLocation.lat,
                 lng: selectedLocation.lng,
             });
@@ -51,13 +52,27 @@ export default function AddSpotPage() {
                     title: 'Failed to Save Spot',
                     description: error,
                 });
-            } else {
-                toast({
-                    variant: 'success',
-                    title: 'Spot Saved!',
-                    description: `${data?.name} has been added to your locations.`,
-                });
-                router.push('/');
+            } else if (newSpot) {
+                // Save to local storage
+                try {
+                    const existingSpots = JSON.parse(localStorage.getItem('user-spots') || '[]');
+                    const updatedSpots = [...existingSpots, newSpot];
+                    localStorage.setItem('user-spots', JSON.stringify(updatedSpots));
+                    
+                    toast({
+                        title: 'Spot Added!',
+                        description: `${newSpot.name} has been saved.`,
+                    });
+                    router.push(`/add-spot/review?id=${newSpot.id}`);
+
+                } catch (storageError) {
+                    console.error("Failed to save to local storage:", storageError);
+                    toast({
+                         variant: 'destructive',
+                         title: 'Failed to Save Spot',
+                         description: 'Could not save the spot to your device.',
+                    });
+                }
             }
         });
     }
@@ -77,7 +92,7 @@ export default function AddSpotPage() {
                 ) : (
                     <Save className="w-4 h-4 mr-2" />
                 )}
-                Save Spot
+                Save & Continue
             </Button>
         </div>
         <Card>

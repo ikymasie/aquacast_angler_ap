@@ -1,5 +1,7 @@
 
 
+'use client';
+
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -7,28 +9,30 @@ import { Star, Plus } from "lucide-react";
 import Link from "next/link";
 import allSpotsData from "@/lib/locations.json";
 import { Button } from "./ui/button";
-
-
-const favoriteNames: string[] = []; // No favorites by default
-const recentNames: string[] = []; // No recents by default
-
-const all_spots = allSpotsData.map(spot => ({
-    name: spot.name,
-    photo: spot.image_url,
-    hint: spot.waterbody_type.split(' ')[0].toLowerCase() + ' ' + spot.region,
-    isFavorite: favoriteNames.includes(spot.name),
-}));
-
-const favorites = all_spots.filter(spot => spot.isFavorite);
-const recents = allSpotsData.filter(spot => recentNames.includes(spot.name)).map(spot => ({
-    name: spot.name,
-    photo: spot.image_url,
-    hint: spot.waterbody_type.split(' ')[0].toLowerCase() + ' ' + spot.region,
-    isFavorite: favoriteNames.includes(spot.name),
-}));
+import { useEffect, useState } from "react";
 
 
 export function FavoritesRecents({ tab = 'all_spots' }: { tab?: 'all_spots' | 'recents' | 'favorites' }) {
+    const [userSpots, setUserSpots] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedSpots = JSON.parse(localStorage.getItem('user-spots') || '[]');
+            setUserSpots(storedSpots);
+        }
+    }, [tab]); // Rerun when tab changes to get latest data
+
+    const all_spots = [...allSpotsData.map(spot => ({ ...spot, isUserSpot: false })), ...userSpots.map(spot => ({ ...spot, isUserSpot: true }))].map(spot => ({
+        ...spot,
+        name: spot.name,
+        photo: spot.image_url,
+        hint: spot.waterbody_type.split(' ')[0].toLowerCase() + ' ' + spot.region,
+        isFavorite: spot.isFavorite,
+    }));
+
+    const favorites = all_spots.filter(spot => spot.isFavorite);
+    const recents = all_spots.filter(spot => spot.isRecent);
+
     const spots = tab === 'favorites' ? favorites : tab === 'recents' ? recents : all_spots;
     
     if (tab !== 'all_spots' && spots.length === 0) {

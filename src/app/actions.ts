@@ -95,15 +95,9 @@ export async function addSpotAction(payload: AddSpotPayload) {
         // 1. Reverse geocode to get a name
         const name = await reverseGeocode(lat, lng);
         
-        // 2. Define the path to the JSON file
-        const filePath = path.join(process.cwd(), 'src', 'lib', 'locations.json');
-        
-        // 3. Read the existing data
-        const fileContent = await fs.readFile(filePath, 'utf-8');
-        const locations = JSON.parse(fileContent);
-
-        // 4. Create the new spot object
+        // 2. Create the new spot object
         const newSpot = {
+            id: `spot_${new Date().getTime()}`,
             name: name,
             region: "custom",
             waterbody_type: "user-added",
@@ -111,17 +105,16 @@ export async function addSpotAction(payload: AddSpotPayload) {
             coordinates: { lat, lon: lng },
             representative_species: ["bass", "bream/tilapia", "catfish"],
             notes: `Added on ${new Date().toLocaleDateString()}`,
-            image_url: `https://placehold.co/400x300.png`
+            image_url: `https://placehold.co/400x300.png?text=${encodeURIComponent(name)}`,
+            isFavorite: false,
+            isRecent: true,
         };
 
-        // 5. Add the new spot and write back to the file
-        locations.push(newSpot);
-        await fs.writeFile(filePath, JSON.stringify(locations, null, 2));
-
-        return { data: { name }, error: null };
+        // 3. Return the new spot data to the client
+        return { data: newSpot, error: null };
 
     } catch (err) {
-        console.error("Failed to add spot:", err);
+        console.error("Failed to process new spot:", err);
         const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while adding the spot.";
         return { data: null, error: errorMessage };
     }
