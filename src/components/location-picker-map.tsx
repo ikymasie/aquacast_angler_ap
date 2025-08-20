@@ -1,20 +1,23 @@
 
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
-import { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { useState, useEffect } from 'react';
 import type { LatLngExpression } from 'leaflet';
 import L from 'leaflet';
 
-// Fix for default icon issue with webpack (guard so it doesn't re-run weirdly during HMR)
-if (typeof window !== 'undefined' && (L.Icon.Default.prototype as any)._getIconUrl) {
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  });
+// Fix for default icon issue with webpack. This needs to run only once.
+if (typeof window !== 'undefined') {
+    if ((L.Icon.Default.prototype as any)._getIconUrl) {
+        delete (L.Icon.Default.prototype as any)._getIconUrl;
+    }
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    });
 }
+
 
 function LocationMarker() {
   const [position, setPosition] = useState<LatLngExpression | null>(null);
@@ -32,28 +35,23 @@ function LocationMarker() {
   );
 }
 
-// Recenter *without* recreating the map instance
-function Recenter({ center, zoom }: { center: LatLngExpression; zoom: number }) {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(center as any, zoom, { animate: false });
-  }, [map, center, zoom]);
-  return null;
-}
 
 export default function LocationPickerMap() {
   const defaultPosition: LatLngExpression = [-24.6545, 25.9086]; // Gaborone
   const [mapCenter, setMapCenter] = useState<LatLngExpression>(defaultPosition);
   const [isMounted, setIsMounted] = useState(false);
-
-  // Create a *stable* key per mount, so dev StrictMode/HMR doesn't reuse the same DOM node with a fresh map.
-  const mapKeyRef = useRef<string>(`lp-map-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const [mapKey, setMapKey] = useState(0);
 
   useEffect(() => {
     setIsMounted(true);
-    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+    if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => setMapCenter([pos.coords.latitude, pos.coords.longitude]),
+        (pos) => {
+            const newCenter: LatLngExpression = [pos.coords.latitude, pos.coords.longitude];
+            setMapCenter(newCenter);
+            // Force a re-render with a new key to ensure the map re-initializes cleanly with the new center
+            setMapKey(prevKey => prevKey + 1); 
+        },
         () => {
           console.log('Could not get user location, defaulting to Gaborone.');
         }
@@ -61,11 +59,14 @@ export default function LocationPickerMap() {
     }
   }, []);
 
-  if (!isMounted) return null;
+  // Prevent rendering on the server and until the component is mounted
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <MapContainer
-      key={mapKeyRef.current}       // <-- ensures a single Leaflet map per mount
+      key={mapKey} // When this key changes, React will unmount the old and mount a new component
       center={mapCenter}
       zoom={13}
       scrollWheelZoom
@@ -75,7 +76,6 @@ export default function LocationPickerMap() {
         attribution="&copy; OpenStreetMap contributors"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Recenter center={mapCenter} zoom={13} />
       <LocationMarker />
     </MapContainer>
   );
