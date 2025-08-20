@@ -6,6 +6,7 @@ export interface Location {
   longitude: number;
 }
 
+// Simplified weather data from the original mock
 export interface WeatherData {
   temperature: number;
   windSpeed: number;
@@ -21,12 +22,49 @@ export interface HourlyForecastData extends WeatherData {
   time: string;
 }
 
-export interface DailyForecastData {
-  day: string;
-  successScore: number;
-  uvIndex: number;
+// New detailed types for Open-Meteo data and scoring
+export type HourPoint = {
+  t: string; // ISO
+  tempC: number;
+  rh: number;
+  windKph: number;
+  windDeg: number;
+  pressureHpa: number;
+  cloudPct: number;
+  precipMm: number;
+  uv: number;
+  shortwave: number;
+  derived: {
+    pressureTrend3h: number;
+    light: number;
+    windBeaufort: number;
+  };
+};
+
+export type DayContext = {
+  sunrise: string;
+  sunset: string;
+  moonPhase: number;
+  uvMax: number;
+};
+
+export interface RecentWindow {
+    waterTempC: number;
+    stdTempPressure: number;
 }
 
+export interface WeatherApiResponse {
+    hourly: HourPoint[];
+    daily: DayContext;
+    recent: RecentWindow;
+}
+
+export interface ScoredHour {
+    time: string;
+    score: number;
+}
+
+// Mock data for fallback or initial state
 export const MOCK_LOCATION: Location = {
   name: "Lake Harmony, PA",
   latitude: 41.05,

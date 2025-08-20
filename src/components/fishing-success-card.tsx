@@ -2,55 +2,67 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SpeciesSelector } from "@/components/species-selector";
-import { calculateFishingSuccessScoreAction } from "@/app/actions";
+import { getFishingForecastAction } from "@/app/actions";
 import type { Species } from "@/lib/types";
-import { MOCK_CURRENT_CONDITIONS, MOCK_LOCATION } from "@/lib/types";
+import { MOCK_LOCATION } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 type SuccessScoreResult = {
   successScore: number;
   recommendedTimeWindow: string;
 } | null;
 
-export function FishingSuccessCard() {
+export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: any) => void }) {
   const [isPending, startTransition] = useTransition();
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
   const [result, setResult] = useState<SuccessScoreResult>(null);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleGetScore = (species: Species) => {
     startTransition(async () => {
       setError(null);
-      const { data, error } = await calculateFishingSuccessScoreAction({
+      const { data, error } = await getFishingForecastAction({
         species,
         location: MOCK_LOCATION,
-        conditions: MOCK_CURRENT_CONDITIONS,
       });
 
       if (error) {
         setError(error);
+        toast({
+          variant: 'destructive',
+          title: 'Failed to get forecast',
+          description: error,
+        });
       }
       if (data) {
-        setResult(data);
+        setResult({
+            successScore: data.successScore,
+            recommendedTimeWindow: data.recommendedTimeWindow,
+        });
+        onForecastLoad(data);
       }
     });
   };
   
   useEffect(() => {
     handleGetScore(selectedSpecies);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSpecies]);
 
   const scoreColorClass = 
     !result || isPending ? 'bg-muted' :
-    result.successScore >= 75 ? 'bg-success' :
-    result.successScore >= 50 ? 'bg-fair' : 'bg-poor';
+    result.successScore >= 80 ? 'bg-success' : // Excellent
+    result.successScore >= 60 ? 'bg-primary' : // Good
+    result.successScore >= 40 ? 'bg-fair' : 'bg-poor';
   
   const scoreTextColorClass =
     !result || isPending ? 'text-muted-foreground' :
-    result.successScore >= 75 ? 'text-green-900' :
-    result.successScore >= 50 ? 'text-amber-900' : 'text-red-900';
+    result.successScore >= 80 ? 'text-green-900' :
+    result.successScore >= 60 ? 'text-primary-foreground' :
+    result.successScore >= 40 ? 'text-amber-900' : 'text-red-900';
 
 
   return (
@@ -63,7 +75,7 @@ export function FishingSuccessCard() {
                 Fishing Success Score for {MOCK_LOCATION.name}
               </CardTitle>
               <CardDescription className="text-base">
-                Select a species to get a tailored AI-powered forecast.
+                Select a species to get a tailored forecast.
               </CardDescription>
             </CardHeader>
             <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} disabled={isPending} />
@@ -80,7 +92,7 @@ export function FishingSuccessCard() {
                 </div>
               ) : result ? (
                 <div>
-                  <h3 className="text-lg font-semibold font-headline text-primary">Recommended Window</h3>
+                  <h3 className="text-lg font-semibold font-headline text-primary">Recommended Window(s)</h3>
                   <p className="text-lg">{result.recommendedTimeWindow}</p>
                 </div>
               ) : null}

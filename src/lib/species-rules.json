@@ -1,0 +1,50 @@
+{
+  "bream": {
+    "weights": {
+      "timeOfDay": 0.18, "cloud": 0.10, "wind": 0.06, "pressureTrend": 0.12,
+      "airTempComfort": 0.10, "waterTempComfort": 0.16, "precip": 0.04,
+      "moon": 0.08, "stability": 0.10, "levelFlow": 0.06
+    },
+    "curves": {
+      "waterTempComfort": {"type":"gauss","mu":16,"sigma":3},
+      "airTempComfort":   {"type":"gauss","mu":18,"sigma":5},
+      "wind":             {"type":"penalty","breaks":[10,20],"scores":[90,60,25]},
+      "cloud":            {"type":"plateau","ranges":[[30,80]],"score":85},
+      "pressureTrend":    {"type":"trend","riseBonus":15,"fallPenalty":-10, "preFrontDropBonus": 0},
+      "timeOfDay":        {"type":"twilightBoost","dawn":20,"dusk":15},
+      "precip":           {"type":"step","mm":[0,0.2,2.0],"scores":[80,85,50]},
+      "moon":             {"type":"phase","full":5,"new":5,"q1q3":0},
+      "stability":        {"type":"inverseVar","breaks":[0.5,2.0],"scores":[90,70,40]}
+    }
+  },
+  "bass": {
+    "weights": { "timeOfDay":0.20, "cloud":0.12, "wind":0.08, "pressureTrend":0.15,
+      "airTempComfort":0.10, "waterTempComfort":0.18, "precip":0.05, "moon":0.06, "stability":0.06, "levelFlow": 0.0 },
+    "curves": {
+      "waterTempComfort":{"type":"gauss","mu":20,"sigma":4},
+      "airTempComfort":   {"type":"gauss","mu":22,"sigma":6},
+      "cloud":{"type":"plateau","ranges":[[40,100]],"score":90},
+      "pressureTrend":{"type":"trend","preFrontDropBonus":20,"riseBonus":5, "fallPenalty": 0},
+      "timeOfDay":{"type":"twilightBoost","dawn":25,"dusk":20},
+      "wind":{"type":"penalty","breaks":[12,25],"scores":[85,55,25]},
+      "precip":           {"type":"step","mm":[0,0.2,1.5],"scores":[75,85,60]},
+      "moon":             {"type":"phase","full":-5,"new":10,"q1q3":5},
+      "stability":        {"type":"inverseVar","breaks":[0.8,2.5],"scores":[80,70,50]}
+    }
+  },
+  "carp": {
+    "weights": { "timeOfDay":0.18, "cloud":0.10, "wind":0.05, "pressureTrend":0.12,
+      "airTempComfort":0.06, "waterTempComfort":0.22, "precip":0.05, "moon":0.08, "stability":0.09, "levelFlow":0.05 },
+    "curves": {
+      "waterTempComfort":{"type":"gauss","mu":22,"sigma":3},
+      "airTempComfort":   {"type":"gauss","mu":24,"sigma":5},
+      "stability":{"type":"inverseVar","breaks":[0.5,1.5],"scores":[92,75,45]},
+      "wind":{"type":"penalty","breaks":[8,18],"scores":[90,65,35]},
+      "cloud":{"type":"plateau","ranges":[[20,80]],"score":80},
+      "pressureTrend":{"type":"trend","riseBonus":10,"fallPenalty":-5, "preFrontDropBonus": 5},
+      "timeOfDay":        {"type":"twilightBoost","dawn":10,"dusk":15},
+      "precip":           {"type":"step","mm":[0,0.5,3.0],"scores":[85,75,60]},
+      "moon":             {"type":"phase","full":10,"new":5,"q1q3":-5}
+    }
+  }
+}

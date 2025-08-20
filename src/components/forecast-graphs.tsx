@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MOCK_FORECAST_GRAPHS } from "@/lib/types"
+import type { ScoredHour } from "@/lib/types"
 
 const hourlyChartConfig = {
   success: {
@@ -24,8 +25,12 @@ const dailyChartConfig = {
   },
 }
 
-export function ForecastGraphs() {
-  const data = MOCK_FORECAST_GRAPHS;
+interface ForecastGraphsProps {
+    hourlyData?: { time: string; success: number }[];
+    // dailyData will be added later
+}
+
+export function ForecastGraphs({ hourlyData = MOCK_FORECAST_GRAPHS.hourly }: ForecastGraphsProps) {
   
   return (
     <Card className="shadow-md">
@@ -41,9 +46,9 @@ export function ForecastGraphs() {
           </TabsList>
           <TabsContent value="hourly">
             <ChartContainer config={hourlyChartConfig} className="h-64 w-full">
-              <LineChart accessibilityLayer data={data.hourly} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
+              <LineChart accessibilityLayer data={hourlyData} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                <XAxis dataKey="time" tickLine={false} axisLine={false} tickMargin={8} />
+                <XAxis dataKey="time" tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => value.replace(/ /g, '')} />
                 <YAxis
                   domain={[0, 100]}
                   tickLine={false}
@@ -64,7 +69,7 @@ export function ForecastGraphs() {
           </TabsContent>
           <TabsContent value="daily">
             <ChartContainer config={dailyChartConfig} className="h-64 w-full">
-              <BarChart accessibilityLayer data={data.daily} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
+              <BarChart accessibilityLayer data={MOCK_FORECAST_GRAPHS.daily} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" />
                 <XAxis
                   dataKey="day"

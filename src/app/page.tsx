@@ -1,3 +1,5 @@
+'use client';
+
 import { Header } from "@/components/header";
 import { FishingSuccessCard } from "@/components/fishing-success-card";
 import { CurrentConditionsCard } from "@/components/current-conditions-card";
@@ -5,11 +7,17 @@ import { HourlyForecast } from "@/components/hourly-forecast";
 import { ForecastGraphs } from "@/components/forecast-graphs";
 import { InteractiveMap } from "@/components/interactive-map";
 import { FavoritesRecents } from "@/components/favorites-recents";
-import { Suspense } from "react";
+import { Suspense, useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
+  const [forecastData, setForecastData] = useState<any>(null);
+
+  const handleForecastLoad = useCallback((data: any) => {
+    setForecastData(data);
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
@@ -17,7 +25,7 @@ export default function Home() {
         <div className="grid gap-6 lg:grid-cols-3 xl:grid-cols-4">
           <div className="lg:col-span-3 xl:col-span-4">
             <Suspense fallback={<FishingSuccessCardSkeleton />}>
-              <FishingSuccessCard />
+              <FishingSuccessCard onForecastLoad={handleForecastLoad} />
             </Suspense>
           </div>
 
@@ -29,7 +37,7 @@ export default function Home() {
               <HourlyForecast />
             </Suspense>
             <Suspense fallback={<CardSkeleton height="h-96" />}>
-              <ForecastGraphs />
+              <ForecastGraphs hourlyData={forecastData?.hourlyChartData} />
             </Suspense>
           </div>
           

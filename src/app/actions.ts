@@ -1,44 +1,49 @@
 'use server';
 
-import { calculateFishingSuccessScore } from "@/ai/flows/fishing-success-score";
-import type { Species, Location, WeatherData } from "@/lib/types";
+import type { Species, Location, ScoredHour } from "@/lib/types";
+import { fetchWeatherData } from "@/services/weather/openMeteo";
+import { scoreHour, recommendWindows } from "@/lib/scoring";
+import { format, parseISO } from "date-fns";
 
-// This is a simplified input structure for the server action.
-// In a real app, you would fetch more detailed data.
 interface GetScoreActionPayload {
   species: Species;
   location: Location;
-  conditions: WeatherData;
 }
 
-export async function calculateFishingSuccessScoreAction(payload: GetScoreActionPayload) {
+export async function getFishingForecastAction(payload: GetScoreActionPayload) {
   try {
-    // In a real app, you'd fetch live data for hydro, sunmoon, etc.
-    // For this example, we'll use a mix of mock and derived data.
-    const now = new Date();
-    const data = await calculateFishingSuccessScore({
-      species: payload.species,
-      location: payload.location.name,
-      met: {
-        temperature: payload.conditions.temperature,
-        windSpeed: payload.conditions.windSpeed,
-        humidity: payload.conditions.humidity,
-      },
-      hydro: {
-        waterTemperature: 18, // Mock data
-        waterClarity: 'clear', // Mock data
-      },
-      sunmoon: {
-        sunrise: '06:00', // Mock data
-        sunset: '20:30', // Mock data
-        moonPhase: 'waxing crescent', // Mock data
-      },
-      clock: {
-        currentTime: `${now.getHours()}:${now.getMinutes()}`,
-      },
-    });
+    const { species, location } = payload;
+    const weatherData = await fetchWeatherData(location);
 
-    return { data, error: null };
+    const now = new Date();
+    const futureHours = weatherData.hourly.filter(h => parseISO(h.t) >= now);
+
+    if (futureHours.length === 0) {
+      return { data: null, error: "Could not retrieve future forecast data."};
+    }
+
+    const scoredHours: ScoredHour[] = await Promise.all(futureHours.map(async (hour) => ({
+      time: hour.t,
+      score: await scoreHour(species, hour, weatherData.daily, weatherData.recent),
+    })));
+    
+    const currentScore = scoredHours[0].score;
+    const recommendedTimeWindow = await recommendWindows(scoredHours.slice(0, 24)); // Recommend based on next 24h
+
+    // Format hourly data for the chart
+    const hourlyChartData = scoredHours.slice(0, 24).map(h => ({
+        time: format(parseISO(h.time), 'ha'),
+        success: Math.round(h.score)
+    }));
+
+    return { 
+      data: {
+        successScore: currentScore,
+        recommendedTimeWindow,
+        hourlyChartData,
+      }, 
+      error: null 
+    };
   } catch (err) {
     console.error(err);
     const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
