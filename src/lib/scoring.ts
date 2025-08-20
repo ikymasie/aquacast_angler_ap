@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour, DaypartName, DaypartScore, ScoreStatus, OverallDayScore, RecommendedWindow } from './types';
@@ -232,13 +231,13 @@ export async function recommendWindows(scores: ScoredHour[], threshold: number =
 // --- Daypart Scoring ---
 
 export async function getScoreStatus(score: number): Promise<ScoreStatus> {
-    if (score >= 80) return "Excellent";
-    if (score >= 60) return "Good";
-    if (score >= 40) return "Fair";
-    return "Poor";
+    if (score > 87) return "Excellent";
+    if (score > 75) return "Great";
+    if (score >= 63) return "Fair";
+    return "Bad";
 }
 
-function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string, status: ScoreStatus, score: number } | null {
+async function findBestSubWindow(hours: ScoredHour[]): Promise<{ start: string; end: string, status: ScoreStatus, score: number } | null> {
     if (!hours || hours.length === 0) return null;
     
     const goodHours = hours.filter(h => h.score >= 60);
@@ -270,17 +269,9 @@ function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string, s
     return {
         start: bestRun[0].time,
         end: bestRun[bestRun.length - 1].time,
-        status: getScoreStatusSync(avgScore),
+        status: await getScoreStatus(avgScore),
         score: Math.round(avgScore)
     };
-}
-
-// Synchronous version for use in non-async contexts if needed
-function getScoreStatusSync(score: number): ScoreStatus {
-    if (score >= 80) return "Excellent";
-    if (score >= 60) return "Good";
-    if (score >= 40) return "Fair";
-    return "Poor";
 }
 
 
@@ -323,7 +314,7 @@ export async function calculateDaypartScores(
         
         const avgScore = Math.round(topScores.reduce((sum, h) => sum + h.score, 0) / topScores.length);
         const status = await getScoreStatus(avgScore);
-        const bestWindow = findBestSubWindow(scoresInPart);
+        const bestWindow = await findBestSubWindow(scoresInPart);
         
         const isCurrent = isWithinInterval(now, { start, end });
 
@@ -339,17 +330,16 @@ export async function calculateDaypartScores(
     return results;
 }
 
-export async function getOverallDayScore(daypartScores: DaypartScore[]): Promise<OverallDayScore> {
-    if (!daypartScores || daypartScores.length === 0) {
+export async function getOverallDayScore(daypartScores: DaypartScore[], hourlyScores: ScoredHour[]): Promise<OverallDayScore> {
+    if (!hourlyScores || hourlyScores.length === 0) {
         return {
             dayAvgScore: 0,
             dayStatus: "Poor",
         };
     }
     
-    const dayAvgScore = Math.round(daypartScores.reduce((sum, part) => sum + part.score, 0) / daypartScores.length);
+    const dayAvgScore = Math.round(hourlyScores.reduce((sum, part) => sum + part.score, 0) / hourlyScores.length);
     const dayStatus = await getScoreStatus(dayAvgScore);
     
     return { dayAvgScore, dayStatus };
 }
-

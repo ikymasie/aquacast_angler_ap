@@ -48,6 +48,8 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     const scoredHours: ScoredHour[] = await Promise.all(hoursForDay.map(async (hour) => ({
       time: hour.t,
       score: await scoreHour(species, hour, selectedDayData, weatherData.recent),
+      condition: hour.derived.light > 0.5 ? 'Clear' : 'Cloudy', // Simple condition for the icon
+      temperature: Math.round(hour.tempC)
     })));
     
     // Check if we have any scores to process
@@ -64,7 +66,9 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     // Format hourly data for the chart, ensuring we have data
     const hourlyChartData = scoredHours.map(h => ({
         time: format(parseISO(h.time), 'ha'),
-        success: Math.round(h.score)
+        success: Math.round(h.score),
+        condition: h.condition,
+        temperature: h.temperature
     }));
 
     const daypartScores = await calculateDaypartScores(

@@ -44,6 +44,11 @@
 
     --panel: 228 14% 20%; /* #2A2E3F */
 
+    --score-bad: 0 80% 70%; /* Pale Red */
+    --score-fair: 30 90% 70%; /* Pale Orange */
+    --score-great: 60 90% 80%; /* Light Pale Yellow */
+    --score-excellent: 120 70% 80%; /* Light Pale Green */
+
     --good: 145 63% 42%; /* #27AE60 */
     --fair: 45 87% 62%; /* #F2C94C */
     --poor: 0 81% 63%; /* #EB5757 */
@@ -81,6 +86,11 @@
 
     --panel: 228 14% 20%;
     
+    --score-bad: 0 80% 70%; /* Pale Red */
+    --score-fair: 30 90% 70%; /* Pale Orange */
+    --score-great: 60 90% 80%; /* Light Pale Yellow */
+    --score-excellent: 120 70% 80%; /* Light Pale Green */
+
     --good: 145 63% 42%;
     --fair: 45 87% 62%;
     --poor: 0 81% 63%;

@@ -20,9 +20,13 @@ export interface WeatherData {
   condition: string;
 }
 
-export interface HourlyForecastData extends WeatherData {
+export interface HourlyForecastData {
   time: string;
+  temperature: number;
+  condition: string;
+  success: number;
 }
+
 
 // New detailed types for Open-Meteo data and scoring
 export type HourPoint = {
@@ -64,10 +68,12 @@ export interface WeatherApiResponse {
 export interface ScoredHour {
     time: string; // Can be ISO string or formatted time like '3pm'
     score: number;
+    condition: string;
+    temperature: number;
 }
 
 export type DaypartName = 'Morning' | 'Midday' | 'Afternoon' | 'Evening' | 'Night';
-export type ScoreStatus = "Poor" | "Fair" | "Good" | "Excellent";
+export type ScoreStatus = "Poor" | "Bad" | "Fair" | "Great" | "Excellent";
 
 export interface DaypartScore {
     name: DaypartName;
@@ -108,10 +114,10 @@ export const MOCK_CURRENT_CONDITIONS: WeatherData = {
 };
 
 export const MOCK_HOURLY_FORECAST: HourlyForecastData[] = [
-  { time: 'Now', temperature: 22, condition: 'Partly Cloudy', windSpeed: 10, windDirection: 'SW', humidity: 65, pressure: 1012, pressureTrend: 'falling', cloudCover: 75 },
-  { time: '3 PM', temperature: 23, condition: 'Partly Cloudy', windSpeed: 12, windDirection: 'SW', humidity: 63, pressure: 1011, pressureTrend: 'falling', cloudCover: 70 },
-  { time: '4 PM', temperature: 22, condition: 'Cloudy', windSpeed: 15, windDirection: 'S', humidity: 68, pressure: 1010, pressureTrend: 'falling', cloudCover: 85 },
-  { time: '5 PM', temperature: 21, condition: 'Showers', windSpeed: 13, windDirection: 'S', humidity: 75, pressure: 1010, pressureTrend: 'steady', cloudCover: 95 },
+  { time: 'Now', temperature: 22, condition: 'Partly Cloudy', success: 75 },
+  { time: '3 PM', temperature: 23, condition: 'Partly Cloudy', success: 80 },
+  { time: '4 PM', temperature: 22, condition: 'Cloudy', success: 70 },
+  { time: '5 PM', temperature: 21, condition: 'Showers', success: 65 },
 ];
 
 export const MOCK_FORECAST_GRAPHS = {
