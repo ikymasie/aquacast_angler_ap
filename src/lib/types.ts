@@ -70,11 +70,19 @@ export type ScoreStatus = "Poor" | "Fair" | "Good" | "Excellent";
 
 export interface DaypartScore {
     name: DaypartName;
-    avgScore: number;
+    score: number;
     status: ScoreStatus;
-    bestWindow?: {
-        start: string; // ISO strings
+    hasWindow: boolean;
+    isCurrent: boolean;
+}
+
+export interface OverallDayScore {
+    dayAvgScore: number;
+    dayStatus: ScoreStatus;
+    bestWindow: {
+        start: string;
         end: string;
+        status: ScoreStatus;
     } | null;
 }
 
@@ -129,5 +137,3 @@ export const MOCK_FORECAST_GRAPHS = {
     { day: 'Sun', success: 78, uv: 7 },
   ]
 };
-
-    

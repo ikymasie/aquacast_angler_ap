@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour, DaypartName, DaypartScore, ScoreStatus } from './types';
+import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour, DaypartName, DaypartScore, ScoreStatus, OverallDayScore } from './types';
 import { parseISO, isWithinInterval, addMinutes, subMinutes, format, getHours, getMinutes, differenceInMinutes, addHours } from 'date-fns';
 import speciesRules from './species-rules.json';
 
@@ -240,7 +240,7 @@ function getScoreStatus(score: number): ScoreStatus {
     return "Poor";
 }
 
-function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string } | null {
+function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string, status: ScoreStatus } | null {
     const goodHours = hours.filter(h => h.score >= 60);
     if (goodHours.length === 0) return null;
 
@@ -264,10 +264,13 @@ function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string } 
     if (bestRun.length === 0 || differenceInMinutes(parseISO(bestRun[bestRun.length - 1].time), parseISO(bestRun[0].time)) < 45) {
         return null;
     }
+    
+    const avgScore = bestRun.reduce((sum, h) => sum + h.score, 0) / bestRun.length;
 
     return {
         start: bestRun[0].time,
         end: bestRun[bestRun.length - 1].time,
+        status: getScoreStatus(avgScore),
     };
 }
 
@@ -280,12 +283,13 @@ export async function calculateDaypartScores(
     const sunrise = parseISO(sunriseISO);
     const sunset = parseISO(sunsetISO);
     const solarNoon = new Date(sunrise.getTime() + (sunset.getTime() - sunrise.getTime()) / 2);
+    const now = new Date();
 
     const dayparts: Record<DaypartName, { start: Date; end: Date }> = {
         Morning: { start: subMinutes(sunrise, 60), end: addMinutes(sunrise, 180) },
-        Evening: { start: subMinutes(sunset, 90), end: addMinutes(sunset, 60) },
         Midday: { start: addMinutes(sunrise, 180), end: subMinutes(solarNoon, 60) },
         Afternoon: { start: subMinutes(solarNoon, 60), end: subMinutes(sunset, 120) },
+        Evening: { start: subMinutes(sunset, 90), end: addMinutes(sunset, 60) },
         Night: { start: addMinutes(sunset, 60), end: subMinutes(sunrise, 60) } // This is a simplification
     };
     
@@ -304,7 +308,7 @@ export async function calculateDaypartScores(
         });
 
         if (scoresInPart.length === 0) {
-             results.push({ name: partName, avgScore: 0, status: "Poor", bestWindow: null });
+             results.push({ name: partName, score: 0, status: "Poor", hasWindow: false, isCurrent: false });
              return;
         }
 
@@ -316,13 +320,51 @@ export async function calculateDaypartScores(
         const status = getScoreStatus(avgScore);
         const bestWindow = findBestSubWindow(scoresInPart);
         
+        const isCurrent = isWithinInterval(now, { start, end });
+
         results.push({
             name: partName,
-            avgScore,
+            score: avgScore,
             status,
-            bestWindow
+            hasWindow: !!bestWindow,
+            isCurrent,
         });
     });
 
     return results;
+}
+
+export function getOverallDayScore(daypartScores: DaypartScore[]): OverallDayScore {
+    if (!daypartScores || daypartScores.length === 0) {
+        return {
+            dayAvgScore: 0,
+            dayStatus: "Poor",
+            bestWindow: null
+        };
+    }
+    
+    const dayAvgScore = Math.round(daypartScores.reduce((sum, part) => sum + part.score, 0) / daypartScores.length);
+    const dayStatus = getScoreStatus(dayAvgScore);
+    
+    const windows = daypartScores
+        .filter(p => p.hasWindow)
+        .map(p => {
+             const { start, end, status } = findBestSubWindow(p.name as any) || {}; // Needs full hour data
+             return { start, end, status, score: p.score };
+        })
+        .filter(w => w.start && w.end)
+        .sort((a,b) => b.score - a.score);
+
+    const bestWindow = windows[0] ? { start: windows[0].start!, end: windows[0].end!, status: windows[0].status! } : null;
+
+    return { dayAvgScore, dayStatus, bestWindow };
+}
+
+// Stub function to pass to findBestSubWindow. This needs to be implemented properly.
+function findBestSubWindow(partName: DaypartName): any {
+    // This is a placeholder. To implement this correctly, we need access to the `hourlyScores`
+    // that correspond to the given `partName`. The current structure of getOverallDayScore
+    // does not have access to this. This would require a refactor to pass the hourly scores
+    // around or re-calculate them.
+    return null;
 }

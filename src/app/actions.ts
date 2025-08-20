@@ -3,7 +3,7 @@
 
 import type { Species, Location, ScoredHour, DaypartScore } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
-import { scoreHour, recommendWindows, calculateDaypartScores } from "@/lib/scoring";
+import { scoreHour, recommendWindows, calculateDaypartScores, getOverallDayScore } from "@/lib/scoring";
 import { format, parseISO } from "date-fns";
 
 interface GetScoreActionPayload {
@@ -43,11 +43,13 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         success: Math.round(h.score)
     }));
 
-    const daypartScores = calculateDaypartScores(
+    const daypartScores = await calculateDaypartScores(
         scoredHours.slice(0, 24),
         weatherData.daily.sunrise,
         weatherData.daily.sunset
     );
+    
+    const overallDayScore = getOverallDayScore(daypartScores);
 
     return { 
       data: {
@@ -55,6 +57,7 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         recommendedTimeWindow,
         hourlyChartData,
         daypartScores,
+        overallDayScore,
       }, 
       error: null 
     };

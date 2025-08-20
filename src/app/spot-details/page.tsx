@@ -6,12 +6,12 @@ import { BottomNav } from '@/components/bottom-nav';
 import { Header } from '@/components/header';
 import { SpotHeaderCard } from '@/components/spot-header-card';
 import { MapCard } from '@/components/map-card';
-import type { Species, Location, WeatherApiResponse, ScoredHour, DaypartScore } from '@/lib/types';
+import type { Species, Location, WeatherApiResponse, ScoredHour, DaypartScore, OverallDayScore } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
 import { SearchBar } from '@/components/search-bar';
 import { getCachedWeatherData } from '@/services/weather/client';
 import { getFishingForecastAction } from '../actions';
-import { DaypartScorecard } from '@/components/daypart-scorecard';
+import { DaypartScorePanel } from '@/components/daypart-score-panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SpeciesSelector } from '@/components/species-selector';
 
@@ -27,6 +27,7 @@ export default function SpotDetailsPage() {
     const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
     const [weatherData, setWeatherData] = useState<WeatherApiResponse | null>(null);
     const [daypartScores, setDaypartScores] = useState<DaypartScore[] | null>(null);
+    const [overallDayScore, setOverallDayScore] = useState<OverallDayScore | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isForecastLoading, setIsForecastLoading] = useState(true);
 
@@ -55,10 +56,12 @@ export default function SpotDetailsPage() {
                 location: location,
             });
 
-            if (forecastResult.data && Array.isArray(forecastResult.data.daypartScores)) {
-                setDaypartScores(forecastResult.data.daypartScores);
+            if (forecastResult.data) {
+                setDaypartScores(forecastResult.data.daypartScores || null);
+                setOverallDayScore(forecastResult.data.overallDayScore || null)
             } else {
                 setDaypartScores(null);
+                setOverallDayScore(null);
             }
             setIsForecastLoading(false);
         }
@@ -81,20 +84,19 @@ export default function SpotDetailsPage() {
                 <SpotHeaderCard
                     spot={spot}
                     weatherData={weatherData}
-                    location={location}
-                    selectedSpecies={selectedSpecies}
-                    onSelectSpecies={setSelectedSpecies}
                     isLoading={isLoading}
                 />
                 
-                {isForecastLoading || !daypartScores ? (
-                    <Skeleton className="h-64 w-full rounded-xl" />
+                {isForecastLoading || !daypartScores || !overallDayScore ? (
+                    <Skeleton className="h-[180px] w-full rounded-xl" />
                 ) : (
-                    <DaypartScorecard
+                    <DaypartScorePanel
                         speciesKey={selectedSpecies.toLowerCase() as any}
-                        sunriseISO={weatherData?.daily.sunrise || new Date().toISOString()}
-                        sunsetISO={weatherData?.daily.sunset || new Date().toISOString()}
-                        daypartScores={daypartScores}
+                        spotName={spot.name}
+                        dayAvgScore={overallDayScore.dayAvgScore}
+                        dayStatus={overallDayScore.dayStatus}
+                        bestWindow={overallDayScore.bestWindow}
+                        dayparts={daypartScores}
                     />
                 )}
 
