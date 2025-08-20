@@ -9,7 +9,7 @@ import { WeatherIcon } from "./weather-icon";
 export function HourlyForecast() {
   const data = MOCK_HOURLY_FORECAST;
   return (
-    <Card className="shadow-md">
+    <Card>
       <CardHeader>
         <CardTitle className="font-headline text-xl">Hourly Mini-Forecast</CardTitle>
       </CardHeader>

@@ -5,7 +5,7 @@ import { Layers, LocateFixed, Download } from "lucide-react";
 
 export function InteractiveMap() {
   return (
-    <Card className="shadow-md overflow-hidden h-full flex flex-col">
+    <Card className="overflow-hidden h-full flex flex-col">
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle className="font-headline text-xl">Map</CardTitle>
         <div className="flex gap-1">

@@ -13,7 +13,7 @@ export function CurrentConditionsCard() {
     data.pressureTrend === 'falling' ? TrendingDown : Minus;
 
   return (
-    <Card className="shadow-card">
+    <Card>
       <CardHeader>
         <CardTitle className="font-headline text-h2">Current Conditions</CardTitle>
       </CardHeader>

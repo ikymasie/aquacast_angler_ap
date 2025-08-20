@@ -70,7 +70,7 @@ export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: 
   return (
     <Card className="w-full shadow-card rounded-xl overflow-hidden border-0">
       <div className="grid grid-cols-1 md:grid-cols-3">
-        <div className="md:col-span-2 p-6 space-y-4">
+        <div className="md:col-span-2 p-4 space-y-4">
           <CardHeader className="p-0">
             <CardTitle className="font-headline text-h1">
               Fishing Success Score
@@ -97,7 +97,7 @@ export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: 
           </div>
         </div>
 
-        <div className={cn("flex items-center justify-center p-6 text-white gradient-fishing-panel", bgColor)}>
+        <div className={cn("flex items-center justify-center p-4 text-white gradient-fishing-panel", bgColor)}>
             <div className="relative text-center space-y-2">
                 {isPending && !result ? (
                   <Skeleton className="h-12 w-24 mx-auto bg-white/20" />
@@ -122,15 +122,15 @@ export function FishingSuccessCard({ onForecastLoad }: { onForecastLoad: (data: 
 
 function RecommendedWindowCard({ timeWindow, score }: { timeWindow: string, score: number }) {
     const scoreInfo = 
-      score >= 80 ? { label: 'EXCELLENT', className: 'bg-good/10 text-good' } :
-      score >= 60 ? { label: 'GOOD', className: 'bg-good/10 text-good' } :
+      score >= 80 ? { label: 'EXCELLENT', className: 'bg-good/20 text-good' } :
+      score >= 60 ? { label: 'GOOD', className: 'bg-good/20 text-good' } :
       score >= 40 ? { label: 'FAIR', className: 'bg-fair/20 text-fair' } :
-      { label: 'POOR', className: 'bg-poor/10 text-poor' };
+      { label: 'POOR', className: 'bg-poor/20 text-poor' };
   
     const hasWindow = timeWindow && timeWindow.includes('-');
     
     return (
-      <div className="p-4 rounded-lg bg-card border">
+      <div className="p-4 rounded-xl bg-card border shadow-inner-sm">
           <div className="flex items-center justify-between">
               <div>
                   <p className="text-caption text-muted-foreground font-medium">Recommended Window</p>
@@ -145,4 +145,3 @@ function RecommendedWindowCard({ timeWindow, score }: { timeWindow: string, scor
       </div>
     )
   }
-  

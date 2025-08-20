@@ -16,7 +16,7 @@ const recents = [
 
 export function FavoritesRecents() {
   return (
-    <Card className="shadow-md h-full flex flex-col">
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle className="font-headline text-xl">My Spots</CardTitle>
       </CardHeader>

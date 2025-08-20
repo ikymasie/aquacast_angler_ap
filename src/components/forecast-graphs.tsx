@@ -31,7 +31,7 @@ interface ForecastGraphsProps {
 export function ForecastGraphs({ hourlyData = MOCK_FORECAST_GRAPHS.hourly }: ForecastGraphsProps) {
   
   return (
-    <Card className="shadow-card bg-panel text-primary-foreground">
+    <Card className="bg-panel text-primary-foreground">
       <CardHeader>
         <CardTitle className="font-headline text-h2">Fishing Forecast</CardTitle>
         <CardDescription className="text-muted-foreground">Hourly and daily outlook for your spot.</CardDescription>
