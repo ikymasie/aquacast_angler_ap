@@ -1,8 +1,8 @@
 
 'use server';
 
-import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour } from './types';
-import { parseISO, isWithinInterval, addMinutes, subMinutes, format, getMinutes, getHours } from 'date-fns';
+import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour, DaypartName, DaypartScore, ScoreStatus } from './types';
+import { parseISO, isWithinInterval, addMinutes, subMinutes, format, getHours, getMinutes, differenceInMinutes, addHours } from 'date-fns';
 import speciesRules from './species-rules.json';
 
 type SpeciesKey = keyof typeof speciesRules;
@@ -184,11 +184,12 @@ export async function recommendWindows(scores: ScoredHour[], threshold: number =
     let currentRun: { start: string; end: string; scores: number[] } | null = null;
 
     smoothedScores.forEach(({ time, score }, i) => {
+        const isoTime = scores[i].time; // use original unsmoothed time
         if (score >= threshold) {
             if (!currentRun) {
-                currentRun = { start: time, end: time, scores: [score] };
+                currentRun = { start: isoTime, end: isoTime, scores: [score] };
             } else {
-                currentRun.end = time;
+                currentRun.end = isoTime;
                 currentRun.scores.push(score);
             }
         } else {
@@ -228,3 +229,102 @@ export async function recommendWindows(scores: ScoredHour[], threshold: number =
 
     return topRuns.map(run => `${format(parseISO(run.start), 'p')} - ${format(parseISO(run.end), 'p')}`).join(" & ");
 }
+
+
+// --- Daypart Scoring ---
+
+function getScoreStatus(score: number): ScoreStatus {
+    if (score >= 80) return "Excellent";
+    if (score >= 60) return "Good";
+    if (score >= 40) return "Fair";
+    return "Poor";
+}
+
+function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string } | null {
+    const goodHours = hours.filter(h => h.score >= 60);
+    if (goodHours.length === 0) return null;
+
+    let bestRun: ScoredHour[] = [];
+    let currentRun: ScoredHour[] = [];
+
+    for (let i = 0; i < goodHours.length; i++) {
+        if (i === 0 || differenceInMinutes(parseISO(goodHours[i].time), parseISO(goodHours[i - 1].time)) <= 60) {
+            currentRun.push(goodHours[i]);
+        } else {
+            if (currentRun.length > bestRun.length) {
+                bestRun = currentRun;
+            }
+            currentRun = [goodHours[i]];
+        }
+    }
+    if (currentRun.length > bestRun.length) {
+        bestRun = currentRun;
+    }
+
+    if (bestRun.length === 0 || differenceInMinutes(parseISO(bestRun[bestRun.length - 1].time), parseISO(bestRun[0].time)) < 45) {
+        return null;
+    }
+
+    return {
+        start: bestRun[0].time,
+        end: bestRun[bestRun.length - 1].time,
+    };
+}
+
+
+export function calculateDaypartScores(
+    hourlyScores: ScoredHour[],
+    sunriseISO: string,
+    sunsetISO: string
+): DaypartScore[] {
+    const sunrise = parseISO(sunriseISO);
+    const sunset = parseISO(sunsetISO);
+    const solarNoon = new Date(sunrise.getTime() + (sunset.getTime() - sunrise.getTime()) / 2);
+
+    const dayparts: Record<DaypartName, { start: Date; end: Date }> = {
+        Morning: { start: subMinutes(sunrise, 60), end: addMinutes(sunrise, 180) },
+        Evening: { start: subMinutes(sunset, 90), end: addMinutes(sunset, 60) },
+        Midday: { start: addMinutes(sunrise, 180), end: subMinutes(solarNoon, 60) },
+        Afternoon: { start: subMinutes(solarNoon, 60), end: subMinutes(sunset, 120) },
+        Night: { start: addMinutes(sunset, 60), end: subMinutes(sunrise, 60) } // This is a simplification
+    };
+    
+    const results: DaypartScore[] = [];
+
+    (Object.keys(dayparts) as DaypartName[]).forEach(partName => {
+        const { start, end } = dayparts[partName];
+        
+        const scoresInPart = hourlyScores.filter(h => {
+             const hTime = parseISO(h.time);
+             // Handle night spanning midnight
+             if (partName === 'Night' && start > end) {
+                 return hTime >= start || hTime < end;
+             }
+             return hTime >= start && hTime < end;
+        });
+
+        if (scoresInPart.length === 0) {
+             results.push({ name: partName, avgScore: 0, status: "Poor", bestWindow: null });
+             return;
+        }
+
+        const sortedScores = [...scoresInPart].sort((a, b) => b.score - a.score);
+        const top60PercentCount = Math.max(2, Math.ceil(sortedScores.length * 0.6));
+        const topScores = sortedScores.slice(0, top60PercentCount);
+        
+        const avgScore = Math.round(topScores.reduce((sum, h) => sum + h.score, 0) / topScores.length);
+        const status = getScoreStatus(avgScore);
+        const bestWindow = findBestSubWindow(scoresInPart);
+        
+        results.push({
+            name: partName,
+            avgScore,
+            status,
+            bestWindow
+        });
+    });
+
+    return results;
+}
+
+    

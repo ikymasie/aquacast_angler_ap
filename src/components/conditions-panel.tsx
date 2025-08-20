@@ -7,7 +7,6 @@ import { WeatherIcon } from "./weather-icon";
 import { format, parseISO } from 'date-fns';
 import { Skeleton } from "./ui/skeleton";
 import type { Location, WeatherApiResponse } from "@/lib/types";
-import { MOCK_LOCATION } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { getCachedWeatherData } from "@/services/weather/client";
 
@@ -75,12 +74,18 @@ function transformWeatherData(apiData: WeatherApiResponse, location: Location) {
 }
 
 
-export function ConditionsPanel({location = MOCK_LOCATION}: {location?: Location}) {
+export function ConditionsPanel({location, initialData}: {location: Location, initialData?: WeatherApiResponse | null }) {
     const [data, setData] = useState<any>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(!initialData);
     const { ref: hourlyStripRef, width: stripWidth } = useElementWidth();
 
     useEffect(() => {
+        if (initialData) {
+            setData(transformWeatherData(initialData, location));
+            setIsLoading(false);
+            return;
+        }
+
         async function fetchData() {
             setIsLoading(true);
             try {
@@ -95,7 +100,7 @@ export function ConditionsPanel({location = MOCK_LOCATION}: {location?: Location
             }
         }
         fetchData();
-    }, [location]);
+    }, [location, initialData]);
 
     const getHourItemStyle = () => {
         if (stripWidth <= 220) return { iconSize: 18, tempClass: 'text-[13px]/[18px]', timeClass: 'text-[11px]/[14px]', windArrowSize: 12, gaps: 'gap-y-[3px]' };
@@ -134,6 +139,7 @@ export function ConditionsPanel({location = MOCK_LOCATION}: {location?: Location
                 </div>
                  <div className="flex items-center gap-2 mt-3">
                     <WeatherIcon condition="Wind" className="w-6 h-6 text-white/90" windDeg={current.wind.dirDeg}/>
+                     <span className="font-headline text-white/90">{current.wind.speed}</span>
                 </div>
             </div>
 
@@ -149,8 +155,11 @@ export function ConditionsPanel({location = MOCK_LOCATION}: {location?: Location
             </div>
             
             {/* Right Column: Hourly Strip */}
-            <div className="flex-1 flex overflow-x-auto space-x-2" ref={hourlyStripRef}>
-                {hours.slice(1).map((hour: any) => (
+            <div className="flex-1 overflow-x-auto space-x-2 no-scrollbar" ref={hourlyStripRef}>
+                 <div className="flex-shrink-0 flex items-center h-full">
+                    <WeatherIcon condition={current.condition} className="text-white/80 w-[88px] h-[64px]" />
+                </div>
+                {hours.slice(1, 5).map((hour: any) => (
                     <div 
                         key={hour.timeISO} 
                         className={cn("flex-shrink-0 w-14 flex flex-col items-center text-center justify-center py-2", hourItemStyle.gaps)} 
@@ -158,20 +167,12 @@ export function ConditionsPanel({location = MOCK_LOCATION}: {location?: Location
                     >
                          <span className={cn("font-body text-white/75", hourItemStyle.timeClass)}>{hour.label}</span>
                          <WeatherIcon 
-                            condition={hour.condition} 
-                            className="text-white"
-                            style={{width: hourItemStyle.iconSize, height: hourItemStyle.iconSize }}
-                         />
-                         <span className={cn("font-headline font-semibold text-white/90", hourItemStyle.tempClass)}>{hour.tempC}°</span>
-                         <div className="flex items-center flex-col gap-1">
-                            <WeatherIcon 
-                                condition="Wind" 
-                                className="text-white/75" 
-                                windDeg={hour.wind.dirDeg}
-                                style={{width: hourItemStyle.windArrowSize, height: hourItemStyle.windArrowSize}}
-                            />
-                            <span className="font-headline text-xs text-white/75">{hour.wind.speed}</span>
-                         </div>
+                            condition="Wind" 
+                            className="text-white/75" 
+                            windDeg={hour.wind.dirDeg}
+                            style={{width: hourItemStyle.windArrowSize, height: hourItemStyle.windArrowSize}}
+                        />
+                         <span className="font-headline text-xs text-white/75">{hour.wind.speed}</span>
                     </div>
                 ))}
             </div>
@@ -182,6 +183,15 @@ export function ConditionsPanel({location = MOCK_LOCATION}: {location?: Location
                 <span className="font-body text-xs text-white/75 block">{format(currentDate, 'p')}</span>
             </div>
         </div>
+         <style jsx>{`
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        `}</style>
     </Card>
   );
 }
@@ -210,3 +220,5 @@ function ConditionsSkeleton() {
         </Card>
     )
 }
+
+    

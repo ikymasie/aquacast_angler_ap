@@ -1,9 +1,9 @@
 
 'use server';
 
-import type { Species, Location, ScoredHour } from "@/lib/types";
+import type { Species, Location, ScoredHour, DaypartScore } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
-import { scoreHour, recommendWindows } from "@/lib/scoring";
+import { scoreHour, recommendWindows, calculateDaypartScores } from "@/lib/scoring";
 import { format, parseISO } from "date-fns";
 
 interface GetScoreActionPayload {
@@ -43,11 +43,18 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         success: Math.round(h.score)
     }));
 
+    const daypartScores = calculateDaypartScores(
+        scoredHours.slice(0, 24),
+        weatherData.daily.sunrise,
+        weatherData.daily.sunset
+    );
+
     return { 
       data: {
         successScore: currentScore,
         recommendedTimeWindow,
         hourlyChartData,
+        daypartScores,
       }, 
       error: null 
     };
@@ -69,8 +76,6 @@ export async function addSpotAction(payload: AddSpotPayload) {
         const { lat, lng, name } = payload;
 
         // Construct the URL for our new API route.
-        // We assume our app is running on localhost:9002 for server-side fetch.
-        // In a production environment, this should be an absolute URL.
         const apiUrl = process.env.NODE_ENV === 'production'
             ? `https://YOUR_PRODUCTION_DOMAIN/api/place-from-latlng?lat=${lat}&lng=${lng}`
             : `http://localhost:9002/api/place-from-latlng?lat=${lat}&lng=${lng}`;
@@ -101,7 +106,7 @@ export async function addSpotAction(payload: AddSpotPayload) {
             coordinates: { lat, lon: lng },
             representative_species: ["bass", "bream/tilapia", "catfish"],
             notes: `Added on ${new Date().toLocaleDateString()}`,
-            image_url: `https://placehold.co/400x300.png?text=${encodeURIComponent(name || generatedName)}`,
+            image_url: `https://placehold.co/400x300.png`,
             isFavorite: false,
             isRecent: true,
         };
@@ -114,3 +119,5 @@ export async function addSpotAction(payload: AddSpotPayload) {
         return { data: null, error: errorMessage };
     }
 }
+
+    

@@ -9,7 +9,7 @@ import { SectionHeader } from '@/components/section-header';
 import { FavoritesRecents } from '@/components/favorites-recents';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from 'react';
-import { FishingSuccessCard } from '@/components/fishing-success-card';
+
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState("recents");
@@ -37,8 +37,6 @@ function AppContent() {
       <main className="flex-1 space-y-4 p-4 pb-24">
         <GreetingBlock />
         <SearchBar />
-        
-        <FishingSuccessCard />
 
         <div className="space-y-3 pt-4">
             <div>

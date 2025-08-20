@@ -1,3 +1,4 @@
+
 export type Species = 'Bream' | 'Bass' | 'Carp';
 
 export interface Location {
@@ -60,9 +61,23 @@ export interface WeatherApiResponse {
 }
 
 export interface ScoredHour {
-    time: string;
+    time: string; // Can be ISO string or formatted time like '3pm'
     score: number;
 }
+
+export type DaypartName = 'Morning' | 'Midday' | 'Afternoon' | 'Evening' | 'Night';
+export type ScoreStatus = "Poor" | "Fair" | "Good" | "Excellent";
+
+export interface DaypartScore {
+    name: DaypartName;
+    avgScore: number;
+    status: ScoreStatus;
+    bestWindow?: {
+        start: string; // ISO strings
+        end: string;
+    } | null;
+}
+
 
 // Mock data for fallback or initial state
 export const MOCK_LOCATION: Location = {
@@ -114,3 +129,5 @@ export const MOCK_FORECAST_GRAPHS = {
     { day: 'Sun', success: 78, uv: 7 },
   ]
 };
+
+    

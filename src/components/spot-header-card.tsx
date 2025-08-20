@@ -1,32 +1,43 @@
 
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
+import { ConditionsPanel } from './conditions-panel';
+import type { Location, WeatherApiResponse } from '@/lib/types';
 import { MOCK_LOCATION } from '@/lib/types';
-import { Bookmark, Star } from 'lucide-react';
-import { Button } from './ui/button';
 
 interface SpotHeaderCardProps {
     spot: {
         name: string;
         nearest_town: string;
-        isFavorite?: boolean;
     };
+    weatherData: WeatherApiResponse | null;
+    location: Location;
 }
 
-export function SpotHeaderCard({ spot }: SpotHeaderCardProps) {
+export function SpotHeaderCard({ spot, weatherData, location = MOCK_LOCATION }: SpotHeaderCardProps) {
+
+    const rainProbability = weatherData?.hourly[0]?.precipMm > 0
+        ? Math.round(weatherData.hourly[0].precipMm * 100) / 10 // Simplistic mapping
+        : 0;
+
     return (
-        <Card className="rounded-xl shadow-card border-0 p-4 bg-transparent">
-            <div className="flex items-center justify-between">
-                <h1 className="font-headline text-h1 text-foreground">{spot.name}</h1>
-                 <Button variant="ghost" size="icon" className="h-10 w-10">
-                    {spot.isFavorite 
-                        ? <Star className="w-6 h-6 text-amber-400 fill-amber-400" />
-                        : <Bookmark className="w-6 h-6 text-muted-foreground" />
-                    }
-                </Button>
+        <Card className="rounded-xl shadow-card border-0 p-4 bg-white">
+            <h1 className="font-headline text-h2 text-ink-900">{spot.name}</h1>
+            <p className="text-muted-foreground text-sm -mt-1">{spot.nearest_town}</p>
+            
+            <div className="mt-4">
+                <ConditionsPanel location={location} initialData={weatherData} />
             </div>
-            <p className="text-muted-foreground">{spot.nearest_town}</p>
+            {rainProbability > 0 && (
+                <div className="text-right mt-2">
+                    <p className="text-caption text-muted-foreground">
+                        Rain possibility: <span className="text-primary font-semibold">{rainProbability}%</span>
+                    </p>
+                </div>
+            )}
         </Card>
     );
 }
+
+    
