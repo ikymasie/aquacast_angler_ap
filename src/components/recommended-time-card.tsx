@@ -25,19 +25,22 @@ export function RecommendedTimeCard({ window }: RecommendedTimeCardProps) {
     }
     const getAmPm = (isoString: string) => {
         const date = parseISO(isoString);
-        return format(date, "A.M");
+        // Escape literal characters with single quotes
+        return format(date, "a");
     }
 
     const startTime = formatTime(window.start);
     const endTime = formatTime(window.end);
-    const ampm = getAmPm(window.start); // Assume same period
+    const startAmPm = getAmPm(window.start);
+    const endAmPm = getAmPm(window.end);
 
     return (
         <Card className="p-4 rounded-xl text-center bg-accent border-primary/20 border">
             <p className="text-sm text-primary-dark/80 font-medium">Recommended time interval.</p>
             <p className="font-headline text-3xl font-bold text-primary-dark mt-1">
-                {startTime}-{endTime} <span className="text-2xl">{ampm}</span>
+                {startTime} <span className="text-2xl">{startAmPm}</span> - {endTime} <span className="text-2xl">{endAmPm}</span>
             </p>
         </Card>
     );
 }
+
