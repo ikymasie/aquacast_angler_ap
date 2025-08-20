@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Suspense } from 'react';
@@ -20,6 +21,10 @@ import { ForecastGraphs } from '@/components/forecast-graphs';
 import { FishingSuccessCard } from '@/components/fishing-success-card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { SidebarProvider, Sidebar, SidebarInset, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import { Home, Star, Map, Settings } from 'lucide-react';
+import { BottomNav } from '@/components/bottom-nav';
+import { Header } from '@/components/header';
 
 function SpotHeaderCard() {
   return (
@@ -157,33 +162,67 @@ function DailyAccordion() {
 
 export default function SpotDetailsPage() {
   return (
-    <div className="p-4 md:p-6 space-y-4">
-      <SpotHeaderCard />
-      <div className="mt-4">
-         <SpeciesSelector selectedSpecies="Bass" onSelectSpecies={() => {}} />
-      </div>
-      <div className="mt-4">
-        <FishingSuccessCard />
-      </div>
-      <div className="mt-4">
-        <InteractiveMap />
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-        <InfoTile icon={Thermometer} label="Air Temp" value="22°" />
-        <InfoTile icon={Wind} label="Wind" value="12 km/h" />
-        <InfoTile icon={Droplets} label="Humidity" value="68%" />
-        <InfoTile icon={Gauge} label="Pressure" value="1012 hPa" variant="active" />
-      </div>
-      <div className="mt-4">
-        <ForecastGraphs />
-      </div>
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <UVIndexWidget/>
-        <SunriseSunsetDial/>
-      </div>
-      <div className="mt-4">
-        <DailyAccordion/>
-      </div>
-    </div>
+    <SidebarProvider>
+        <Sidebar>
+            <SidebarContent className="p-2">
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                    <SidebarMenuButton tooltip={{ children: 'Home' }} asChild>
+                        <Link href="/"><Home /></Link>
+                    </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                    <SidebarMenuButton tooltip={{ children: 'Favorites' }}>
+                        <Star />
+                    </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                    <SidebarMenuButton tooltip={{ children: 'Maps' }}>
+                        <Map />
+                    </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                    <SidebarMenuButton tooltip={{ children: 'Settings' }}>
+                        <Settings />
+                    </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarContent>
+        </Sidebar>
+        <SidebarInset>
+            <div className="flex flex-col min-h-screen bg-background">
+                <Header/>
+                <main className="flex-1 p-4 md:p-6 space-y-4">
+                    <SpotHeaderCard />
+                    <div className="mt-4">
+                        <SpeciesSelector selectedSpecies="Bass" onSelectSpecies={() => {}} />
+                    </div>
+                    <div className="mt-4">
+                        <FishingSuccessCard />
+                    </div>
+                    <div className="mt-4">
+                        <InteractiveMap />
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                        <InfoTile icon={Thermometer} label="Air Temp" value="22°" />
+                        <InfoTile icon={Wind} label="Wind" value="12 km/h" />
+                        <InfoTile icon={Droplets} label="Humidity" value="68%" />
+                        <InfoTile icon={Gauge} label="Pressure" value="1012 hPa" variant="active" />
+                    </div>
+                    <div className="mt-4">
+                        <ForecastGraphs />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <UVIndexWidget/>
+                        <SunriseSunsetDial/>
+                    </div>
+                    <div className="mt-4">
+                        <DailyAccordion/>
+                    </div>
+                </main>
+                <BottomNav />
+            </div>
+        </SidebarInset>
+    </SidebarProvider>
   );
 }

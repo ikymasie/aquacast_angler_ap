@@ -1,50 +1,97 @@
 
-import { AppScreens } from "@/components/landing/app-screens";
-import { Faq } from "@/components/landing/faq";
-import { Features } from "@/components/landing/features";
-import { Footer } from "@/components/landing/footer";
-import { Header } from "@/components/landing/header";
-import { Hero } from "@/components/landing/hero";
-import { HowItWorks } from "@/components/landing/how-it-works";
-import { SpeciesSection } from "@/components/landing/species-section";
-import { Testimonials } from "@/components/landing/testimonials";
-import { TrustStrip } from "@/components/landing/trust-strip";
-import { Button } from "@/components/ui/button";
+'use client';
 
-export default function LandingPage() {
+import { Header } from '@/components/header';
+import { ConditionsPanel } from '@/components/conditions-panel';
+import { LocationsRail } from '@/components/locations-rail';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarInset,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from '@/components/ui/sidebar';
+import { Home, Star, Map, Settings } from 'lucide-react';
+import { BottomNav } from '@/components/bottom-nav';
+import { SearchBar } from '@/components/search-bar';
+import { SectionHeader } from '@/components/section-header';
+
+function GreetingBlock() {
+    return (
+        <div className="px-4">
+             <h1 className="font-headline text-h1 font-bold text-ink-900">Hello John</h1>
+             <p className="font-body text-body text-ink-700">It’s a little <span className="text-primary">cloudy</span> today.</p>
+             <p className="font-body text-sm text-muted-foreground mt-2">Search for the best fishing spots</p>
+        </div>
+    )
+}
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <Header />
-      <main className="flex-1">
-        <Hero />
-        <AppScreens />
-        <Features />
-        <SpeciesSection />
-        <HowItWorks />
-        <TrustStrip />
-        <Testimonials />
-        <Faq />
-        <section className="bg-gradient-to-r from-teal-600 to-blue-700 py-12 md:py-20 text-white">
-          <div className="container mx-auto text-center px-4">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">
-              Get the Winning Edge
-            </h2>
-            <p className="max-w-2xl mx-auto mb-8 text-lg text-white/90">
-              Stop guessing. Start catching. Download AquaCast and get your personalized fishing forecast today.
-            </p>
-            <div className="flex justify-center items-center gap-4">
-              <Button size="lg" variant="default" className="bg-white text-teal-600 hover:bg-white/90">
-                Open Web App
-              </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                Get the App
-              </Button>
-            </div>
-             <p className="text-xs text-white/80 mt-4">Available on iOS and Android.</p>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+    <SidebarProvider>
+      <Sidebar>
+        <SidebarContent className="p-2">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton tooltip={{ children: 'Home' }} isActive>
+                <Home />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  Home
+                </span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton tooltip={{ children: 'Favorites' }}>
+                <Star />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  Favorites
+                </span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton tooltip={{ children: 'Maps' }}>
+                <Map />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  Maps
+                </span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton tooltip={{ children: 'Settings' }}>
+                <Settings />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  Settings
+                </span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarContent>
+      </Sidebar>
+      <SidebarInset>
+        <div className="flex flex-col min-h-screen bg-background">
+          <Header />
+          <main className="flex-1 space-y-3">
+             <div className="mt-3 space-y-3">
+                <GreetingBlock />
+                <div className="px-4 mt-3">
+                    <SearchBar />
+                </div>
+             </div>
+             <div className="mt-4 px-4">
+                <ConditionsPanel />
+             </div>
+             <div className="mt-5 px-4">
+                <SectionHeader title="Locations." />
+             </div>
+             <div className="mt-3">
+                <LocationsRail />
+             </div>
+          </main>
+          <BottomNav />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

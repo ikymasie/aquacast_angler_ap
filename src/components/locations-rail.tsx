@@ -46,7 +46,7 @@ export function LocationsRail() {
             <div className="mt-3 overflow-x-auto">
                 <div className="flex space-x-3 px-4">
                     {spots.map((spot) => (
-                        <div key={spot.name} className="relative rounded-xl overflow-hidden aspect-[16/10] group cursor-pointer flex-shrink-0 w-40">
+                        <div key={spot.name} className="relative rounded-lg overflow-hidden aspect-[16/10] group cursor-pointer flex-shrink-0 w-40">
                             <Image src={spot.photo} layout="fill" objectFit="cover" alt={spot.name} data-ai-hint={spot.hint} />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                             <div className="absolute bottom-0 left-0 p-2">

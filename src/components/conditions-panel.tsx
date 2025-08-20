@@ -15,27 +15,27 @@ const hourlyData = [
 
 export function ConditionsPanel() {
   return (
-    <Card className="w-full rounded-[20px] shadow-floating border-0 gradient-fishing-panel text-white h-[180px] p-4">
+    <Card className="w-full rounded-xl shadow-floating border-0 gradient-fishing-panel text-white h-[180px] p-4">
         <div className="flex h-full">
             {/* Left Block */}
             <div className="flex flex-col min-w-[96px]">
                 <span className="font-body text-sm text-white/90">Cloudy</span>
-                <span className="font-numeric font-semibold text-numeric-xl">25°</span>
+                <span className="font-headline font-semibold text-numeric-xl">25°</span>
                 <span className="font-body text-caption text-white/80 mt-1">Friday 27.05.2022</span>
                 <div className="flex items-center gap-2 mt-3">
                     <Cloud className="w-5 h-5 text-white/90"/>
-                    <span className="font-numeric text-sm">3.2</span>
+                    <span className="font-headline text-sm">3.2</span>
                 </div>
             </div>
 
             {/* Now Pill */}
-            <div className="flex-shrink-0 w-14 h-full bg-white/10 rounded-xl flex flex-col items-center justify-center text-center mx-2">
+            <div className="flex-shrink-0 w-14 h-full bg-white/10 rounded-lg flex flex-col items-center justify-center text-center mx-2">
                  <span className="font-body text-caption text-white/70">Now</span>
                  <WeatherIcon condition="Cloudy" className="w-5 h-5 my-2"/>
-                 <span className="font-numeric font-semibold text-sm">25°</span>
+                 <span className="font-headline font-semibold text-sm">25°</span>
                  <div className="flex items-center gap-1 mt-1">
                     <ArrowUp className="w-3 h-3"/>
-                    <span className="font-numeric text-xs">3.2</span>
+                    <span className="font-headline text-xs">3.2</span>
                  </div>
             </div>
             
@@ -45,10 +45,10 @@ export function ConditionsPanel() {
                     <div key={hour.time} className="flex-shrink-0 w-14 flex flex-col items-center text-center">
                          <span className="font-body text-caption text-white/70">{hour.time}</span>
                          <WeatherIcon condition={hour.condition} className="w-5 h-5 my-2"/>
-                         <span className="font-numeric font-semibold text-sm">{hour.temp}°</span>
+                         <span className="font-headline font-semibold text-sm">{hour.temp}°</span>
                          <div className="flex items-center gap-1 mt-1">
                             <ArrowUp className="w-3 h-3"/>
-                            <span className="font-numeric text-xs">{hour.windSpeed}</span>
+                            <span className="font-headline text-xs">{hour.windSpeed}</span>
                          </div>
                     </div>
                 ))}
