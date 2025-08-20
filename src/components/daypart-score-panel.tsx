@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { ThreeHourIntervalScore, RecommendedWindow, ScoreStatus, Species } from "@/lib/types";
 import { format, parseISO } from 'date-fns';
-import { Clock, Dot } from "lucide-react";
+import { Clock } from "lucide-react";
 import { FishBreamIcon } from "./icons/fish-bream";
 import { FishBassIcon } from "./icons/fish-bass";
 import { FishCarpIcon } from "./icons/fish-carp";
@@ -127,7 +127,6 @@ export function DaypartScorePanel({
                                     <span className={cn("font-body text-white/85", cellStyle.label)}>{interval.label}</span>
                                     <WeatherIcon condition={interval.condition} className="text-white" style={{ width: cellStyle.icon, height: cellStyle.icon, color: `hsl(${color})` }} />
                                     <span className={cn("font-headline font-semibold text-white", cellStyle.score)}>{interval.score}</span>
-                                    <div className="w-4 h-4"/>
                                 </div>
                             )
                         })}
