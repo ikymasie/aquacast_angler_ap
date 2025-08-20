@@ -15,7 +15,7 @@ const recentNames = ["Gaborone Dam", "Chobe River (Kasane)", "Thamalakane River 
 
 const all_spots = allSpotsData.map(spot => ({
     name: spot.name,
-    photo: `https://placehold.co/160x100.png`,
+    photo: spot.image_url,
     hint: spot.waterbody_type.split(' ')[0].toLowerCase() + ' ' + spot.region,
     isFavorite: favoriteNames.includes(spot.name),
     isRecent: recentNames.includes(spot.name),
