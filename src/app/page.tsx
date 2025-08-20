@@ -1,100 +1,50 @@
-'use client';
 
-import { Suspense, useState, useCallback } from 'react';
-import { Header } from '@/components/header';
-import { FishingSuccessCard } from '@/components/fishing-success-card';
-import { CurrentConditionsCard } from '@/components/current-conditions-card';
-import { HourlyForecast } from '@/components/hourly-forecast';
-import { FavoritesRecents } from '@/components/favorites-recents';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarInset,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from '@/components/ui/sidebar';
-import { Home, Star, Map, Settings } from 'lucide-react';
-import { BottomNav } from '@/components/bottom-nav';
-import { SearchBar } from '@/components/search-bar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AppScreens } from "@/components/landing/app-screens";
+import { Faq } from "@/components/landing/faq";
+import { Features } from "@/components/landing/features";
+import { Footer } from "@/components/landing/footer";
+import { Header } from "@/components/landing/header";
+import { Hero } from "@/components/landing/hero";
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { SpeciesSection } from "@/components/landing/species-section";
+import { Testimonials } from "@/components/landing/testimonials";
+import { TrustStrip } from "@/components/landing/trust-strip";
+import { Button } from "@/components/ui/button";
 
-export default function HomePage() {
+export default function LandingPage() {
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarContent className="p-2">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip={{ children: 'Home' }} isActive>
-                <Home />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Home
-                </span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip={{ children: 'Favorites' }}>
-                <Star />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Favorites
-                </span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip={{ children: 'Maps' }}>
-                <Map />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Maps
-                </span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip={{ children: 'Settings' }}>
-                <Settings />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Settings
-                </span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarContent>
-      </Sidebar>
-      <SidebarInset>
-        <div className="flex flex-col min-h-screen bg-background">
-          <Header />
-          <main className="flex-1 p-4 md:p-6">
-            <div className="space-y-4">
-              <div className="mt-3">
-                <SearchBar />
-              </div>
-              <div className="mt-4">
-                <FishingSuccessCard />
-              </div>
-              <div className="mt-4">
-                <Tabs defaultValue="all_locations" className="w-full">
-                  <TabsList className="grid w-full max-w-md grid-cols-3 mx-auto h-9 rounded-full bg-secondary text-secondary-foreground">
-                    <TabsTrigger value="all_locations" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">All Locations</TabsTrigger>
-                    <TabsTrigger value="recents" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Recently</TabsTrigger>
-                    <TabsTrigger value="favorites" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Favorites</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="all_locations" className="mt-3">
-                    <FavoritesRecents />
-                  </TabsContent>
-                  <TabsContent value="recents" className="mt-3">
-                    <FavoritesRecents tab="recents" />
-                  </TabsContent>
-                  <TabsContent value="favorites" className="mt-3">
-                    <FavoritesRecents tab="favorites" />
-                  </TabsContent>
-                </Tabs>
-              </div>
+    <div className="flex flex-col min-h-screen bg-background">
+      <Header />
+      <main className="flex-1">
+        <Hero />
+        <AppScreens />
+        <Features />
+        <SpeciesSection />
+        <HowItWorks />
+        <TrustStrip />
+        <Testimonials />
+        <Faq />
+        <section className="bg-gradient-to-r from-teal-600 to-blue-700 py-12 md:py-20 text-white">
+          <div className="container mx-auto text-center px-4">
+            <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">
+              Get the Winning Edge
+            </h2>
+            <p className="max-w-2xl mx-auto mb-8 text-lg text-white/90">
+              Stop guessing. Start catching. Download AquaCast and get your personalized fishing forecast today.
+            </p>
+            <div className="flex justify-center items-center gap-4">
+              <Button size="lg" variant="default" className="bg-white text-teal-600 hover:bg-white/90">
+                Open Web App
+              </Button>
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                Get the App
+              </Button>
             </div>
-          </main>
-          <BottomNav />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+             <p className="text-xs text-white/80 mt-4">Available on iOS and Android.</p>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </div>
   );
 }

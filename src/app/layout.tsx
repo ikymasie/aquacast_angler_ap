@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'AquaCast',
-  description: 'Your AI-powered fishing forecast',
+  title: 'AquaCast - Species-Aware Fishing Forecasts for Bream, Bass & Carp',
+  description: 'AquaCast provides AI-powered fishing success scores, 24/7 forecasts, and offline maps to help you find the best time and place to fish for Bream, Bass, and Carp.',
 };
 
 export default function RootLayout({
