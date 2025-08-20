@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Star } from "lucide-react";
+import Link from "next/link";
 
 const favorites = [
   { name: "Willow Creek Reservoir", photo: "https://placehold.co/160x96.png", hint: "lake sunset" },
@@ -14,33 +15,18 @@ const recents = [
     { name: "Sunset Marina", photo: "https://placehold.co/160x96.png", hint: "marina boats" },
 ];
 
+const all_spots = [...favorites, ...recents];
 
-export function FavoritesRecents() {
-  return (
-    <Card className="h-full flex flex-col rounded-xl">
-      <CardHeader>
-        <Tabs defaultValue="favorites" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="favorites">Favorites</TabsTrigger>
-            <TabsTrigger value="recents">Recents</TabsTrigger>
-          </TabsList>
-          <TabsContent value="favorites" className="mt-4">
-            <SpotList spots={favorites} />
-          </TabsContent>
-          <TabsContent value="recents" className="mt-4">
-            <SpotList spots={recents} />
-          </TabsContent>
-        </Tabs>
-      </CardHeader>
-    </Card>
-  );
+export function FavoritesRecents({ tab = 'all_spots' }: { tab?: 'all_spots' | 'recents' | 'favorites' }) {
+    const spots = tab === 'favorites' ? favorites : tab === 'recents' ? recents : all_spots;
+    return <SpotList spots={spots} />;
 }
 
 function SpotList({ spots }: { spots: { name: string, photo: string, hint: string }[] }) {
     return (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {spots.map((spot) => (
-                <div key={spot.name} className="relative rounded-lg overflow-hidden aspect-[16/10] group cursor-pointer">
+                <Link href="/spot-details" key={spot.name} className="relative rounded-lg overflow-hidden aspect-[16/10] group cursor-pointer">
                     <Image src={spot.photo} layout="fill" objectFit="cover" alt={spot.name} data-ai-hint={spot.hint} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute bottom-0 left-0 p-2">
@@ -49,7 +35,7 @@ function SpotList({ spots }: { spots: { name: string, photo: string, hint: strin
                     <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Star className="w-5 h-5 text-white fill-amber-400"/>
                     </div>
-                </div>
+                </Link>
             ))}
         </div>
     )
