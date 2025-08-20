@@ -105,7 +105,7 @@ export function DaypartScorePanel({
                                     )}
                                 >
                                     <span className={cn("font-body text-white/85", cellStyle.label)}>{interval.label}</span>
-                                    <WeatherIcon condition={interval.condition} className="text-white" style={{ width: cellStyle.icon, height: cellStyle.icon, color: `hsl(${color})` }} />
+                                    <WeatherIcon condition={interval.condition} style={{ width: cellStyle.icon, height: cellStyle.icon, color: `hsl(${color})` }} />
                                     <span className={cn("font-headline font-semibold text-white", cellStyle.score)}>{interval.score}</span>
                                 </div>
                             )
