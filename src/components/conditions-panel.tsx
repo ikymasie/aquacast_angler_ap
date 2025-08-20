@@ -1,64 +1,83 @@
 
 'use client';
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Cloud, ArrowUp } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { WeatherIcon } from "./weather-icon";
+import { format } from 'date-fns';
 
-const hourlyData = [
-    { time: '5PM', condition: 'Cloudy', temp: 24, windSpeed: 3.1, windDir: 'N' },
-    { time: '6PM', condition: 'Partly Cloudy', temp: 23, windSpeed: 2.9, windDir: 'N' },
-    { time: '7PM', condition: 'Partly Cloudy', temp: 22, windSpeed: 2.5, windDir: 'NE' },
-    { time: '8PM', condition: 'Clear', temp: 21, windSpeed: 2.2, windDir: 'NE' },
-    { time: '9PM', condition: 'Clear', temp: 20, windSpeed: 2.0, windDir: 'E' },
-]
+const mockData = {
+    locationName: "İzmir",
+    current: {
+      condition: "Cloudy",
+      tempC: 25,
+      dateISO: "2022-05-27T19:00:00.000Z",
+      weekday: "Friday",
+      wind: { speed: 3.2, dirDeg: 210 }
+    },
+    hours: [
+        { timeISO: "2022-05-27T19:00:00.000Z", label: "Now", condition: "Cloudy", tempC: 25, wind: { speed: 3.2, dirDeg: 210 }},
+        { timeISO: "2022-05-27T20:00:00.000Z", label: "8 PM", condition: "Partly Cloudy", tempC: 23, wind: { speed: 2.9, dirDeg: 220 }},
+        { timeISO: "2022-05-27T21:00:00.000Z", label: "9 PM", condition: "Partly Cloudy", tempC: 22, wind: { speed: 2.5, dirDeg: 235 }},
+        { timeISO: "2022-05-27T22:00:00.000Z", label: "10 PM", condition: "Clear", tempC: 21, wind: { speed: 2.2, dirDeg: 240 }},
+        { timeISO: "2022-05-27T23:00:00.000Z", label: "11 PM", condition: "Clear", tempC: 20, wind: { speed: 2.0, dirDeg: 250 }},
+    ],
+    nowIndex: 0,
+};
+
 
 export function ConditionsPanel() {
+    const { current, hours, locationName } = mockData;
+    const currentDate = new Date(current.dateISO);
+
   return (
     <Card className="w-full rounded-xl shadow-floating border-0 gradient-fishing-panel text-white h-[180px] p-4">
-        <div className="flex h-full">
+        <div className="flex h-full items-center gap-3">
             {/* Left Block */}
-            <div className="flex flex-col min-w-[96px]">
-                <span className="font-body text-sm text-white/90">Cloudy</span>
-                <span className="font-headline font-semibold text-numeric-xl">25°</span>
-                <span className="font-body text-caption text-white/80 mt-1">Friday 27.05.2022</span>
-                <div className="flex items-center gap-2 mt-3">
-                    <Cloud className="w-5 h-5 text-white/90"/>
-                    <span className="font-headline text-sm">3.2</span>
+            <div className="flex flex-col w-[110px] flex-shrink-0">
+                <span className="font-body text-sm text-white/90">{current.condition}</span>
+                <span className="font-headline font-semibold text-[44px] leading-[48px] text-white">{current.tempC}°</span>
+                <div className="mt-1.5">
+                    <span className="font-body text-xs text-white/80 block">{current.weekday}</span>
+                    <span className="font-body text-xs text-white/80 block">{format(currentDate, 'dd.MM.yyyy')}</span>
+                </div>
+                 <div className="flex items-center gap-2 mt-3">
+                    <WeatherIcon condition="Wind" className="w-6 h-6 text-white/90" windDeg={current.wind.dirDeg}/>
                 </div>
             </div>
 
             {/* Now Pill */}
-            <div className="flex-shrink-0 w-14 h-full bg-white/10 rounded-lg flex flex-col items-center justify-center text-center mx-2">
+            <div className="flex-shrink-0 w-14 h-[148px] bg-white/10 rounded-lg flex flex-col items-center justify-center text-center">
                  <span className="font-body text-caption text-white/70">Now</span>
-                 <WeatherIcon condition="Cloudy" className="w-5 h-5 my-2"/>
-                 <span className="font-headline font-semibold text-sm">25°</span>
-                 <div className="flex items-center gap-1 mt-1">
-                    <ArrowUp className="w-3 h-3"/>
-                    <span className="font-headline text-xs">3.2</span>
+                 <WeatherIcon condition={current.condition} className="w-5 h-5 my-2 text-white"/>
+                 <span className="font-headline font-semibold text-sm">{current.tempC}°</span>
+                 <div className="flex items-center flex-col gap-1 mt-1">
+                    <WeatherIcon condition="Wind" className="w-4 h-4 text-white/90" windDeg={current.wind.dirDeg}/>
+                    <span className="font-headline text-xs text-white/90">{current.wind.speed}</span>
                  </div>
             </div>
             
             {/* Hourly Strip */}
             <div className="flex-1 flex overflow-x-auto space-x-2">
-                {hourlyData.map(hour => (
-                    <div key={hour.time} className="flex-shrink-0 w-14 flex flex-col items-center text-center">
-                         <span className="font-body text-caption text-white/70">{hour.time}</span>
-                         <WeatherIcon condition={hour.condition} className="w-5 h-5 my-2"/>
-                         <span className="font-headline font-semibold text-sm">{hour.temp}°</span>
-                         <div className="flex items-center gap-1 mt-1">
-                            <ArrowUp className="w-3 h-3"/>
-                            <span className="font-headline text-xs">{hour.windSpeed}</span>
+                {hours.slice(1).map(hour => (
+                    <div key={hour.timeISO} className="flex-shrink-0 w-14 flex flex-col items-center text-center space-y-1">
+                         <span className="font-body text-caption text-white/75">{hour.label}</span>
+                         <WeatherIcon condition={hour.condition} className="w-5 h-5 my-1 text-white"/>
+                         <span className="font-headline font-semibold text-sm text-white/90">{hour.tempC}°</span>
+                         <div className="flex items-center flex-col gap-1">
+                            <WeatherIcon condition="Wind" className="w-3.5 h-3.5 text-white/75" windDeg={hour.wind.dirDeg}/>
+                            <span className="font-headline text-xs text-white/75">{hour.wind.speed}</span>
                          </div>
                     </div>
                 ))}
             </div>
 
              <div className="absolute top-4 right-4 text-right">
-                <span className="font-body text-xs text-white/75">izmir</span>
-                <span className="font-body text-xs text-white/75 block">7PM</span>
+                <span className="font-body text-xs text-white/75 capitalize">{locationName}</span>
+                <span className="font-body text-xs text-white/75 block">{format(currentDate, 'p')}</span>
             </div>
         </div>
     </Card>
   );
 }
+
+    

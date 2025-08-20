@@ -1,13 +1,18 @@
-import { Sun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudSun } from "lucide-react";
+import { Sun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudSun, MoveUp } from "lucide-react";
 
 interface WeatherIconProps {
   condition: string;
   className?: string;
+  windDeg?: number;
 }
 
-export function WeatherIcon({ condition, className }: WeatherIconProps) {
+export function WeatherIcon({ condition, className, windDeg }: WeatherIconProps) {
   const lowerCaseCondition = condition.toLowerCase();
 
+  if (lowerCaseCondition === 'wind') {
+    const style = windDeg !== undefined ? { transform: `rotate(${windDeg}deg)` } : {};
+    return <MoveUp className={className} style={style} />;
+  }
   if (lowerCaseCondition.includes('sunny') || lowerCaseCondition.includes('clear')) {
     return <Sun className={className} />;
   }
@@ -30,3 +35,5 @@ export function WeatherIcon({ condition, className }: WeatherIconProps) {
   // Default icon
   return <Cloud className={className} />;
 }
+
+    
