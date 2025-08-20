@@ -6,15 +6,14 @@ import { BottomNav } from '@/components/bottom-nav';
 import { Header } from '@/components/header';
 import { SpotHeaderCard } from '@/components/spot-header-card';
 import { MapCard } from '@/components/map-card';
-import { SpeciesVerticalSelector } from '@/components/species-vertical-selector';
 import type { Species, Location, WeatherApiResponse, ScoredHour, DaypartScore } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
 import { SearchBar } from '@/components/search-bar';
 import { getCachedWeatherData } from '@/services/weather/client';
 import { getFishingForecastAction } from '../actions';
-import { MOCK_LOCATION } from '@/lib/types';
 import { DaypartScorecard } from '@/components/daypart-scorecard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SpeciesSelector } from '@/components/species-selector';
 
 // Find a spot by name, or return the first one as a fallback.
 function getSpotByName(name?: string | null) {
@@ -25,47 +24,48 @@ function getSpotByName(name?: string | null) {
 
 export default function SpotDetailsPage() {
     const [spot, setSpot] = useState(getSpotByName()); // Example spot
-    const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
+    const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
     const [weatherData, setWeatherData] = useState<WeatherApiResponse | null>(null);
-    const [forecast, setForecast] = useState<{ hourly: ScoredHour[] } | null>(null);
     const [daypartScores, setDaypartScores] = useState<DaypartScore[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isForecastLoading, setIsForecastLoading] = useState(true);
+
+    const location = useMemo(() => ({
+        name: spot.name,
+        latitude: spot.coordinates.lat,
+        longitude: spot.coordinates.lon,
+    }), [spot.name, spot.coordinates.lat, spot.coordinates.lon]);
 
     useEffect(() => {
-        // In a real app, you'd get the spot name from the URL query params
-        // For now, we use a default spot.
-        const defaultSpotLocation = {
-            name: spot.name,
-            latitude: spot.coordinates.lat,
-            longitude: spot.coordinates.lon,
-        };
-
-        async function loadData() {
+        async function loadWeather() {
             setIsLoading(true);
-            const weather = await getCachedWeatherData(defaultSpotLocation);
+            const weather = await getCachedWeatherData(location);
             setWeatherData(weather);
-
-            const forecastResult = await getFishingForecastAction({
-                species: selectedSpecies,
-                location: defaultSpotLocation,
-            });
-
-            if (forecastResult.data) {
-                setForecast({ hourly: forecastResult.data.hourlyChartData.map(h => ({ time: h.time, score: h.success})) });
-                setDaypartScores(forecastResult.data.daypartScores);
-            }
             setIsLoading(false);
         }
+        loadWeather();
+    }, [location]);
 
-        loadData();
-    }, [spot.name, spot.coordinates.lat, spot.coordinates.lon, selectedSpecies]);
+    useEffect(() => {
+        async function loadForecast() {
+            if (!weatherData) return;
+            setIsForecastLoading(true);
+            const forecastResult = await getFishingForecastAction({
+                species: selectedSpecies,
+                location: location,
+            });
+
+            if (forecastResult.data && Array.isArray(forecastResult.data.daypartScores)) {
+                setDaypartScores(forecastResult.data.daypartScores);
+            } else {
+                setDaypartScores(null);
+            }
+            setIsForecastLoading(false);
+        }
+        loadForecast();
+    }, [location, selectedSpecies, weatherData]);
 
 
-    const speciesList = [
-        { id: 'Bass', name: 'Bass', imageUrl: '/icons/fish-bass.svg' },
-        { id: 'Bream', name: 'Bream', imageUrl: '/icons/fish-bream.svg' },
-        { id: 'Carp', name: 'Carp', imageUrl: '/icons/fish-carp.svg' },
-    ];
      const mapThumbnails = [
         { id: 'map', imageUrl: 'https://placehold.co/100x100.png?text=Map', hint: 'map view' },
         { id: 'photo1', imageUrl: 'https://placehold.co/100x100.png', hint: 'fishing spot photo' },
@@ -81,34 +81,33 @@ export default function SpotDetailsPage() {
                 <SpotHeaderCard
                     spot={spot}
                     weatherData={weatherData}
-                    location={{ name: spot.name, latitude: spot.coordinates.lat, longitude: spot.coordinates.lon }}
+                    location={location}
+                    selectedSpecies={selectedSpecies}
+                    onSelectSpecies={setSelectedSpecies}
+                    isLoading={isLoading}
                 />
                 
-                {isLoading || !weatherData || !daypartScores ? (
+                {isForecastLoading || !daypartScores ? (
                     <Skeleton className="h-64 w-full rounded-xl" />
                 ) : (
                     <DaypartScorecard
                         speciesKey={selectedSpecies.toLowerCase() as any}
-                        sunriseISO={weatherData.daily.sunrise}
-                        sunsetISO={weatherData.daily.sunset}
+                        sunriseISO={weatherData?.daily.sunrise || new Date().toISOString()}
+                        sunsetISO={weatherData?.daily.sunset || new Date().toISOString()}
                         daypartScores={daypartScores}
                     />
                 )}
 
-               <div className="flex flex-col md:flex-row gap-3 pt-3">
-                   <div className="w-full md:w-[112px]">
-                       <SpeciesVerticalSelector
-                           items={speciesList}
-                           selectedId={selectedSpecies}
-                           onSelect={(id) => setSelectedSpecies(id as Species)}
-                       />
-                   </div>
-                   <div className="flex-1">
-                       <MapCard
-                           center={{ lat: spot.coordinates.lat, lng: spot.coordinates.lon }}
-                           thumbnails={mapThumbnails}
-                       />
-                   </div>
+               <div className="pt-3 space-y-3">
+                   <SpeciesSelector 
+                       selectedSpecies={selectedSpecies}
+                       onSelectSpecies={setSelectedSpecies}
+                       disabled={isForecastLoading}
+                   />
+                   <MapCard
+                       center={{ lat: spot.coordinates.lat, lng: spot.coordinates.lon }}
+                       thumbnails={mapThumbnails}
+                   />
                </div>
             </Suspense>
         </main>

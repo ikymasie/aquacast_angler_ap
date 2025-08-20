@@ -1,6 +1,7 @@
 
 import type {Config} from 'tailwindcss';
 
+// Harmless comment to invalidate build cache and fix ENOENT error.
 export default {
   darkMode: ['class'],
   content: [

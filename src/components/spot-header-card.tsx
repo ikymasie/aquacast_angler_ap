@@ -3,8 +3,10 @@
 
 import { Card } from '@/components/ui/card';
 import { ConditionsPanel } from './conditions-panel';
-import type { Location, WeatherApiResponse } from '@/lib/types';
+import type { Location, Species, WeatherApiResponse } from '@/lib/types';
 import { MOCK_LOCATION } from '@/lib/types';
+import { SpeciesSelector } from './species-selector';
+import { Skeleton } from './ui/skeleton';
 
 interface SpotHeaderCardProps {
     spot: {
@@ -13,12 +15,15 @@ interface SpotHeaderCardProps {
     };
     weatherData: WeatherApiResponse | null;
     location: Location;
+    selectedSpecies: Species;
+    onSelectSpecies: (species: Species) => void;
+    isLoading: boolean;
 }
 
-export function SpotHeaderCard({ spot, weatherData, location = MOCK_LOCATION }: SpotHeaderCardProps) {
+export function SpotHeaderCard({ spot, weatherData, location = MOCK_LOCATION, selectedSpecies, onSelectSpecies, isLoading }: SpotHeaderCardProps) {
 
     const rainProbability = weatherData?.hourly[0]?.precipMm > 0
-        ? Math.round(weatherData.hourly[0].precipMm * 100) / 10 // Simplistic mapping
+        ? Math.min(100, Math.round(weatherData.hourly[0].precipMm * 40)) // Simplistic mapping, cap at 100
         : 0;
 
     return (
@@ -29,15 +34,16 @@ export function SpotHeaderCard({ spot, weatherData, location = MOCK_LOCATION }: 
             <div className="mt-4">
                 <ConditionsPanel location={location} initialData={weatherData} />
             </div>
-            {rainProbability > 0 && (
-                <div className="text-right mt-2">
-                    <p className="text-caption text-muted-foreground">
-                        Rain possibility: <span className="text-primary font-semibold">{rainProbability}%</span>
-                    </p>
+            
+            <div className="mt-3 grid grid-cols-2 items-center">
+                <div className="col-span-2">
+                     <SpeciesSelector 
+                        selectedSpecies={selectedSpecies}
+                        onSelectSpecies={onSelectSpecies}
+                        disabled={isLoading}
+                    />
                 </div>
-            )}
+            </div>
         </Card>
     );
 }
-
-    
