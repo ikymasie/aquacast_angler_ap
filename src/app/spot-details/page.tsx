@@ -90,7 +90,7 @@ export default function SpotDetailsPage() {
                     />
                 )}
 
-               <div className="flex flex-col md:flex-row gap-3">
+               <div className="flex flex-col md:flex-row gap-3 pt-3">
                    <div className="w-full md:w-[112px]">
                        <SpeciesVerticalSelector
                            items={speciesList}

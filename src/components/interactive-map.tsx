@@ -20,31 +20,6 @@ export function InteractiveMap({ center, zoom = 12 }: InteractiveMapProps) {
         gestureHandling: 'cooperative'
     }), []);
     
-    const CustomMarker = () => (
-        <div className="relative">
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full">
-                 <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50% 50% 50% 0',
-                    background: '#1C1F28',
-                    transform: 'rotate(-45deg)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                 }}>
-                    <div style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: 'white',
-                        transform: 'rotate(45deg)'
-                    }}></div>
-                 </div>
-            </div>
-        </div>
-    );
-
     if (loadError) return <div>Error loading maps</div>;
     if (!isLoaded) return <div>Loading Maps...</div>;
 
@@ -62,4 +37,3 @@ export function InteractiveMap({ center, zoom = 12 }: InteractiveMapProps) {
         </GoogleMap>
     );
 }
-
