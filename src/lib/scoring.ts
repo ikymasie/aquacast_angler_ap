@@ -241,6 +241,8 @@ function getScoreStatus(score: number): ScoreStatus {
 }
 
 function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string, status: ScoreStatus } | null {
+    if (!hours || hours.length === 0) return null;
+    
     const goodHours = hours.filter(h => h.score >= 60);
     if (goodHours.length === 0) return null;
 
@@ -248,7 +250,7 @@ function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string, s
     let currentRun: ScoredHour[] = [];
 
     for (let i = 0; i < goodHours.length; i++) {
-        if (i === 0 || differenceInMinutes(parseISO(goodHours[i].time), parseISO(goodHours[i - 1].time)) <= 60) {
+        if (i === 0 || differenceInMinutes(parseISO(goodHours[i].time), parseISO(goodHours[i - 1].time)) <= 61) { // Allow 61 min for rounding
             currentRun.push(goodHours[i]);
         } else {
             if (currentRun.length > bestRun.length) {
@@ -290,7 +292,7 @@ export async function calculateDaypartScores(
         Midday: { start: addMinutes(sunrise, 180), end: subMinutes(solarNoon, 60) },
         Afternoon: { start: subMinutes(solarNoon, 60), end: subMinutes(sunset, 120) },
         Evening: { start: subMinutes(sunset, 90), end: addMinutes(sunset, 60) },
-        Night: { start: addMinutes(sunset, 60), end: subMinutes(sunrise, 60) } // This is a simplification
+        Night: { start: addMinutes(sunset, 60), end: subMinutes(addHours(sunrise, 24), 60) } 
     };
     
     const results: DaypartScore[] = [];
@@ -300,11 +302,7 @@ export async function calculateDaypartScores(
         
         const scoresInPart = hourlyScores.filter(h => {
              const hTime = parseISO(h.time);
-             // Handle night spanning midnight
-             if (partName === 'Night' && start > end) {
-                 return hTime >= start || hTime < end;
-             }
-             return hTime >= start && hTime < end;
+             return isWithinInterval(hTime, {start, end});
         });
 
         if (scoresInPart.length === 0) {
@@ -334,7 +332,7 @@ export async function calculateDaypartScores(
     return results;
 }
 
-export function getOverallDayScore(daypartScores: DaypartScore[]): OverallDayScore {
+export async function getOverallDayScore(daypartScores: DaypartScore[], hourlyScores: ScoredHour[]): Promise<OverallDayScore> {
     if (!daypartScores || daypartScores.length === 0) {
         return {
             dayAvgScore: 0,
@@ -346,25 +344,7 @@ export function getOverallDayScore(daypartScores: DaypartScore[]): OverallDaySco
     const dayAvgScore = Math.round(daypartScores.reduce((sum, part) => sum + part.score, 0) / daypartScores.length);
     const dayStatus = getScoreStatus(dayAvgScore);
     
-    const windows = daypartScores
-        .filter(p => p.hasWindow)
-        .map(p => {
-             const { start, end, status } = findBestSubWindow(p.name as any) || {}; // Needs full hour data
-             return { start, end, status, score: p.score };
-        })
-        .filter(w => w.start && w.end)
-        .sort((a,b) => b.score - a.score);
-
-    const bestWindow = windows[0] ? { start: windows[0].start!, end: windows[0].end!, status: windows[0].status! } : null;
+    const bestWindow = findBestSubWindow(hourlyScores);
 
     return { dayAvgScore, dayStatus, bestWindow };
-}
-
-// Stub function to pass to findBestSubWindow. This needs to be implemented properly.
-function findBestSubWindow(partName: DaypartName): any {
-    // This is a placeholder. To implement this correctly, we need access to the `hourlyScores`
-    // that correspond to the given `partName`. The current structure of getOverallDayScore
-    // does not have access to this. This would require a refactor to pass the hourly scores
-    // around or re-calculate them.
-    return null;
 }
