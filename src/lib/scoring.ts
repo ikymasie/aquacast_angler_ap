@@ -233,7 +233,7 @@ export async function recommendWindows(scores: ScoredHour[], threshold: number =
 
 // --- Daypart Scoring ---
 
-function getScoreStatus(score: number): ScoreStatus {
+export async function getScoreStatus(score: number): Promise<ScoreStatus> {
     if (score >= 80) return "Excellent";
     if (score >= 60) return "Good";
     if (score >= 40) return "Fair";
@@ -272,8 +272,16 @@ function findBestSubWindow(hours: ScoredHour[]): { start: string; end: string, s
     return {
         start: bestRun[0].time,
         end: bestRun[bestRun.length - 1].time,
-        status: getScoreStatus(avgScore),
+        status: getScoreStatusSync(avgScore),
     };
+}
+
+// Synchronous version for use in non-async contexts if needed
+function getScoreStatusSync(score: number): ScoreStatus {
+    if (score >= 80) return "Excellent";
+    if (score >= 60) return "Good";
+    if (score >= 40) return "Fair";
+    return "Poor";
 }
 
 
@@ -297,7 +305,7 @@ export async function calculateDaypartScores(
     
     const results: DaypartScore[] = [];
 
-    (Object.keys(dayparts) as DaypartName[]).forEach(partName => {
+    for (const partName of Object.keys(dayparts) as DaypartName[]) {
         const { start, end } = dayparts[partName];
         
         const scoresInPart = hourlyScores.filter(h => {
@@ -307,7 +315,7 @@ export async function calculateDaypartScores(
 
         if (scoresInPart.length === 0) {
              results.push({ name: partName, score: 0, status: "Poor", hasWindow: false, isCurrent: false });
-             return;
+             continue;
         }
 
         const sortedScores = [...scoresInPart].sort((a, b) => b.score - a.score);
@@ -315,7 +323,7 @@ export async function calculateDaypartScores(
         const topScores = sortedScores.slice(0, top60PercentCount);
         
         const avgScore = Math.round(topScores.reduce((sum, h) => sum + h.score, 0) / topScores.length);
-        const status = getScoreStatus(avgScore);
+        const status = await getScoreStatus(avgScore);
         const bestWindow = findBestSubWindow(scoresInPart);
         
         const isCurrent = isWithinInterval(now, { start, end });
@@ -327,7 +335,7 @@ export async function calculateDaypartScores(
             hasWindow: !!bestWindow,
             isCurrent,
         });
-    });
+    }
 
     return results;
 }
@@ -342,7 +350,7 @@ export async function getOverallDayScore(daypartScores: DaypartScore[], hourlySc
     }
     
     const dayAvgScore = Math.round(daypartScores.reduce((sum, part) => sum + part.score, 0) / daypartScores.length);
-    const dayStatus = getScoreStatus(dayAvgScore);
+    const dayStatus = await getScoreStatus(dayAvgScore);
     
     const bestWindow = findBestSubWindow(hourlyScores);
 

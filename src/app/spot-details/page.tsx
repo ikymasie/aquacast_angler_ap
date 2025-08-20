@@ -14,6 +14,7 @@ import { getFishingForecastAction } from '../actions';
 import { DaypartScorePanel } from '@/components/daypart-score-panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SpeciesSelector } from '@/components/species-selector';
+import { getScoreStatus } from '@/lib/scoring';
 
 // Find a spot by name, or return the first one as a fallback.
 function getSpotByName(name?: string | null) {
@@ -26,6 +27,7 @@ export default function SpotDetailsPage() {
     const [spot, setSpot] = useState(getSpotByName()); // Example spot
     const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
     const [weatherData, setWeatherData] = useState<WeatherApiResponse | null>(null);
+    const [successScore, setSuccessScore] = useState<number | null>(null);
     const [daypartScores, setDaypartScores] = useState<DaypartScore[] | null>(null);
     const [overallDayScore, setOverallDayScore] = useState<OverallDayScore | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -57,9 +59,11 @@ export default function SpotDetailsPage() {
             });
 
             if (forecastResult.data) {
+                setSuccessScore(forecastResult.data.successScore || null);
                 setDaypartScores(forecastResult.data.daypartScores || null);
                 setOverallDayScore(forecastResult.data.overallDayScore || null)
             } else {
+                setSuccessScore(null);
                 setDaypartScores(null);
                 setOverallDayScore(null);
             }
@@ -87,14 +91,14 @@ export default function SpotDetailsPage() {
                     isLoading={isLoading}
                 />
                 
-                {isForecastLoading || !daypartScores || !overallDayScore ? (
+                {isForecastLoading || !daypartScores || !overallDayScore || successScore === null ? (
                     <Skeleton className="h-[180px] w-full rounded-xl" />
                 ) : (
                     <DaypartScorePanel
                         speciesKey={selectedSpecies.toLowerCase() as any}
                         spotName={spot.name}
-                        dayAvgScore={overallDayScore.dayAvgScore}
-                        dayStatus={overallDayScore.dayStatus}
+                        successScore={successScore}
+                        dayStatus={getScoreStatus(successScore)}
                         bestWindow={overallDayScore.bestWindow}
                         dayparts={daypartScores}
                     />

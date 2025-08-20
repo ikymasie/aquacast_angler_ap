@@ -39,9 +39,11 @@ const statusBadgeClasses: Record<ScoreStatus, string> = {
 };
 
 
-interface DaypartScorePanelProps extends OverallDayScore {
+interface DaypartScorePanelProps extends Omit<OverallDayScore, 'dayAvgScore' | 'dayStatus'> {
     speciesKey: 'bream' | 'bass' | 'carp';
     spotName: string;
+    successScore: number;
+    dayStatus: ScoreStatus;
     dayparts: DaypartScore[];
 }
 
@@ -51,7 +53,7 @@ export function DaypartScorePanel(props: DaypartScorePanelProps) {
         return <div className="text-center p-4">Loading daypart scores...</div>
     }
 
-    const { speciesKey, spotName, dayAvgScore, dayStatus, bestWindow, dayparts } = props;
+    const { speciesKey, spotName, successScore, dayStatus, bestWindow, dayparts } = props;
     const SpeciesIcon = speciesIcons[speciesKey] || FishBreamIcon;
     
     return (
@@ -59,14 +61,14 @@ export function DaypartScorePanel(props: DaypartScorePanelProps) {
             <div className="flex h-full items-center gap-3">
                 {/* Left Column */}
                 <div className="flex flex-col w-[110px] flex-shrink-0 text-center items-center">
-                    <span className="font-body text-sm text-white/90">Today</span>
-                    <span className="font-headline font-semibold text-[44px] leading-none text-white">{dayAvgScore}</span>
+                    <span className="font-body text-sm text-white/90">Now</span>
+                    <span className="font-headline font-semibold text-[44px] leading-none text-white">{Math.round(successScore)}</span>
                     <Badge className={cn("h-6 mt-1.5 px-3 text-sm border-0", statusBadgeClasses[dayStatus])}>{dayStatus}</Badge>
                     <div className="flex items-center gap-1.5 mt-2 bg-white/10 rounded-full h-6 px-2">
                         <SpeciesIcon className="w-4 h-4 text-white" />
                         <span className="font-body text-xs text-white/90 capitalize">{speciesKey}</span>
                     </div>
-                    <p className="font-body text-xs text-white/80 mt-1.5 leading-tight" >Next 24h • {spotName.split(',')[0]}</p>
+                    <p className="font-body text-xs text-white/80 mt-1.5 leading-tight" >{spotName.split(',')[0]}</p>
                 </div>
 
                 {/* Center Column: Best Window Pillar */}

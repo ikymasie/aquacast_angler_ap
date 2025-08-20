@@ -49,7 +49,7 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         weatherData.daily.sunset
     );
     
-    const overallDayScore = getOverallDayScore(daypartScores);
+    const overallDayScore = await getOverallDayScore(daypartScores, scoredHours);
 
     return { 
       data: {
