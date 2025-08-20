@@ -2,7 +2,6 @@
 'use client';
 
 import { Suspense, useState, useEffect, useMemo, useCallback } from 'react';
-import { BottomNav } from '@/components/bottom-nav';
 import { Header } from '@/components/header';
 import { SpotHeaderCard } from '@/components/spot-header-card';
 import { MapCard } from '@/components/map-card';
@@ -110,7 +109,7 @@ export default function SpotDetailsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
         <Header/>
-        <main className="flex-1 p-4 md:p-6 space-y-4 pb-24">
+        <main className="flex-1 p-4 md:p-6 space-y-4 pb-8">
             <Suspense fallback={<Skeleton className="w-full h-screen" />}>
                 <SpotHeaderCard
                     spot={spot}
@@ -166,7 +165,6 @@ export default function SpotDetailsPage() {
                 </Tabs>
             </Suspense>
         </main>
-        <BottomNav />
     </div>
   );
 }
