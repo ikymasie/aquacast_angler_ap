@@ -3,7 +3,6 @@
 
 import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
 import { useState, useMemo, useCallback } from 'react';
-import allSpotsData from "@/lib/locations.json";
 
 interface LocationPickerMapProps {
     onLocationSelect: (location: { lat: number; lng: number; }) => void;

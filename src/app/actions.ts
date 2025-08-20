@@ -5,8 +5,6 @@ import type { Species, Location, ScoredHour } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, recommendWindows } from "@/lib/scoring";
 import { format, parseISO } from "date-fns";
-import fs from 'fs/promises';
-import path from 'path';
 
 interface GetScoreActionPayload {
   species: Species;
@@ -65,44 +63,40 @@ interface AddSpotPayload {
     lng: number;
 }
 
-async function reverseGeocode(lat: number, lng: number): Promise<string> {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) throw new Error("Google Maps API key is missing.");
-
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.status !== 'OK' || data.results.length === 0) {
-        throw new Error(`Reverse geocoding failed: ${data.status}`);
-    }
-    
-    const result = data.results[0];
-    const locality = result.address_components.find((c: any) => c.types.includes('locality'))?.long_name;
-    const administrativeArea = result.address_components.find((c: any) => c.types.includes('administrative_area_level_1'))?.short_name;
-
-    if (locality && administrativeArea) {
-        return `${locality}, ${administrativeArea}`;
-    }
-    // Fallback to a formatted address if specific components aren't found
-    return result.formatted_address.split(',').slice(0, 2).join(',');
-}
-
-
 export async function addSpotAction(payload: AddSpotPayload) {
     try {
         const { lat, lng } = payload;
+
+        // Construct the URL for our new API route.
+        // We assume our app is running on localhost:3000 for server-side fetch.
+        // In a production environment, this should be an absolute URL.
+        const apiUrl = process.env.NODE_ENV === 'production'
+            ? `https://YOUR_PRODUCTION_DOMAIN/api/place-from-latlng?lat=${lat}&lng=${lng}`
+            : `http://localhost:9002/api/place-from-latlng?lat=${lat}&lng=${lng}`;
+
+
+        const response = await fetch(apiUrl, { cache: 'no-store' });
+
+        if (!response.ok) {
+            const errorBody = await response.json();
+            throw new Error(errorBody.error || `Failed to fetch place details: ${response.statusText}`);
+        }
+
+        const data = await response.json();
         
-        // 1. Reverse geocode to get a name
-        const name = await reverseGeocode(lat, lng);
+        if (!data.place && !data.geocode) {
+            throw new Error("Could not find location information for the selected spot.");
+        }
+
+        const name = data.place?.displayName?.text || data.geocode?.formattedAddress || "Unnamed Spot";
+        const nearestTown = name.split(',')[0];
         
-        // 2. Create the new spot object
         const newSpot = {
-            id: `spot_${new Date().getTime()}`,
+            id: data.place?.id || `spot_${new Date().getTime()}`,
             name: name,
             region: "custom",
             waterbody_type: "user-added",
-            nearest_town: name.split(',')[0],
+            nearest_town: nearestTown,
             coordinates: { lat, lon: lng },
             representative_species: ["bass", "bream/tilapia", "catfish"],
             notes: `Added on ${new Date().toLocaleDateString()}`,
@@ -111,7 +105,6 @@ export async function addSpotAction(payload: AddSpotPayload) {
             isRecent: true,
         };
 
-        // 3. Return the new spot data to the client
         return { data: newSpot, error: null };
 
     } catch (err) {
