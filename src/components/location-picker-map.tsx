@@ -1,12 +1,11 @@
 
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-import { useState, useEffect } from 'react';
-import type { LatLngExpression } from 'leaflet';
-import L from 'leaflet';
+import { useEffect, useRef, useState } from 'react';
+import L, { type LatLngExpression, type Map as LeafletMap } from 'leaflet';
 
-// Fix for default icon issue with webpack. This needs to run only once.
+// Fix for default icon issue with webpack.
+// This needs to run only once, and guarded to prevent errors during hot-reloads.
 if (typeof window !== 'undefined') {
     if ((L.Icon.Default.prototype as any)._getIconUrl) {
         delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -19,64 +18,71 @@ if (typeof window !== 'undefined') {
 }
 
 
-function LocationMarker() {
-  const [position, setPosition] = useState<LatLngExpression | null>(null);
-  const map = useMapEvents({
-    click(e) {
-      setPosition(e.latlng);
-      map.flyTo(e.latlng, map.getZoom());
-    },
-  });
-
-  return position === null ? null : (
-    <Marker position={position}>
-      <Popup>You selected this spot.</Popup>
-    </Marker>
-  );
-}
-
-
 export default function LocationPickerMap() {
-  const defaultPosition: LatLngExpression = [-24.6545, 25.9086]; // Gaborone
-  const [mapCenter, setMapCenter] = useState<LatLngExpression>(defaultPosition);
-  const [isMounted, setIsMounted] = useState(false);
-  const [mapKey, setMapKey] = useState(0);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
+  const [center, setCenter] = useState<LatLngExpression>([-24.6545, 25.9086]); // Gaborone
 
   useEffect(() => {
-    setIsMounted(true);
+    // Attempt to get user's location
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-            const newCenter: LatLngExpression = [pos.coords.latitude, pos.coords.longitude];
-            setMapCenter(newCenter);
-            // Force a re-render with a new key to ensure the map re-initializes cleanly with the new center
-            setMapKey(prevKey => prevKey + 1); 
+          const userLatLng: LatLngExpression = [pos.coords.latitude, pos.coords.longitude];
+          setCenter(userLatLng);
+           if (mapRef.current) {
+                mapRef.current.setView(userLatLng);
+            }
         },
         () => {
-          console.log('Could not get user location, defaulting to Gaborone.');
+          console.log('Could not get user location, using default.');
         }
       );
     }
   }, []);
 
-  // Prevent rendering on the server and until the component is mounted
-  if (!isMounted) {
-    return null;
-  }
+  useEffect(() => {
+    // Initialize map only if container exists and map is not already initialized.
+    if (mapContainerRef.current && !mapRef.current) {
+      mapRef.current = L.map(mapContainerRef.current, {
+        center: center,
+        zoom: 13,
+        scrollWheelZoom: true,
+      });
 
-  return (
-    <MapContainer
-      key={mapKey} // When this key changes, React will unmount the old and mount a new component
-      center={mapCenter}
-      zoom={13}
-      scrollWheelZoom
-      style={{ height: '100%', width: '100%' }}
-    >
-      <TileLayer
-        attribution="&copy; OpenStreetMap contributors"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <LocationMarker />
-    </MapContainer>
-  );
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(mapRef.current);
+
+      // Add click listener
+      mapRef.current.on('click', (e) => {
+          if (!markerRef.current) {
+              markerRef.current = L.marker(e.latlng).addTo(mapRef.current!);
+              markerRef.current.bindPopup('You selected this spot.').openPopup();
+          } else {
+              markerRef.current.setLatLng(e.latlng);
+          }
+           mapRef.current?.flyTo(e.latlng, mapRef.current.getZoom());
+      });
+    }
+
+    // Cleanup function to run when the component unmounts
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, []); // Empty dependency array ensures this effect runs only once on mount.
+  
+   // Effect to update map center when state changes
+    useEffect(() => {
+        if (mapRef.current) {
+            mapRef.current.setView(center, 13, { animate: true });
+        }
+    }, [center]);
+
+
+  return <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />;
 }
