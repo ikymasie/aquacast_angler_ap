@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,6 +16,7 @@
 
     --primary: 173 58% 51%; /* #3CC7B7 */
     --primary-foreground: 0 0% 100%; /* White for contrast */
+    --primary-dark: 174 65% 44%; /* #2DB1A2 */
 
     --secondary: 220 20% 96%;
     --secondary-foreground: 224 15% 17%;
@@ -40,10 +42,9 @@
     --chart-4: 45 87% 62%;
     --chart-5: 145 63% 42%;
 
-    --nav-background: 228 14% 20%; /* #2A2E3F - panel */
-    --nav-foreground: 0 0% 98%;
+    --panel: 228 14% 20%; /* #2A2E3F */
 
-    --success: 145 63% 42%; /* #27AE60 */
+    --good: 145 63% 42%; /* #27AE60 */
     --fair: 45 87% 62%; /* #F2C94C */
     --poor: 0 81% 63%; /* #EB5757 */
   }
@@ -60,6 +61,7 @@
 
     --primary: 173 58% 51%;
     --primary-foreground: 0 0% 100%;
+    --primary-dark: 174 65% 44%;
 
     --secondary: 228 14% 25%;
     --secondary-foreground: 210 20% 98%;
@@ -77,10 +79,9 @@
     --input: 220 14% 28%;
     --ring: 173 58% 51%;
 
-    --nav-background: 228 14% 20%;
-    --nav-foreground: 0 0% 98%;
-
-    --success: 145 63% 42%;
+    --panel: 228 14% 20%;
+    
+    --good: 145 63% 42%;
     --fair: 45 87% 62%;
     --poor: 0 81% 63%;
   }

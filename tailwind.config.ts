@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -10,16 +11,19 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: "1rem", // 16px
       screens: {
-        "2xl": "1400px",
+        sm: "600px",
+        md: "834px",
+        lg: "1024px",
+        xl: "1120px",
       },
     },
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Space Grotesk', 'sans-serif'],
-        code: ['Inter', 'monospace'], // Using Inter for tabular nums
+        code: ['Inter', 'monospace'],
       },
       fontSize: {
         'h1': ['24px', '32px'],
@@ -43,6 +47,7 @@ export default {
         },
         primary: {
           DEFAULT: 'hsl(var(--primary))',
+          dark: 'hsl(var(--primary-dark))',
           foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
@@ -64,29 +69,24 @@ export default {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-        chart: {
-          '1': 'hsl(var(--chart-1))',
-          '2': 'hsl(var(--chart-2))',
-          '3': 'hsl(var(--chart-3))',
-          '4': 'hsl(var(--chart-4))',
-          '5': 'hsl(var(--chart-5))',
-        },
-        nav: {
-            background: 'hsl(var(--nav-background))',
-            foreground: 'hsl(var(--nav-foreground))',
-        },
-        good: 'hsl(var(--success))',
+        'ink-900': '#1C1F28',
+        'ink-700': '#2C2C2C',
+        'ink-500': '#6B7280',
+        'ink-300': '#A0A4A8',
+        'line-200': '#E6E9EE',
+        'line-300': '#D6DAE1',
+        good: 'hsl(var(--good))',
         fair: 'hsl(var(--fair))',
         poor: 'hsl(var(--poor))',
         alert: 'hsl(var(--destructive))',
-        panel: 'hsl(var(--nav-background))',
+        panel: 'hsl(var(--panel))',
       },
       borderRadius: {
-        lg: 'var(--radius)', // 16px
-        xl: '1.25rem', // 20px
-        md: '0.75rem', // 12px
-        sm: 'calc(var(--radius) - 4px)', // fallback
-        full: '999px',
+        'xl': '1.25rem', // 20px
+        'lg': '1rem', // 16px
+        'md': '0.75rem', // 12px
+        'sm': 'calc(var(--radius) - 4px)',
+        'full': '999px',
       },
       boxShadow: {
         'card': '0 8px 24px rgba(28,31,40,0.08)',

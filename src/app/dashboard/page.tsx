@@ -1,12 +1,9 @@
 
 'use client';
 
-import { Suspense, useState, useCallback } from 'react';
 import { Header } from '@/components/header';
-import { FishingSuccessCard } from '@/components/fishing-success-card';
-import { CurrentConditionsCard } from '@/components/current-conditions-card';
-import { HourlyForecast } from '@/components/hourly-forecast';
-import { FavoritesRecents } from '@/components/favorites-recents';
+import { ConditionsPanel } from '@/components/conditions-panel';
+import { LocationsRail } from '@/components/locations-rail';
 import {
   SidebarProvider,
   Sidebar,
@@ -19,7 +16,17 @@ import {
 import { Home, Star, Map, Settings } from 'lucide-react';
 import { BottomNav } from '@/components/bottom-nav';
 import { SearchBar } from '@/components/search-bar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SectionHeader } from '@/components/section-header';
+
+function GreetingBlock() {
+    return (
+        <div className="px-4">
+             <h1 className="font-headline text-h1 font-bold text-ink-900">Hello John</h1>
+             <p className="font-body text-body text-ink-700">It’s a little <span className="text-primary">cloudy</span> today.</p>
+             <p className="font-body text-sm text-ink-500 mt-2">Search for the best fishing spots</p>
+        </div>
+    )
+}
 
 export default function DashboardPage() {
   return (
@@ -65,33 +72,22 @@ export default function DashboardPage() {
       <SidebarInset>
         <div className="flex flex-col min-h-screen bg-background">
           <Header />
-          <main className="flex-1 p-4 md:p-6">
-            <div className="space-y-4">
-              <div className="mt-3">
-                <SearchBar />
-              </div>
-              <div className="mt-4">
-                <FishingSuccessCard />
-              </div>
-              <div className="mt-4">
-                <Tabs defaultValue="all_locations" className="w-full">
-                  <TabsList className="grid w-full max-w-md grid-cols-3 mx-auto h-9 rounded-full bg-secondary text-secondary-foreground">
-                    <TabsTrigger value="all_locations" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">All Locations</TabsTrigger>
-                    <TabsTrigger value="recents" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Recently</TabsTrigger>
-                    <TabsTrigger value="favorites" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Favorites</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="all_locations" className="mt-3">
-                    <FavoritesRecents />
-                  </TabsContent>
-                  <TabsContent value="recents" className="mt-3">
-                    <FavoritesRecents tab="recents" />
-                  </TabsContent>
-                  <TabsContent value="favorites" className="mt-3">
-                    <FavoritesRecents tab="favorites" />
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </div>
+          <main className="flex-1">
+             <div className="mt-3 space-y-3">
+                <GreetingBlock />
+                <div className="px-4 mt-3">
+                    <SearchBar />
+                </div>
+             </div>
+             <div className="mt-4 px-4">
+                <ConditionsPanel />
+             </div>
+             <div className="mt-5 px-4">
+                <SectionHeader title="Locations." />
+             </div>
+             <div className="mt-3">
+                <LocationsRail />
+             </div>
           </main>
           <BottomNav />
         </div>
