@@ -5,13 +5,21 @@ import { Header } from '@/components/header';
 import { BottomNav } from '@/components/bottom-nav';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, MapPin, Save } from 'lucide-react';
+import { ArrowLeft, MapPin, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { useMemo } from 'react';
+import { useMemo, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
+import { addSpotAction } from '@/app/actions';
+import { useToast } from "@/hooks/use-toast";
+import type { LatLngLiteral } from 'leaflet';
 
 export default function AddSpotPage() {
+    const [selectedLocation, setSelectedLocation] = useState<LatLngLiteral | null>(null);
+    const [isPending, startTransition] = useTransition();
+    const router = useRouter();
+    const { toast } = useToast();
 
     const LocationPickerMap = useMemo(() => dynamic(
         () => import('@/components/location-picker-map'),
@@ -20,6 +28,39 @@ export default function AddSpotPage() {
             ssr: false 
         }
     ), []);
+
+    const handleSaveSpot = () => {
+        if (!selectedLocation) {
+            toast({
+                variant: 'destructive',
+                title: 'No Location Selected',
+                description: 'Please tap on the map to select a fishing spot.',
+            });
+            return;
+        }
+
+        startTransition(async () => {
+            const { data, error } = await addSpotAction({
+                lat: selectedLocation.lat,
+                lng: selectedLocation.lng,
+            });
+
+            if (error) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Failed to Save Spot',
+                    description: error,
+                });
+            } else {
+                toast({
+                    variant: 'success',
+                    title: 'Spot Saved!',
+                    description: `${data?.name} has been added to your locations.`,
+                });
+                router.push('/');
+            }
+        });
+    }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -30,8 +71,12 @@ export default function AddSpotPage() {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Home
             </Link>
-            <Button>
-                <Save className="w-4 h-4 mr-2" />
+            <Button onClick={handleSaveSpot} disabled={!selectedLocation || isPending}>
+                {isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                )}
                 Save Spot
             </Button>
         </div>
@@ -47,7 +92,7 @@ export default function AddSpotPage() {
               Use the map to find and select your fishing spot. Pan and zoom to find the exact location, then tap to place a pin.
             </p>
             <div className="aspect-video w-full bg-secondary rounded-lg overflow-hidden">
-                <LocationPickerMap />
+                <LocationPickerMap onLocationSelect={setSelectedLocation} />
             </div>
           </CardContent>
         </Card>

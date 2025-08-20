@@ -14,7 +14,11 @@ const defaultCenter = {
   lng: 25.9086
 };
 
-export default function LocationPickerMap() {
+interface LocationPickerMapProps {
+    onLocationSelect: (location: { lat: number; lng: number }) => void;
+}
+
+export default function LocationPickerMap({ onLocationSelect }: LocationPickerMapProps) {
   const [mapCenter, setMapCenter] = useState(defaultCenter);
   const [markerPosition, setMarkerPosition] = useState<google.maps.LatLngLiteral | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -41,8 +45,9 @@ export default function LocationPickerMap() {
         lng: event.latLng.lng(),
       };
       setMarkerPosition(newPosition);
+      onLocationSelect(newPosition);
     }
-  }, []);
+  }, [onLocationSelect]);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
