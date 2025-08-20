@@ -40,6 +40,8 @@ export async function GET(req: NextRequest) {
     }
 
     const revJson = await revRes.json() as any;
+    console.log("Reverse Geocoding Response:", JSON.stringify(revJson, null, 2));
+
     const results: any[] = revJson?.results || [];
     if (!results.length) {
       return new Response(JSON.stringify({ results: [], message: "No matches" }), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -81,6 +83,7 @@ export async function GET(req: NextRequest) {
     }
 
     const place = await placeRes.json();
+    console.log("Place Details Response:", JSON.stringify(place, null, 2));
 
     return new Response(JSON.stringify({
       geocode: best,      // includes formattedAddress, granularity, etc.
@@ -88,7 +91,7 @@ export async function GET(req: NextRequest) {
     }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
   } catch (err: any) {
-    console.error(err);
+    console.error("Error in place-from-latlng API route:", err);
     return new Response(JSON.stringify({ error: err.message ?? "Unknown error" }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
