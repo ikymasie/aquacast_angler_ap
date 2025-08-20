@@ -10,10 +10,27 @@ import { SectionHeader } from '@/components/section-header';
 import { AquaCastLogo } from '@/components/aqua-cast-logo';
 import { FavoritesRecents } from '@/components/favorites-recents';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState("all_spots");
+
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log('User location:', position.coords.latitude, position.coords.longitude);
+          // You can now use the coordinates to fetch location-specific data
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          // Handle errors or user denial gracefully
+        }
+      );
+    } else {
+      console.log('Geolocation is not supported by this browser.');
+    }
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
