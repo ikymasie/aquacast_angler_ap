@@ -1,88 +1,77 @@
 
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import L, { type LatLngExpression, type Map as LeafletMap } from 'leaflet';
+import { useState, useEffect, useCallback } from 'react';
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 
-// Fix for default icon issue with webpack.
-// This needs to run only once, and guarded to prevent errors during hot-reloads.
-if (typeof window !== 'undefined') {
-    if ((L.Icon.Default.prototype as any)._getIconUrl) {
-        delete (L.Icon.Default.prototype as any)._getIconUrl;
-    }
-    L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    });
-}
+const containerStyle = {
+  width: '100%',
+  height: '100%'
+};
 
+const defaultCenter = {
+  lat: -24.6545,
+  lng: 25.9086
+};
 
 export default function LocationPickerMap() {
-  const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<LeafletMap | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
-  const [center, setCenter] = useState<LatLngExpression>([-24.6545, 25.9086]); // Gaborone
+  const [mapCenter, setMapCenter] = useState(defaultCenter);
+  const [markerPosition, setMarkerPosition] = useState<google.maps.LatLngLiteral | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Attempt to get user's location
-    if ('geolocation' in navigator) {
+    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const userLatLng: LatLngExpression = [pos.coords.latitude, pos.coords.longitude];
-          setCenter(userLatLng);
-           if (mapRef.current) {
-                mapRef.current.setView(userLatLng);
-            }
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setMapCenter({ lat: latitude, lng: longitude });
         },
-        () => {
-          console.log('Could not get user location, using default.');
+        (error) => {
+          console.error("Error getting geolocation: ", error);
         }
       );
     }
+    setIsLoaded(true);
   }, []);
 
-  useEffect(() => {
-    // Initialize map only if container exists and map is not already initialized.
-    if (mapContainerRef.current && !mapRef.current) {
-      mapRef.current = L.map(mapContainerRef.current, {
-        center: center,
-        zoom: 13,
-        scrollWheelZoom: true,
-      });
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-      }).addTo(mapRef.current);
-
-      // Add click listener
-      mapRef.current.on('click', (e) => {
-          if (!markerRef.current) {
-              markerRef.current = L.marker(e.latlng).addTo(mapRef.current!);
-              markerRef.current.bindPopup('You selected this spot.').openPopup();
-          } else {
-              markerRef.current.setLatLng(e.latlng);
-          }
-           mapRef.current?.flyTo(e.latlng, mapRef.current.getZoom());
-      });
+  const handleMapClick = useCallback((event: google.maps.MapMouseEvent) => {
+    if (event.latLng) {
+      const newPosition = {
+        lat: event.latLng.lat(),
+        lng: event.latLng.lng(),
+      };
+      setMarkerPosition(newPosition);
     }
+  }, []);
 
-    // Cleanup function to run when the component unmounts
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-    };
-  }, []); // Empty dependency array ensures this effect runs only once on mount.
-  
-   // Effect to update map center when state changes
-    useEffect(() => {
-        if (mapRef.current) {
-            mapRef.current.setView(center, 13, { animate: true });
-        }
-    }, [center]);
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
+  if (!apiKey) {
+    return <div>Error: Google Maps API key is missing.</div>;
+  }
 
-  return <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />;
+  if (!isLoaded) {
+    return <div>Loading map...</div>;
+  }
+
+  return (
+    <LoadScript
+      googleMapsApiKey={apiKey}
+      libraries={["places"]}
+    >
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={mapCenter}
+        zoom={13}
+        onClick={handleMapClick}
+        options={{
+          streetViewControl: false,
+          mapTypeControl: false,
+          fullscreenControl: false,
+        }}
+      >
+        {markerPosition && <Marker position={markerPosition} />}
+      </GoogleMap>
+    </LoadScript>
+  );
 }
