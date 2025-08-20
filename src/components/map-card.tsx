@@ -17,7 +17,7 @@ export function MapCard({ center, thumbnails }: MapCardProps) {
     const [activeThumbId, setActiveThumbId] = useState(thumbnails[0]?.id || 'map');
 
     return (
-        <Card className="overflow-hidden h-[260px] flex flex-col rounded-xl shadow-card border-2 border-white/30">
+        <Card className="overflow-hidden h-[400px] md:h-[500px] flex flex-col rounded-xl shadow-card border-2 border-white/30">
             <CardContent className="p-0 flex-1 relative">
                 <InteractiveMap center={center} />
 

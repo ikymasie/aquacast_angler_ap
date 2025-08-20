@@ -8,7 +8,6 @@ import { SpotHeaderCard } from '@/components/spot-header-card';
 import { MapCard } from '@/components/map-card';
 import type { Species, Location, WeatherApiResponse, DaypartScore, OverallDayScore, RecommendedWindow } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
-import { SearchBar } from '@/components/search-bar';
 import { getCachedWeatherData } from '@/services/weather/client';
 import { getFishingForecastAction } from '../actions';
 import { DaypartScorePanel } from '@/components/daypart-score-panel';
@@ -17,6 +16,7 @@ import { SpeciesSelector } from '@/components/species-selector';
 import { RecommendedTimeCard } from '@/components/recommended-time-card';
 import { DaySelector } from '@/components/day-selector';
 import { format, startOfToday } from 'date-fns';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // Find a spot by name, or return the first one as a fallback.
 function getSpotByName(name?: string | null) {
@@ -90,50 +90,59 @@ export default function SpotDetailsPage() {
     <div className="flex flex-col min-h-screen bg-background">
         <Header/>
         <main className="flex-1 p-4 md:p-6 space-y-4 pb-24">
-            <Suspense fallback={<div>Loading...</div>}>
-                <SearchBar />
+            <Suspense fallback={<Skeleton className="w-full h-screen" />}>
                 <SpotHeaderCard
                     spot={spot}
                 />
                 
-                {isLoading || !weatherData ? (
-                    <Skeleton className="h-12 w-full" />
-                ) : (
-                    <DaySelector 
-                        dailyData={weatherData.daily}
-                        selectedDate={selectedDate}
-                        onDateSelect={setSelectedDate}
-                    />
-                )}
+                <Tabs defaultValue="forecast" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="forecast">Forecast</TabsTrigger>
+                        <TabsTrigger value="map">Map</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="forecast" className="space-y-4 pt-4">
+                        {isLoading || !weatherData ? (
+                            <Skeleton className="h-12 w-full" />
+                        ) : (
+                            <DaySelector 
+                                dailyData={weatherData.daily}
+                                selectedDate={selectedDate}
+                                onDateSelect={setSelectedDate}
+                            />
+                        )}
 
-                {isForecastLoading || !daypartScores || !overallDayScore || successScore === null ? (
-                    <Skeleton className="h-[180px] w-full rounded-xl" />
-                ) : (
-                    <DaypartScorePanel
-                        speciesKey={selectedSpecies.toLowerCase() as any}
-                        spotName={spot.name}
-                        successScore={successScore}
-                        overallScore={overallDayScore}
-                        dayparts={daypartScores}
-                    />
-                )}
+                        {isForecastLoading || !daypartScores || !overallDayScore || successScore === null ? (
+                            <Skeleton className="h-[180px] w-full rounded-xl" />
+                        ) : (
+                            <DaypartScorePanel
+                                speciesKey={selectedSpecies.toLowerCase() as any}
+                                spotName={spot.name}
+                                successScore={successScore}
+                                overallScore={overallDayScore}
+                                dayparts={daypartScores}
+                            />
+                        )}
 
-               <div className="pt-3 space-y-3">
-                   <SpeciesSelector 
-                       selectedSpecies={selectedSpecies}
-                       onSelectSpecies={setSelectedSpecies}
-                       disabled={isForecastLoading}
-                   />
-                    {isForecastLoading || !recommendedWindow ? (
-                        <Skeleton className="h-[88px] w-full rounded-xl" />
-                    ) : (
-                        <RecommendedTimeCard window={recommendedWindow} />
-                    )}
-                   <MapCard
-                       center={{ lat: spot.coordinates.lat, lng: spot.coordinates.lon }}
-                       thumbnails={mapThumbnails}
-                   />
-               </div>
+                       <div className="pt-3 space-y-3">
+                           <SpeciesSelector 
+                               selectedSpecies={selectedSpecies}
+                               onSelectSpecies={setSelectedSpecies}
+                               disabled={isForecastLoading}
+                           />
+                            {isForecastLoading || !recommendedWindow ? (
+                                <Skeleton className="h-[88px] w-full rounded-xl" />
+                            ) : (
+                                <RecommendedTimeCard window={recommendedWindow} />
+                            )}
+                       </div>
+                    </TabsContent>
+                    <TabsContent value="map" className="pt-4">
+                        <MapCard
+                           center={{ lat: spot.coordinates.lat, lng: spot.coordinates.lon }}
+                           thumbnails={mapThumbnails}
+                       />
+                    </TabsContent>
+                </Tabs>
             </Suspense>
         </main>
         <BottomNav />
