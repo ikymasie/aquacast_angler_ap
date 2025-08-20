@@ -98,6 +98,8 @@ export default function ReviewSpotPage() {
     };
 
     const handleFinish = () => {
+        // Only update local storage if a new photo was actually taken.
+        // The spot with a placeholder image is already saved from the previous step.
         if (photoData && spot) {
             try {
                  const allSpots = JSON.parse(localStorage.getItem('user-spots') || '[]');
@@ -105,16 +107,27 @@ export default function ReviewSpotPage() {
                  if (spotIndex > -1) {
                     allSpots[spotIndex].image_url = photoData;
                     localStorage.setItem('user-spots', JSON.stringify(allSpots));
+                    toast({
+                        title: "Photo Saved!",
+                        description: "Your spot's image has been updated.",
+                        variant: 'success'
+                    });
                  }
             } catch (e) {
                 console.error("Could not update spot with photo", e);
+                 toast({
+                    title: "Error Saving Photo",
+                    description: "Could not save the new image.",
+                    variant: 'destructive'
+                });
             }
+        } else {
+             toast({
+                title: "Spot Saved!",
+                description: "Your new spot is ready to use.",
+                variant: 'success'
+            });
         }
-        toast({
-            title: "Spot Saved!",
-            description: "Your new spot is ready.",
-            variant: 'success'
-        });
         router.push('/');
     };
     
@@ -126,6 +139,8 @@ export default function ReviewSpotPage() {
         return null;
     }
 
+    const displayImage = photoData || spot.image_url;
+
     return (
         <div className="flex flex-col min-h-screen bg-background">
             <Header />
@@ -133,7 +148,7 @@ export default function ReviewSpotPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="font-headline text-h2">Review Your New Spot</CardTitle>
-                        <CardDescription>Take a picture to remember this location.</CardDescription>
+                        <CardDescription>Optionally, take a picture to remember this location.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
@@ -142,17 +157,18 @@ export default function ReviewSpotPage() {
                         </div>
                         
                         <div className="relative aspect-video w-full bg-secondary rounded-lg overflow-hidden flex items-center justify-center">
-                            {photoData ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={photoData} alt="Spot capture" className="w-full h-full object-cover" />
-                            ) : (
+                            {hasCameraPermission && !photoData ? (
                                 <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
+                            ) : (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={displayImage} alt="Spot capture" className="w-full h-full object-cover" />
                             )}
-                            {hasCameraPermission === false && (
+                            
+                            {hasCameraPermission === false && !photoData && (
                                 <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
                                     <VideoOff className="w-10 h-10 mb-2"/>
                                     <p className="font-semibold">Camera Not Available</p>
-                                    <p className="text-sm">Could not access camera. Please check your browser permissions.</p>
+                                    <p className="text-sm">Permissions denied or no camera found.</p>
                                 </div>
                             )}
                         </div>
@@ -163,7 +179,7 @@ export default function ReviewSpotPage() {
                            <Alert variant="destructive">
                                 <AlertTitle>Camera Access Denied</AlertTitle>
                                 <AlertDescription>
-                                Please enable camera permissions in your browser settings to take a photo.
+                                You can still save your spot. To add a photo later, enable camera permissions in your browser settings.
                                 </AlertDescription>
                             </Alert>
                         )}
