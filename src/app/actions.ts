@@ -4,7 +4,7 @@
 import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
-import { format, parseISO, startOfDay, endOfDay, isWithinInterval, isToday, isFuture } from "date-fns";
+import { format, parseISO, startOfDay, endOfDay, isWithinInterval, isToday, isFuture, addHours } from "date-fns";
 import type { CastingAdviceInput } from "@/ai/flows/casting-advice-flow";
 import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
 
@@ -33,16 +33,20 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     let hoursForDay: any[];
 
     if (isToday(selectedDate)) {
-        // For today, get all hours from now until the end of the day.
+        // For today, get a full 24-hour forecast starting from the current hour.
+        const now = new Date();
+        const next24HoursEnd = addHours(now, 24);
+        
         hoursForDay = weatherData.hourly.filter(h => {
             const hourTime = parseISO(h.t);
-            return isFuture(hourTime) && isWithinInterval(hourTime, { start: new Date(), end: endOfDay(selectedDate) });
+            return isFuture(hourTime) && isWithinInterval(hourTime, { start: now, end: next24HoursEnd });
         });
         
-        // Fallback: If no future hours are left for today, just grab all available future hours.
+        // Fallback: If for some reason that yields nothing, just grab all available future hours.
         if (hoursForDay.length === 0) {
             hoursForDay = weatherData.hourly.filter(h => isFuture(parseISO(h.t)));
         }
+
     } else {
         // For future dates, get all hours for that day.
         const dayStart = startOfDay(selectedDate);
@@ -52,7 +56,7 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         );
     }
     
-    if (hoursForDay.length === 0) {
+    if (hoursForDay.length < 4) { // Ensure we have at least a few hours to work with
       return { data: null, error: "Not enough forecast data is available to create a forecast for the selected date."};
     }
 
