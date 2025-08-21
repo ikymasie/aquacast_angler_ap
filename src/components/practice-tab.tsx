@@ -10,12 +10,14 @@ import { LureSelector } from './lure-selector';
 import { SessionHeader } from './practice/session-header';
 import { cn } from '@/lib/utils';
 import { Skeleton } from './ui/skeleton';
+import { LivePracticeHUD } from './practice/live-practice-hud';
 
 export function PracticeTab() {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
   const [selectedLureFamily, setSelectedLureFamily] = useState<LureFamily | 'All'>('All');
   const [catalog, setCatalog] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeDrill, setActiveDrill] = useState<any | null>(null);
 
   useEffect(() => {
     const loadCatalog = async () => {
@@ -47,7 +49,15 @@ export function PracticeTab() {
   const handleLureSelect = (lure: LureFamily | 'All') => {
     setSelectedLureFamily(lure);
   };
+
+  const handleStartDrill = (drill: any) => {
+    setActiveDrill(drill);
+  };
   
+  if (activeDrill) {
+    return <LivePracticeHUD drill={activeDrill} onExit={() => setActiveDrill(null)} />;
+  }
+
   const allDrills = catalog?.speciesCatalog?.families?.flatMap((family: any) => family.drills) || [];
 
   const filteredDrills = selectedLureFamily === 'All'
@@ -83,7 +93,7 @@ export function PracticeTab() {
                 </>
             ) : filteredDrills.length > 0 ? (
                 filteredDrills.map((drill: any) => (
-                    <DrillCard key={drill.drillKey} drill={drill} />
+                    <DrillCard key={drill.drillKey} drill={drill} onStart={handleStartDrill} />
                 ))
             ) : (
                  <div className="col-span-1 md:col-span-2 text-center py-10 px-4 border-2 border-dashed rounded-lg mt-4">
@@ -97,4 +107,3 @@ export function PracticeTab() {
     </div>
   );
 }
-

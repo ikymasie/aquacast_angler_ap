@@ -21,9 +21,10 @@ interface DrillCardProps {
         proTip: string;
     }
   };
+  onStart: (drill: any) => void;
 }
 
-export function DrillCard({ drill }: DrillCardProps) {
+export function DrillCard({ drill, onStart }: DrillCardProps) {
   const families = drill.requiredFamilies || [];
 
   return (
@@ -40,7 +41,7 @@ export function DrillCard({ drill }: DrillCardProps) {
          <p className="text-sm text-muted-foreground mt-3">{drill.ui?.whatYouLearn || 'A drill to improve your skills.'}</p>
       </div>
       <div className="flex justify-end mt-4">
-        <Button size="sm">
+        <Button size="sm" onClick={() => onStart(drill)}>
             <Play className="w-4 h-4 mr-2"/>
             Start Drill
         </Button>
