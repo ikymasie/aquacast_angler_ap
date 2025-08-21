@@ -4,12 +4,15 @@
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { useMemo } from "react";
 
+export type MapTypeId = 'roadmap' | 'satellite' | 'terrain' | 'hybrid';
+
 interface InteractiveMapProps {
     center: { lat: number; lng: number; };
     zoom?: number;
+    mapTypeId?: MapTypeId;
 }
 
-export function InteractiveMap({ center, zoom = 12 }: InteractiveMapProps) {
+export function InteractiveMap({ center, zoom = 12, mapTypeId = 'roadmap' }: InteractiveMapProps) {
     const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
     });
@@ -17,8 +20,9 @@ export function InteractiveMap({ center, zoom = 12 }: InteractiveMapProps) {
     const mapOptions = useMemo(() => ({
         mapId: "9b6563cf95e73ca085e3f4d1",
         disableDefaultUI: true,
-        gestureHandling: 'cooperative'
-    }), []);
+        gestureHandling: 'cooperative',
+        mapTypeId: mapTypeId,
+    }), [mapTypeId]);
     
     if (loadError) return <div>Error loading maps</div>;
     if (!isLoaded) return <div>Loading Maps...</div>;

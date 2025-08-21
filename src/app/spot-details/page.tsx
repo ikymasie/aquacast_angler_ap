@@ -24,7 +24,7 @@ import { QuickMetricsPanel } from '@/components/quick-metrics-panel';
 import { LureSelector } from '@/components/lure-selector';
 import type { CastingAdviceInput, CastingAdviceOutput } from '@/ai/flows/casting-advice-flow';
 import { CastingConditionsCard } from '@/components/casting-conditions-card';
-import type { LureAdviceInput, LureAdviceOutput } from '@/ai/flows/lure-advice-flow';
+import type { LureAdviceOutput } from '@/ai/flows/lure-advice-flow';
 import { RecommendedSpotCard } from '@/components/recommended-spot-card';
 
 
@@ -94,7 +94,7 @@ export default function SpotDetailsPage() {
              const allScoredHours: ScoredHour[] = (forecastResult.data.hourlyChartData || []).map((d: any) => {
                 if (!weatherData) return null;
                 const correspondingHour = weatherData.hourly.find(h => 
-                    h.t.startsWith(selectedDateString) && format(parseISO(h.t), 'ha') === d.time
+                     h.t.startsWith(selectedDateString) && format(parseISO(h.t), 'ha') === d.time
                 );
                 return {
                     time: correspondingHour?.t || new Date().toISOString(),
@@ -234,12 +234,6 @@ export default function SpotDetailsPage() {
     }, [isForecastLoading, selectedLure, dayContext, threeHourScores]);
 
 
-     const mapThumbnails = [
-        { id: 'map', imageUrl: 'https://placehold.co/100x100.png?text=Map', hint: 'map view' },
-        { id: 'photo1', imageUrl: 'https://placehold.co/100x100.png', hint: 'fishing spot photo' },
-        { id: 'photo2', imageUrl: 'https://placehold.co/100x100.png', hint: 'lake view' },
-    ];
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
         <Header/>
@@ -333,7 +327,6 @@ export default function SpotDetailsPage() {
                     <TabsContent value="map" className="pt-4">
                         <MapCard
                            center={{ lat: spot.coordinates.lat, lng: spot.coordinates.lon }}
-                           thumbnails={mapThumbnails}
                        />
                     </TabsContent>
                 </Tabs>
