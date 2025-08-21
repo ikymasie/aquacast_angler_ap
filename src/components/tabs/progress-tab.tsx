@@ -135,6 +135,45 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
 
   }, [sessions]);
 
+  const recentDrills = useMemo(() => {
+    if (!sessions || sessions.length === 0) return [];
+    
+    const completedSessions = sessions.filter(s => s.status === 'completed');
+
+    // Group sessions by drillKey
+    const drills = completedSessions.reduce((acc, session) => {
+        if (!acc[session.drillKey]) {
+            acc[session.drillKey] = [];
+        }
+        acc[session.drillKey].push(session);
+        return acc;
+    }, {} as Record<string, any[]>);
+
+    // Process each group
+    return Object.values(drills).map(drillSessions => {
+        const lastSession = drillSessions[0]; // Already sorted by startTime desc
+        const allAttempts = lastSession.rounds?.flatMap((r:any) => r.attempts) || [];
+        const hitsStrip = allAttempts.slice(-10).map((a:any) => a.outcome === 'hit' ? '1' : '0').join('');
+        
+        // Find best grade across all sessions for this drill
+        const bestGrade = drillSessions.reduce((best, s) => {
+            if (!s.finalGrade) return best;
+            if (!best) return s.finalGrade;
+            // Simple alphabetical sort, 'A' is better than 'B'
+            return s.finalGrade < best ? s.finalGrade : best;
+        }, null) || 'N/A';
+
+        return {
+            drillKey: lastSession.drillKey,
+            species: lastSession.speciesKey || 'unknown',
+            family: 'unknown', // This would need to be looked up from the catalog
+            bestGrade,
+            lastScore: lastSession.finalScore || 0,
+            hitsStrip,
+        };
+    }).slice(0, 5); // Take the 5 most recent unique drills
+  }, [sessions]);
+
   useEffect(() => {
     const loadCatalog = async () => {
       setIsLoadingCatalog(true);
@@ -217,7 +256,7 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
       />
       <WeeklyOverviewCard {...weeklyStats} />
       <SkillWheel data={skillData} />
-      <DrillOverviewCarousel />
+      <DrillOverviewCarousel drills={recentDrills} />
       <MasteryOverview />
       <TrendsChart />
       <AiCoachCard />

@@ -12,13 +12,7 @@ import {
 import { SectionHeader } from "../section-header";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-
-const MOCK_DRILLS = [
-  { drillKey: "soft_skip_precision_v1", species: "bream", family: "soft", bestGrade: "A", lastScore: 78, hitsStrip: "1101100110" },
-  { drillKey: "spinner_lane_cadence_v1", species: "bass", family: "spinner", bestGrade: "A", lastScore: 81, hitsStrip: "1011111011" },
-  { drillKey: "bream_live_quiet_entry_v1", species: "bream", family: "live", bestGrade: "B", lastScore: 72, hitsStrip: "1110101101" },
-  { drillKey: "bass_depth_ladder_hold_v1", species: "bass", family: "crank/swim", bestGrade: "A", lastScore: 85, hitsStrip: "1111011110" },
-];
+import { Skeleton } from "../ui/skeleton";
 
 const gradeBands: Record<string, string> = {
     'S': 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white',
@@ -26,9 +20,21 @@ const gradeBands: Record<string, string> = {
     'B': 'bg-score-fair text-foreground',
     'C': 'bg-score-fair-slow text-white',
     'D': 'bg-score-poor text-white',
+    'N/A': 'bg-muted text-muted-foreground'
 }
 
-function DrillResultCard({ drill }: { drill: typeof MOCK_DRILLS[0] }) {
+interface DrillResultCardProps {
+    drill: {
+        drillKey: string;
+        species: string;
+        family: string;
+        bestGrade: string;
+        lastScore: number;
+        hitsStrip: string;
+    };
+}
+
+function DrillResultCard({ drill }: DrillResultCardProps) {
     const gradeClass = gradeBands[drill.bestGrade] || 'bg-muted text-muted-foreground';
     
     return (
@@ -60,21 +66,31 @@ function DrillResultCard({ drill }: { drill: typeof MOCK_DRILLS[0] }) {
     )
 }
 
-export function DrillOverviewCarousel() {
+interface DrillOverviewCarouselProps {
+    drills: DrillResultCardProps['drill'][];
+}
+
+export function DrillOverviewCarousel({ drills }: DrillOverviewCarouselProps) {
   return (
     <div className="space-y-3">
         <SectionHeader title="Recent Drills" />
-        <Carousel opts={{ align: "start" }} className="w-full">
-            <CarouselContent className="-ml-2">
-                {MOCK_DRILLS.map((drill) => (
-                    <CarouselItem key={drill.drillKey} className="pl-4 basis-3/4 sm:basis-1/2 md:basis-1/3">
-                       <DrillResultCard drill={drill} />
-                    </CarouselItem>
-                ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden sm:flex" />
-            <CarouselNext className="hidden sm:flex" />
-        </Carousel>
+         {drills.length === 0 ? (
+            <Card className="p-4 rounded-xl text-center border-dashed">
+                <p className="text-muted-foreground">Complete a practice session to see it here.</p>
+            </Card>
+        ) : (
+            <Carousel opts={{ align: "start" }} className="w-full">
+                <CarouselContent className="-ml-2">
+                    {drills.map((drill) => (
+                        <CarouselItem key={drill.drillKey} className="pl-4 basis-3/4 sm:basis-1/2 md:basis-1/3">
+                        <DrillResultCard drill={drill} />
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious className="hidden sm:flex" />
+                <CarouselNext className="hidden sm:flex" />
+            </Carousel>
+        )}
     </div>
   );
 }
