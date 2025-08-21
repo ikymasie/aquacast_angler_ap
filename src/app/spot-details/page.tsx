@@ -86,7 +86,8 @@ export default function SpotDetailsPage() {
 
         if (forecastResult.data && weatherData?.hourly) {
              const allScoredHours: ScoredHour[] = weatherData.hourly.map((h, i) => {
-                const correspondingForecast = forecastResult.data.hourlyChartData.find(d => d.time === h.t);
+                // This mapping is simplified as the action now returns all necessary data
+                const correspondingForecast = forecastResult.data.hourlyChartData.find(d => d.time === format(parseISO(h.t), 'ha'));
                 return {
                     time: h.t,
                     score: correspondingForecast?.success ?? 0,
@@ -96,14 +97,19 @@ export default function SpotDetailsPage() {
              });
 
             const futureScoredHours = allScoredHours.filter(h => isFuture(new Date(h.time)));
-
             const recWindow = await recommendWindows(futureScoredHours);
+            
             setRecommendedWindow(recWindow);
             setThreeHourScores(forecastResult.data.threeHourScores || []);
             setOverallDayScore(forecastResult.data.overallDayScore || null);
-        } else {
+            
+            if (forecastResult.error) {
+                setForecastError(forecastResult.error);
+            }
+
+        } else if (forecastResult.error) {
             console.error("Forecast Error:", forecastResult.error);
-            setForecastError(forecastResult.error ?? "Failed to load forecast.");
+            setForecastError(forecastResult.error);
             // Clear previous results on error
             setRecommendedWindow(null);
             setThreeHourScores([]);
@@ -198,14 +204,18 @@ export default function SpotDetailsPage() {
                            <Card className="h-[180px] w-full rounded-xl bg-destructive/10 border-destructive/50 flex items-center justify-center p-4">
                                <p className="text-center text-destructive-foreground">{forecastError}</p>
                            </Card>
-                        ) : (
+                        ) : (threeHourScores.length > 0 && overallDayScore) ? (
                            <DaypartScorePanel
                                speciesKey={selectedSpecies.toLowerCase() as any}
                                spotName={spot.name}
-                               dayAvgScore={overallDayScore?.dayAvgScore ?? 0}
-                               dayStatus={overallDayScore?.dayStatus ?? 'Poor'}
+                               dayAvgScore={overallDayScore.dayAvgScore}
+                               dayStatus={overallDayScore.dayStatus}
                                intervals={threeHourScores}
                            />
+                        ) : (
+                           <Card className="h-[180px] w-full rounded-xl bg-secondary/50 flex items-center justify-center p-4">
+                               <p className="text-center text-muted-foreground">Not enough data for a full day summary. Check again later.</p>
+                           </Card>
                         )}
                         
                         <SpeciesSelector 
