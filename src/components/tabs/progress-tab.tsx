@@ -25,7 +25,7 @@ import { TrendsChart } from '../progress/trends-chart';
 import { AiCoachCard } from '../progress/ai-coach-card';
 import { QuestsCard } from '../progress/quests-card';
 import { HistoryCard } from '../progress/history-card';
-import { differenceInDays, startOfWeek, format } from 'date-fns';
+import { differenceInDays, startOfWeek, format, addDays, isSameDay, differenceInMinutes } from 'date-fns';
 
 export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetails?: boolean }) {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
@@ -60,9 +60,10 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
     const thisWeeksSessions = sessions.filter(s => s.endTime && differenceInDays(now, s.endTime.toDate()) <= 7);
 
     const totalCasts = thisWeeksSessions.reduce((sum, s) => sum + (s.rounds?.reduce((rSum: number, r: any) => rSum + r.attempts.length, 0) || 0), 0);
+    
     const totalMinutes = thisWeeksSessions.reduce((sum, s) => {
-        if (!s.startTime || !s.endTime) return sum;
-        return sum + Math.round(differenceInDays(s.endTime.toDate(), s.startTime.toDate()) / 60)
+        if (!s.startTime?.toDate() || !s.endTime?.toDate()) return sum;
+        return sum + differenceInMinutes(s.endTime.toDate(), s.startTime.toDate());
     }, 0);
 
     const trend = Array(7).fill(0).map((_, i) => {
@@ -158,7 +159,7 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
   const MainContent = () => (
     <div className="space-y-6">
       <RankBanner
-        isLoading={isUserLoading}
+        isLoading={isUserLoading || isLoadingSessions}
         rankPoints={user?.practiceProfile?.xp || 0}
         nextRankPoints={user?.practiceProfile?.nextLevelXp || 1000}
         level={user?.practiceProfile?.level || 1}
@@ -228,17 +229,3 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
     </>
   );
 }
-
-function addDays(date: Date, days: number) {
-    var result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
-}
-
-function isSameDay(d1: Date, d2: Date) {
-    return d1.getFullYear() === d2.getFullYear() &&
-        d1.getMonth() === d2.getMonth() &&
-        d1.getDate() === d2.getDate();
-}
-
-    
