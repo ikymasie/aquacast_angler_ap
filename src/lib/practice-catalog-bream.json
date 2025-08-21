@@ -335,11 +335,14 @@
         "familyKey": "crank_swim",
         "label": "Crank/Swim (Micro)",
         "recommendedBaits": [
-          { "baitKey": "micro_squarebill_1_0", "name": "Micro Squarebill 1.0" }
+          { "baitKey": "micro_squarebill_1_0", "name": "Micro Squarebill 1.0" },
+          { "baitKey": "micro_swimbait_2_5in", "name": "Micro Swimbait 2.5\"" }
         ],
         "techniques": [
           { "techniqueKey": "cast_overhead", "label": "Overhead Distance + Accuracy" },
-          { "techniqueKey": "depth_track", "label": "Depth Track" }
+          { "techniqueKey": "depth_track", "label": "Depth Track" },
+          { "techniqueKey": "cover_deflect", "label": "Cover Deflection" },
+          { "techniqueKey": "stop_go", "label": "Stop-Go Cadence" }
         ],
         "drills": [
           {
@@ -371,6 +374,156 @@
                 "Depth control improved when speed stabilized within a narrow band.",
                 "Edge time peaked on casts launched parallel rather than at 30°.",
                 "Tick-and-release events correlated with longer follow durations."
+              ]
+            }
+          },
+          {
+            "drillKey": "bream_crank_deflection_v1",
+            "name": "Crankbait Deflection",
+            "learningOutcome": "Mastering the art of deflecting a crankbait off hard cover to trigger strikes.",
+            "difficulty": 3,
+            "unlockAtLevel": 6,
+            "requires": { "family": "crank_swim", "baits": ["micro_squarebill_1_0"] },
+            "techniques": ["cover_deflect", "cast_overhead"],
+            "params": { "rounds": 3, "castsPerRound": 10, "obstacle": "rock_pile", "distance_m": 12 },
+            "metrics": ["deflection_quality", "re-engagement_time_s", "accuracy"],
+            "scoring": { "weights": { "deflection_quality": 0.5, "re-engagement_time_s": 0.3, "accuracy": 0.2 } },
+            "recommendedConditions": [{ "label": "Windy points", "windKph": ">=10", "body": "lake" }],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Deflecting a crankbait off cover creates an erratic action that mimics fleeing prey.",
+                "A quick re-engagement of the lure's wobble after deflection is key.",
+                "Bream often strike the moment the lure changes direction."
+              ],
+              "possibleStrategies": [
+                "Aim to hit the edge of the cover, not the center.",
+                "Pause for a split second after impact, then resume your retrieve.",
+                "Use a rod with a softer tip to absorb the shock and prevent the lure from snagging."
+              ],
+              "insights": [
+                "High scores are achieved with a clean 'tick' and immediate wobble restart.",
+                "Most snags occur when retrieving too fast into the cover.",
+                "A re-engagement time under 1 second dramatically increases strike potential."
+              ]
+            }
+          },
+          {
+            "drillKey": "bream_swimbait_stop_go_v1",
+            "name": "Swimbait Stop & Go",
+            "learningOutcome": "Using a stop-and-go retrieve with a swimbait to convert following fish.",
+            "difficulty": 2,
+            "unlockAtLevel": 6,
+            "requires": { "family": "crank_swim", "baits": ["micro_swimbait_2_5in"] },
+            "techniques": ["stop_go", "depth_track"],
+            "params": { "rounds": 3, "castsPerRound": 8, "run_duration_s": 5, "pause_duration_s": 2 },
+            "metrics": ["rhythm_consistency", "depth_on_pause", "bite_detection"],
+            "scoring": { "weights": { "rhythm_consistency": 0.4, "depth_on_pause": 0.4, "bite_detection": 0.2 } },
+            "recommendedConditions": [{ "label": "Clear water flats", "cloudPct": "<=50", "windKph": "<=10" }],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "The pause allows curious bream that are following the swimbait to catch up and strike.",
+                "Maintaining depth during the pause is crucial; the lure shouldn't sink out of sight.",
+                "Bites often come as the lure starts moving again."
+              ],
+              "possibleStrategies": [
+                "Reel for a count of 5, then pause for a count of 2.",
+                "During the pause, slightly lift your rod tip to prevent the swimbait from sinking too fast.",
+                "Watch your line for any jumps or ticks during the pause."
+              ],
+              "insights": [
+                "Consistent rhythm is more important than a fast retrieve.",
+                "Most bites are detected within the first second after the pause.",
+                "Scores improve when the swimbait stays within 1 foot of its running depth during the pause."
+              ]
+            }
+          },
+          {
+            "drillKey": "bream_shallow_waking_v1",
+            "name": "Shallow Water Wake",
+            "learningOutcome": "Creating a surface 'wake' with a shallow crankbait to attract aggressive surface-feeding bream.",
+            "difficulty": 2,
+            "unlockAtLevel": 7,
+            "requires": { "family": "crank_swim", "baits": ["micro_squarebill_1_0"] },
+            "techniques": ["retrieve_control", "depth_track"],
+            "params": { "rounds": 3, "castsPerRound": 10, "target_depth_m": 0.2, "wake_consistency_pct": 80 },
+            "metrics": ["wake_uptime_pct", "speed_consistency", "accuracy"],
+            "scoring": { "weights": { "wake_uptime_pct": 0.6, "speed_consistency": 0.3, "accuracy": 0.1 } },
+            "recommendedConditions": [{ "label": "Calm mornings/evenings", "windKph": "<=8", "daypart": "morning|evening" }],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "A 'waking' lure imitates a struggling baitfish on the surface, a can't-miss meal for bream.",
+                "The key is to retrieve just fast enough to create a V-shaped wake without the lure diving.",
+                "Strikes are often explosive and visual."
+              ],
+              "possibleStrategies": [
+                "Hold your rod tip high (at a 45-degree angle or more) to keep the lure up.",
+                "Use a slow, steady retrieve speed. Find the 'sweet spot' where the wake forms.",
+                "Cast past your target and begin the waking retrieve as it enters the strike zone."
+              ],
+              "insights": [
+                "Maintaining a consistent wake for over 80% of the retrieve is the goal.",
+                "If the lure dives, you're reeling too fast. If there's no wake, you're too slow.",
+                "This technique is most effective over submerged vegetation or shallow flats."
+              ]
+            }
+          },
+          {
+            "drillKey": "bream_deep_countdown_v1",
+            "name": "Deep Water Countdown",
+            "learningOutcome": "Letting a swimbait sink to a specific depth before retrieving to target suspended bream.",
+            "difficulty": 3,
+            "unlockAtLevel": 8,
+            "requires": { "family": "crank_swim", "baits": ["micro_swimbait_2_5in"] },
+            "techniques": ["depth_track", "cast_overhead"],
+            "params": { "rounds": 3, "castsPerRound": 8, "target_depth_m": 3, "sink_rate_s_per_m": 3 },
+            "metrics": ["depth_accuracy_m", "countdown_consistency", "bite_detection_on_fall"],
+            "scoring": { "weights": { "depth_accuracy_m": 0.5, "countdown_consistency": 0.3, "bite_detection_on_fall": 0.2 } },
+            "recommendedConditions": [{ "label": "Hot, sunny days", "season": "hot", "cloudPct": "<=30" }],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "On hot days, bream often suspend in deeper, cooler water.",
+                "Knowing your lure's sink rate allows you to consistently target the right depth.",
+                "Many bites occur as the lure falls, so watch your line."
+              ],
+              "possibleStrategies": [
+                "After casting, count 'one-one-thousand, two-one-thousand...' until you reach the target count.",
+                "Keep a semi-slack line as the lure falls, watching for any ticks or jumps.",
+                "Once at depth, use a slow, steady retrieve to keep the lure in the strike zone."
+              ],
+              "insights": [
+                "A consistent countdown is more important than guessing.",
+                "Practice in clear water to visually confirm your lure's sink rate.",
+                "Most fall-bites are subtle; if your line stops sinking early, set the hook."
+              ]
+            }
+          },
+          {
+            "drillKey": "bream_current_seam_swing_v1",
+            "name": "Current Seam Swing",
+            "learningOutcome": "Using river current to 'swing' a crankbait naturally through a feeding lane.",
+            "difficulty": 4,
+            "unlockAtLevel": 9,
+            "requires": { "family": "crank_swim", "baits": ["micro_squarebill_1_0"] },
+            "techniques": ["cast_overhead", "depth_track"],
+            "params": { "rounds": 3, "castsPerRound": 10, "target": "current_seam", "swing_arc_degrees": 45 },
+            "metrics": ["seam_entry_accuracy", "swing_speed_consistency", "natural_drift_pct"],
+            "scoring": { "weights": { "natural_drift_pct": 0.5, "seam_entry_accuracy": 0.3, "swing_speed_consistency": 0.2 } },
+            "recommendedConditions": [{ "label": "Moderate river flow", "body": "river" }],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Bream sit on the edge of currents, waiting for food to drift by.",
+                "A natural swing presents the lure as if it's being carried by the current.",
+                "The strike often comes at the end of the swing, as the lure starts to rise."
+              ],
+              "possibleStrategies": [
+                "Cast across the current, upstream of your target area.",
+                "Let the current do the work, reeling just enough to keep the lure wobbling.",
+                "As the lure swings across the current, slowly lower your rod tip to maintain depth."
+              ],
+              "insights": [
+                "The best swing speed matches the speed of the surrounding current.",
+                "Avoid reeling too fast, which makes the presentation look unnatural.",
+                "A clean entry into the seam is critical for setting up a successful swing."
               ]
             }
           }
