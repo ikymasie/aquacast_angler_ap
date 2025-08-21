@@ -50,15 +50,7 @@ const analyzePhotoFlow = ai.defineFlow(
         outputSchema: PhotoAnalysisOutputSchema,
     },
     async (input) => {
-        // For demonstration, we'll return a static response.
-        // In a real scenario, you would call the prompt.
-        // const { output } = await prompt(input);
-        // return output!;
-
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
-
-        return {
-            analysis: "This appears to be a healthy Bream, known for putting up a great fight on light tackle. Nice catch!",
-        };
+        const { output } = await prompt(input);
+        return output!;
     }
 );
