@@ -76,8 +76,10 @@ export default {
         'ink-300': '#A0A4A8',
         'line-200': '#E6E9EE',
         'line-300': '#D6DAE1',
+        'brand-deep-teal': '#0E6B64',
+        'brand-accent-orange': '#F37E2C',
         'score-good': '#27AE60',
-        fair: 'hsl(var(--fair))',
+        'fair': 'hsl(var(--fair))',
         'score-poor': '#EB5757',
         'score-bad': 'hsl(var(--score-bad))',
         'score-fair': 'hsl(var(--score-fair))',
@@ -92,10 +94,12 @@ export default {
         'md': '0.75rem', // 12px
         'sm': 'calc(var(--radius) - 4px)',
         'full': '999px',
+        'onboarding': '14px',
       },
       boxShadow: {
         'card': '0 8px 24px rgba(28,31,40,0.08)',
         'floating': '0 12px 32px rgba(28,31,40,0.14)',
+        'onboarding-cta': '0 8px 24px rgba(28,31,40,0.12)',
       },
       keyframes: {
         'accordion-down': {
@@ -123,5 +127,3 @@ export default {
   },
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
-
-    

@@ -14,23 +14,22 @@ import { getCachedWeatherData } from '@/services/weather/client';
 import { ConditionsPanel } from '@/components/conditions-panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/hooks/use-user';
-import { UserAuthDialog } from '@/components/user-auth-dialog';
 import { useRouter } from 'next/navigation';
 
 function AppContent() {
   const { user, isInitialized, isLoading } = useUser();
-  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("recents");
   const [location, setLocation] = useState<Location | null>(null);
   const [weather, setWeather] = useState<WeatherApiResponse | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(true);
 
   useEffect(() => {
-    // Open the dialog if initialization is complete but there's no user.
-    if (isInitialized && !user && !isLoading) {
-      setIsAuthDialogOpen(true);
+    // If initialization is complete and there's no user, redirect to the welcome page.
+    if (isInitialized && !user) {
+      router.replace('/welcome');
     }
-  }, [isInitialized, user, isLoading]);
+  }, [isInitialized, user, router]);
 
 
   useEffect(() => {
@@ -84,23 +83,13 @@ function AppContent() {
     }
   }, [location]);
 
-  if (!isInitialized) {
+  if (!isInitialized || !user) {
     return (
       <div className="flex flex-col min-h-screen bg-background items-center justify-center">
         <Skeleton className="h-screen w-screen" />
       </div>
     );
   }
-
-  if (!user) {
-    return (
-       <div className="flex flex-col min-h-screen bg-background items-center justify-center">
-        <UserAuthDialog isOpen={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
-        <Skeleton className="h-screen w-screen" />
-      </div>
-    )
-  }
-
 
   return (
     <div className="flex flex-col min-h-screen bg-background">

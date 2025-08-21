@@ -22,10 +22,14 @@ interface UserAuthDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// NOTE: This component is currently not used in the new /welcome onboarding flow,
+// but is being kept in case it's needed for other purposes, like editing a user profile.
+// The main registration flow is now at /auth/create.
+
 export function UserAuthDialog({ isOpen, onOpenChange }: UserAuthDialogProps) {
-  const { createAndSignInUser } = useUser();
+  const { createAndSignInUser, user } = useUser();
   const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState('');
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -55,16 +59,17 @@ export function UserAuthDialog({ isOpen, onOpenChange }: UserAuthDialogProps) {
   };
 
   const handleInteractOutside = (e: Event) => {
-    e.preventDefault();
+    // Prevent closing the dialog by clicking outside if it's essential.
+    // e.preventDefault();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent onInteractOutside={handleInteractOutside} hideCloseButton={true} className="sm:max-w-[425px]">
+      <DialogContent onInteractOutside={handleInteractOutside} className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Welcome to AquaCast</DialogTitle>
+          <DialogTitle>Complete Your Profile</DialogTitle>
           <DialogDescription>
-            Create an account to get personalized forecasts.
+            Set your display name to personalize your experience.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -88,29 +93,16 @@ export function UserAuthDialog({ isOpen, onOpenChange }: UserAuthDialogProps) {
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              readOnly
+              disabled
               className="col-span-3"
-              placeholder="you@example.com"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phone" className="text-right">
-              Phone
-            </Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="col-span-3"
-              placeholder="+1 555-123-4567"
             />
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSubmit} disabled={isPending || !isFormValid} className="w-full">
+          <Button onClick={handleSubmit} disabled={isPending || !displayName} className="w-full">
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Create Account & Sign In
+            Save Profile
           </Button>
         </DialogFooter>
       </DialogContent>
