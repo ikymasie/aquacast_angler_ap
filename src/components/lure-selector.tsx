@@ -4,9 +4,10 @@
 import { Card } from "./ui/card";
 import { cn } from "@/lib/utils";
 import type { LureFamily } from "@/lib/types";
-
-// Placeholder icons, replace with actual icons later
-import { Target, Fish, Waves, Bot } from 'lucide-react';
+import { LureCrankSwimIcon } from './icons/lure-crank-swim';
+import { LureLiveIcon } from './icons/lure-live';
+import { LureSoftIcon } from './icons/lure-soft';
+import { LureSpinnerIcon } from './icons/lure-spinner';
 
 interface LureSelectorProps {
   selectedLure: LureFamily;
@@ -15,15 +16,15 @@ interface LureSelectorProps {
 }
 
 const lureOptions: { name: LureFamily; icon: React.FC<React.SVGProps<SVGSVGElement>> }[] = [
-    { name: 'Live', icon: Fish },
-    { name: 'Crank/Swim', icon: Waves },
-    { name: 'Spinner', icon: Target },
-    { name: 'Soft', icon: Bot },
+    { name: 'Live', icon: LureLiveIcon },
+    { name: 'Crank/Swim', icon: LureCrankSwimIcon },
+    { name: 'Spinner', icon: LureSpinnerIcon },
+    { name: 'Soft', icon: LureSoftIcon },
 ];
 
 export function LureSelector({ selectedLure, onLureSelect, disabled }: LureSelectorProps) {
   return (
-    <div className="grid grid-cols-4 gap-2 mt-4">
+    <div className="grid grid-cols-4 gap-2">
       {lureOptions.map(({ name, icon: Icon }) => (
         <Card
           key={name}
@@ -32,7 +33,7 @@ export function LureSelector({ selectedLure, onLureSelect, disabled }: LureSelec
             "p-3 rounded-lg text-center cursor-pointer transition-all duration-150",
             "border border-line-200 bg-white shadow-sm hover:shadow-md",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
-            selectedLure === name && "border-primary bg-primary/10",
+            selectedLure === name && "border-primary bg-primary/10 ring-2 ring-primary ring-offset-background",
             disabled && "opacity-50 cursor-not-allowed"
           )}
           role="button"

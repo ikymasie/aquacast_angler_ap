@@ -22,8 +22,9 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     const selectedDate = parseISO(date);
 
     // Find the daily data for the selected day from the 7-day forecast data
-    const dayIndex = weatherData.daily.findIndex(d => isSameDay(startOfDay(parseISO(d.sunrise)), startOfDay(selectedDate)));
+    const dayIndex = weatherData.daily.findIndex(d => new Date(d.sunrise).toDateString() === selectedDate.toDateString());
     const selectedDayData = weatherData.daily[dayIndex >= 0 ? dayIndex : 0];
+
 
     if (!selectedDayData) {
         return { data: null, error: "Could not retrieve daily forecast data for the selected date."};

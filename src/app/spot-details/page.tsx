@@ -5,10 +5,10 @@ import { Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { Header } from '@/components/header';
 import { SpotHeaderCard } from '@/components/spot-header-card';
 import { MapCard } from '@/components/map-card';
-import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, ScoredHour, LureFamily, CastingConditions } from '@/lib/types';
+import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, ScoredHour, LureFamily, DayContext } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
 import { getCachedWeatherData } from '@/services/weather/client';
-import { getFishingForecastAction } from '../actions';
+import { getFishingForecastAction, getCastingAdviceAction } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SpeciesSelector } from '@/components/species-selector';
 import { RecommendedTimeCard } from '@/components/recommended-time-card';
@@ -21,10 +21,18 @@ import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { CastingAdvisorPanel } from '@/components/casting-advisor-panel';
 import { QuickMetricsPanel } from '@/components/quick-metrics-panel';
+import { LureSelector } from '@/components/lure-selector';
+import type { CastingAdviceInput, CastingAdviceOutput } from '@/ai/flows/casting-advice-flow';
 
 // Find a spot by name, or return the first one as a fallback.
 function getSpotByName(name?: string | null) {
   if (!name) return allSpotsData[0];
+  // Handle user-added spots from localStorage
+  if (typeof window !== 'undefined') {
+      const userSpots = JSON.parse(localStorage.getItem('user-spots') || '[]');
+      const userSpot = userSpots.find((s: any) => s.name === name);
+      if (userSpot) return userSpot;
+  }
   const spot = allSpotsData.find(s => s.name === name);
   return spot || allSpotsData[0];
 }
@@ -44,17 +52,27 @@ export default function SpotDetailsPage() {
     const [forecastError, setForecastError] = useState<string | null>(null);
     
     // Casting advice state
-    const [castingConditions, setCastingConditions] = useState<CastingConditions | null>(null);
+    const [selectedLure, setSelectedLure] = useState<LureFamily>('Soft');
+    const [advice, setAdvice] = useState<CastingAdviceOutput | null>(null);
+    const [isAdviceLoading, setIsAdviceLoading] = useState(false);
     
     // General weather state
     const [weatherData, setWeatherData] = useState<WeatherApiResponse | null>(null);
     const [isWeatherLoading, setIsWeatherLoading] = useState(true);
 
-    const location = useMemo(() => ({
+    const location: Location = useMemo(() => ({
         name: spot.name,
         latitude: spot.coordinates.lat,
         longitude: spot.coordinates.lon,
     }), [spot]);
+
+    const dayContext: DayContext | undefined = useMemo(() => {
+        if (!weatherData) return undefined;
+        // Find the daily data for the selected day from the 7-day forecast data
+        const dayIndex = weatherData.daily.findIndex(d => new Date(d.sunrise).toDateString() === selectedDate.toDateString());
+        return weatherData.daily[dayIndex >= 0 ? dayIndex : 0];
+    }, [weatherData, selectedDate]);
+
 
     const loadForecast = useCallback(async (species: Species, date: Date, loc: Location) => {
         setIsForecastLoading(true);
@@ -82,7 +100,7 @@ export default function SpotDetailsPage() {
             setOverallDayScore(forecastResult.data.overallDayScore || null);
         } else {
             console.error("Forecast Error:", forecastResult.error);
-            setForecastError(forecastResult.error);
+            setForecastError(forecastResult.error ?? "Failed to load forecast.");
             // Clear previous results on error
             setRecommendedWindow(null);
             setThreeHourScores([]);
@@ -91,50 +109,53 @@ export default function SpotDetailsPage() {
         setIsForecastLoading(false);
     }, [weatherData?.hourly]);
 
+    const loadCastingAdvice = useCallback(async (lure: LureFamily) => {
+        if (!dayContext || !threeHourScores.length) return;
+
+        setIsAdviceLoading(true);
+        const payload: CastingAdviceInput = {
+            species: selectedSpecies,
+            location,
+            lureFamily: lure,
+            dayContext,
+            scoredHours: threeHourScores,
+        };
+        const result = await getCastingAdviceAction(payload);
+        if (result.data) {
+            setAdvice(result.data);
+        } else {
+            console.error("Advice Error:", result.error);
+            setAdvice(null);
+        }
+        setIsAdviceLoading(false);
+    }, [dayContext, threeHourScores, selectedSpecies, location]);
+
+
     // Initial weather data fetch
     useEffect(() => {
         async function loadWeather() {
             setIsWeatherLoading(true);
             const weather = await getCachedWeatherData(location);
             setWeatherData(weather);
-
-            // Set casting conditions from the most recent weather data
-            if (weather && weather.hourly.length > 0 && weather.recent) {
-                 const nowHour = weather.hourly.find(h => isFuture(new Date(h.t))) || weather.hourly[0];
-                 const hourOfDay = getHours(new Date(nowHour.t));
-                 
-                 let daypart: CastingConditions['daypart'] = 'midday';
-                 if (hourOfDay >= 5 && hourOfDay < 12) daypart = 'morning';
-                 else if (hourOfDay >= 12 && hourOfDay < 17) daypart = 'midday';
-                 else if (hourOfDay >= 17 && hourOfDay < 21) daypart = 'evening';
-                 else daypart = 'night';
-
-                 setCastingConditions({
-                     windKph: nowHour.windKph,
-                     windDirDeg: nowHour.windDeg,
-                     cloudPct: nowHour.cloudPct,
-                     pressureTrendHpaPer3h: nowHour.derived.pressureTrend3h,
-                     rainMm24h: 0, // This needs to be calculated properly if available
-                     waterLevel: 'stable', // Placeholder
-                     body: spot.waterbody_type.includes('river') ? 'river' : 'lake',
-                     season: new Date().getMonth() > 3 && new Date().getMonth() < 10 ? 'hot' : 'cool',
-                     daypart: daypart,
-                     stability72h: weather.recent.stdTempPressure < 1.0 ? 'low' : weather.recent.stdTempPressure < 2.0 ? 'medium' : 'high',
-                 });
-            }
             setIsWeatherLoading(false);
         }
         loadWeather();
-    }, [location, spot.waterbody_type]);
+    }, [location]);
 
     // Subsequent forecast calculation when dependencies change
     useEffect(() => {
-        // This effect runs when the initial weather data is loaded,
-        // or when the user changes the species or date.
         if (weatherData && !isWeatherLoading) {
             loadForecast(selectedSpecies, selectedDate, location);
         }
     }, [weatherData, isWeatherLoading, selectedSpecies, selectedDate, location, loadForecast]);
+
+    // Load casting advice when its dependencies are ready
+    useEffect(() => {
+        if (!isForecastLoading && threeHourScores.length > 0) {
+            loadCastingAdvice(selectedLure);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isForecastLoading, threeHourScores, selectedLure]); // only re-run when forecast is loaded or lure changes
 
 
      const mapThumbnails = [
@@ -169,7 +190,7 @@ export default function SpotDetailsPage() {
                         )}
                         
                         <SpeciesSelector 
-                           selectedSpecies={selectedSpecies}
+                           selectedSpecies={setSelectedSpecies}
                            onSelectSpecies={setSelectedSpecies}
                            disabled={isForecastLoading}
                         />
@@ -193,9 +214,9 @@ export default function SpotDetailsPage() {
                        <div className="pt-3 space-y-3">
                             {isWeatherLoading ? (
                                 <Skeleton className="h-20 w-full rounded-xl" />
-                            ) : weatherData ? (
+                            ) : weatherData && dayContext ? (
                                 <QuickMetricsPanel 
-                                    dayContext={weatherData.daily[0]}
+                                    dayContext={dayContext}
                                     recentWindow={weatherData.recent}
                                 />
                             ) : null}
@@ -209,10 +230,14 @@ export default function SpotDetailsPage() {
                     </TabsContent>
 
                      <TabsContent value="advisor" className="space-y-4 pt-4">
+                        <LureSelector 
+                            selectedLure={selectedLure}
+                            onLureSelect={setSelectedLure}
+                            disabled={isAdviceLoading || isForecastLoading}
+                        />
                         <CastingAdvisorPanel 
-                            isLoading={isWeatherLoading}
-                            conditions={castingConditions}
-                            species={selectedSpecies.toLowerCase() as any}
+                            isLoading={isAdviceLoading || isForecastLoading}
+                            advice={advice}
                         />
                     </TabsContent>
 
