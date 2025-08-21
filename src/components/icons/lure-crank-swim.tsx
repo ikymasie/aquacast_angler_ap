@@ -21,3 +21,5 @@ export function LureCrankSwimIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+    

@@ -20,10 +20,10 @@ interface TechniqueCardProps {
 }
 
 const lureIcons: Record<string, React.FC<any>> = {
-  'crank_swim': LureCrankSwimIcon,
-  live: LureLiveIcon,
-  soft: LureSoftIcon,
-  spinner: LureSpinnerIcon,
+  'Crank/Swim': LureCrankSwimIcon,
+  'Live': LureLiveIcon,
+  'Soft': LureSoftIcon,
+  'Spinner': LureSpinnerIcon,
 };
 
 const skillIcons: Record<string, React.ElementType> = {
@@ -38,8 +38,7 @@ const skillIcons: Record<string, React.ElementType> = {
 export function TechniqueCard({ technique }: TechniqueCardProps) {
 
   const getLureIcon = (lureFamily: string) => {
-    const key = lureFamily.toLowerCase();
-    return lureIcons[key] || LureSoftIcon;
+    return lureIcons[lureFamily] || LureSoftIcon;
   };
 
   const getSkillIcon = (skill: string) => {
