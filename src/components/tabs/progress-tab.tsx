@@ -8,7 +8,6 @@ import { DrillCard } from '@/components/drill-card';
 import { SpeciesSelector } from '@/components/species-selector';
 import type { Species, LureFamily } from '@/lib/types';
 import { LureSelector } from '@/components/lure-selector';
-import { SessionHeader } from '@/components/practice/session-header';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SessionSetupSheet } from '@/components/practice/session-setup-sheet';
@@ -18,6 +17,8 @@ import { startPracticeSessionAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { usePracticeState } from '@/hooks/use-practice-state';
 import { RankBanner } from '../progress/rank-banner';
+import { WeeklyOverviewCard } from '../progress/weekly-overview-card';
+import { SkillWheel } from '../progress/skill-wheel';
 
 export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetails?: boolean }) {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
@@ -106,7 +107,9 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
 
   const MainContent = () => (
     <div className="space-y-6">
-      <RankBanner />
+      {!isInsideSpotDetails && <RankBanner />}
+      <WeeklyOverviewCard />
+      <SkillWheel />
       
       <div className={cn(!isInsideSpotDetails && "sticky top-[56px] z-10 bg-background/95 backdrop-blur-sm py-4 -mx-4 px-4 border-b")}>
           <div className="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
