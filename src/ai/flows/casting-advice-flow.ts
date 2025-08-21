@@ -28,9 +28,10 @@ const CastingAdviceOutputSchema = z.object({
         summary: z.string().describe("A 2-3 sentence summary of where to cast, considering the species and conditions."),
         ranked_spots: z.array(z.object({
             name: z.string().describe("Name of the structure or spot type (e.g., 'Drop-offs', 'Weed Beds')."),
+            score: z.number().min(0).max(100).describe("A 0-100 score for how good this spot is right now."),
             reasoning: z.string().describe("Brief (1 sentence) reasoning for why this spot is good now."),
             status: z.custom<ScoreStatus>().describe("The current fishing status for this spot type."),
-        })).describe("A ranked list of 2-3 specific structure types to target."),
+        })).describe("A ranked list of up to 6 specific structure types to target."),
     }),
     how_to_fish: z.object({
         recommendation: z.string().describe("A 2-3 sentence recommendation for lure presentation and retrieval style."),
@@ -73,7 +74,7 @@ const prompt = ai.definePrompt({
         **Your Task:**
         Generate advice based *only* on the data provided. Be concise and direct.
 
-        1.  **Where to Cast:** Analyze the conditions and species. Suggest 2-3 specific types of structures or areas to target. For each, provide a brief reasoning and a status (e.g., Prime, Good, Fair).
+        1.  **Where to Cast:** Analyze the conditions and species. Suggest up to 6 specific types of structures or areas to target. For each, provide a brief reasoning, a numeric score (0-100), and a status (e.g., Prime, Good, Fair).
         2.  **How to Fish:** Based on the selected lure family ({{{lureFamily}}}), provide a specific recommendation for presentation or retrieval.
         3.  **When to Fish:** Look at the forecast scores and identify the most promising time block. Summarize this with a brief reason.
     `,

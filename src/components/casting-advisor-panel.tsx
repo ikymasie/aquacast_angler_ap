@@ -4,19 +4,60 @@
 import React from 'react';
 import type { ScoreStatus } from "@/lib/types";
 import type { CastingAdviceOutput } from '@/ai/flows/casting-advice-flow';
-import { Card, CardContent, CardHeader } from "./ui/card";
+import { Card } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from '@/lib/utils';
-import { MapPin, Wind, Clock } from 'lucide-react';
+import { SpotBankIcon } from './icons/spot-bank';
+import { SpotCoverIcon } from './icons/spot-cover';
+import { SpotDropOffIcon } from './icons/spot-drop-off';
+import { SpotFlatIcon } from './icons/spot-flat';
+import { SpotInflowIcon } from './icons/spot-inflow';
+import { SpotPointIcon } from './icons/spot-point';
+
+const SPOT_ICONS: Record<string, React.FC<any>> = {
+    "Drop-offs": SpotDropOffIcon,
+    "Weed Beds": SpotFlatIcon,
+    "Windward Bank": SpotBankIcon,
+    "Points": SpotPointIcon,
+    "Sunken Cover": SpotCoverIcon,
+    "Creek Mouths": SpotInflowIcon,
+    "default": SpotBankIcon,
+};
+
+const getIconForSpot = (spotName: string): React.FC<any> => {
+    const keywords: Record<string, React.FC<any>> = {
+        "drop-off": SpotDropOffIcon,
+        "flat": SpotFlatIcon,
+        "weed": SpotFlatIcon,
+        "bank": SpotBankIcon,
+        "point": SpotPointIcon,
+        "cover": SpotCoverIcon,
+        "shade": SpotCoverIcon,
+        "inflow": SpotInflowIcon,
+        "creek": SpotInflowIcon,
+        "seam": SpotInflowIcon,
+        "structure": SpotCoverIcon,
+        "transition": SpotBankIcon,
+    };
+
+    const lowerCaseName = spotName.toLowerCase();
+    for (const keyword in keywords) {
+        if (lowerCaseName.includes(keyword)) {
+            return keywords[keyword];
+        }
+    }
+    return SPOT_ICONS["default"];
+};
+
 
 const statusColors: Record<ScoreStatus, string> = {
-    "Prime": "bg-score-prime text-white",
-    "Very Good": "bg-score-very-good text-white",
-    "Good": "bg-score-good text-white",
-    "Fair": "bg-score-fair text-black",
-    "Fair-Slow": "bg-score-fair-slow text-white",
-    "Poor": "bg-score-poor text-white",
-    "Very Poor": "bg-score-very-poor text-white",
+    "Prime": "text-score-prime",
+    "Very Good": "text-score-very-good",
+    "Good": "text-score-good",
+    "Fair": "text-score-fair",
+    "Fair-Slow": "text-score-fair-slow",
+    "Poor": "text-score-poor",
+    "Very Poor": "text-score-very-poor",
 };
 
 interface CastingAdvisorPanelProps {
@@ -38,32 +79,33 @@ export function CastingAdvisorPanel({ isLoading, advice }: CastingAdvisorPanelPr
         );
     }
 
-    const { where_to_cast, how_to_fish, when_to_fish } = advice;
+    const { where_to_cast, how_to_fish } = advice;
+
+    // Take the top 6 spots for the grid display
+    const topSpots = where_to_cast.ranked_spots.slice(0, 6);
 
     return (
-        <Card className="w-full rounded-xl shadow-card border-0 p-4 space-y-4">
+        <Card className="w-full rounded-xl shadow-card border-0 p-4 space-y-4 gradient-fishing-panel text-white">
             <div>
-                <h3 className="font-headline text-lg flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /> Where to Cast</h3>
-                <p className="text-muted-foreground text-sm mt-1">{where_to_cast.summary}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
-                    {where_to_cast.ranked_spots.map(spot => (
-                        <div key={spot.name} className={cn("p-2 rounded-lg text-sm", statusColors[spot.status])}>
-                            <p className="font-bold">{spot.name}</p>
-                            <p className="text-xs opacity-90">{spot.reasoning}</p>
-                        </div>
-                    ))}
+                <h3 className="font-headline text-lg">Where to Cast</h3>
+                <p className="text-white/80 text-sm mt-1">{where_to_cast.summary}</p>
+                <div className="grid grid-cols-3 gap-2 mt-3">
+                    {topSpots.map(spot => {
+                        const Icon = getIconForSpot(spot.name);
+                        return (
+                            <div key={spot.name} className="bg-white/15 rounded-lg p-2 text-center flex flex-col items-center justify-center aspect-square">
+                                <Icon className="w-6 h-6 text-white/90" />
+                                <span className="font-headline font-bold text-xl mt-1">{spot.score}</span>
+                                <span className="text-[11px] leading-tight font-medium text-white/80">{spot.name}</span>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
-            <div className="border-t pt-4">
-                <h3 className="font-headline text-lg flex items-center gap-2"><Wind className="w-5 h-5 text-primary" /> How to Fish</h3>
-                <p className="text-muted-foreground text-sm mt-1">{how_to_fish.recommendation}</p>
-            </div>
-            
-            <div className="border-t pt-4">
-                <h3 className="font-headline text-lg flex items-center gap-2"><Clock className="w-5 h-5 text-primary" /> When to Fish</h3>
-                <p className="text-muted-foreground text-sm mt-1">{when_to_fish.timing_recommendation}</p>
-                 <p className="text-muted-foreground text-xs mt-1 italic">{when_to_fish.reasoning}</p>
+            <div className="border-t border-white/20 pt-4">
+                <h3 className="font-headline text-lg">How to Fish</h3>
+                <p className="text-white/80 text-sm mt-1">{how_to_fish.recommendation}</p>
             </div>
         </Card>
     );
@@ -77,10 +119,14 @@ function CastingAdvisorSkeleton() {
                  <Skeleton className="h-6 w-1/2" />
                  <Skeleton className="h-4 w-full" />
                  <Skeleton className="h-4 w-3/4" />
-             </div>
-              <div className="space-y-2 pt-4 border-t">
-                 <Skeleton className="h-6 w-1/2" />
-                 <Skeleton className="h-4 w-full" />
+                 <div className="grid grid-cols-3 gap-2 pt-2">
+                    <Skeleton className="w-full aspect-square rounded-lg" />
+                    <Skeleton className="w-full aspect-square rounded-lg" />
+                    <Skeleton className="w-full aspect-square rounded-lg" />
+                    <Skeleton className="w-full aspect-square rounded-lg" />
+                    <Skeleton className="w-full aspect-square rounded-lg" />
+                    <Skeleton className="w-full aspect-square rounded-lg" />
+                 </div>
              </div>
               <div className="space-y-2 pt-4 border-t">
                  <Skeleton className="h-6 w-1/2" />
