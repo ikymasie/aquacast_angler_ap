@@ -192,12 +192,6 @@ export default function SpotDetailsPage() {
                             />
                         )}
                         
-                        <SpeciesSelector 
-                           selectedSpecies={selectedSpecies}
-                           onSelectSpecies={setSelectedSpecies}
-                           disabled={isForecastLoading}
-                        />
-
                         {isForecastLoading ? (
                            <Skeleton className="h-[180px] w-full rounded-xl" />
                         ) : forecastError ? (
@@ -213,6 +207,12 @@ export default function SpotDetailsPage() {
                                intervals={threeHourScores}
                            />
                         )}
+                        
+                        <SpeciesSelector 
+                           selectedSpecies={selectedSpecies}
+                           onSelectSpecies={setSelectedSpecies}
+                           disabled={isForecastLoading}
+                        />
 
                        <div className="pt-3 space-y-3">
                             {isWeatherLoading ? (
@@ -256,5 +256,3 @@ export default function SpotDetailsPage() {
     </div>
   );
 }
-
-    
