@@ -15,7 +15,7 @@ import { SpotInflowIcon } from './icons/spot-inflow';
 import { SpotPointIcon } from './icons/spot-point';
 import { Fish } from 'lucide-react';
 
-const getIconForSpot = (spotName: string): React.FC<any> => {
+export const getIconForSpot = (spotName: string): React.FC<any> => {
     const keywords: Record<string, React.FC<any>> = {
         "drop-off": SpotDropOffIcon,
         "flat": SpotFlatIcon,
