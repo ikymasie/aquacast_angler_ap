@@ -5,7 +5,7 @@ import { Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { Header } from '@/components/header';
 import { SpotHeaderCard } from '@/components/spot-header-card';
 import { MapCard } from '@/components/map-card';
-import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, HourlyForecastData } from '@/lib/types';
+import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, ScoredHour } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
 import { getCachedWeatherData } from '@/services/weather/client';
 import { getFishingForecastAction } from '../actions';
@@ -13,11 +13,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SpeciesSelector } from '@/components/species-selector';
 import { RecommendedTimeCard } from '@/components/recommended-time-card';
 import { DaySelector } from '@/components/day-selector';
-import { format, startOfToday } from 'date-fns';
+import { startOfToday, isFuture } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DaypartScorePanel } from '@/components/daypart-score-panel';
 import { recommendWindows } from '@/lib/scoring';
-import { ScoredHour } from '@/lib/types';
+import { useSearchParams } from 'next/navigation';
 
 // Find a spot by name, or return the first one as a fallback.
 function getSpotByName(name?: string | null) {
@@ -27,15 +27,18 @@ function getSpotByName(name?: string | null) {
 }
 
 export default function SpotDetailsPage() {
-    const [spot, setSpot] = useState(getSpotByName()); // Example spot
+    const searchParams = useSearchParams();
+    const spotName = searchParams.get('name');
+    const [spot, setSpot] = useState(() => getSpotByName(spotName));
     const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
     const [weatherData, setWeatherData] = useState<WeatherApiResponse | null>(null);
     const [recommendedWindow, setRecommendedWindow] = useState<RecommendedWindow | null>(null);
-    const [threeHourScores, setThreeHourScores] = useState<ThreeHourIntervalScore[] | null>(null);
+    const [threeHourScores, setThreeHourScores] = useState<ThreeHourIntervalScore[]>([]);
     const [overallDayScore, setOverallDayScore] = useState<OverallDayScore | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isWeatherLoading, setIsWeatherLoading] = useState(true);
     const [isForecastLoading, setIsForecastLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState(startOfToday());
+    const [forecastError, setForecastError] = useState<string | null>(null);
 
     const location = useMemo(() => ({
         name: spot.name,
@@ -43,61 +46,57 @@ export default function SpotDetailsPage() {
         longitude: spot.coordinates.lon,
     }), [spot.name, spot.coordinates.lat, spot.coordinates.lon]);
 
+    const loadForecast = useCallback(async (species: Species, date: Date, loc: Location) => {
+        setIsForecastLoading(true);
+        setForecastError(null);
+        
+        const forecastResult = await getFishingForecastAction({
+            species: species,
+            location: loc,
+            date: date.toISOString(),
+        });
+
+        if (forecastResult.data) {
+            const allScoredHours: ScoredHour[] = (weatherData?.hourly || []).map((h, i) => ({
+                time: h.t,
+                score: forecastResult.data.hourlyChartData[i]?.success || 0,
+                condition: forecastResult.data.hourlyChartData[i]?.condition || 'Clear',
+                temperature: forecastResult.data.hourlyChartData[i]?.temperature || 0
+            }));
+
+            const futureScoredHours = allScoredHours.filter(h => isFuture(new Date(h.time)));
+            
+            const recWindow = await recommendWindows(futureScoredHours);
+            setRecommendedWindow(recWindow);
+            setThreeHourScores(forecastResult.data.threeHourScores || []);
+            setOverallDayScore(forecastResult.data.overallDayScore || null);
+        } else {
+            console.error("Forecast Error:", forecastResult.error);
+            setForecastError(forecastResult.error);
+            setRecommendedWindow(null);
+            setThreeHourScores([]);
+            setOverallDayScore(null);
+        }
+        setIsForecastLoading(false);
+    }, [weatherData?.hourly]);
+    
+    // Initial weather data fetch
     useEffect(() => {
         async function loadWeather() {
-            setIsLoading(true);
+            setIsWeatherLoading(true);
             const weather = await getCachedWeatherData(location);
             setWeatherData(weather);
-            setIsLoading(false);
+            setIsWeatherLoading(false);
         }
         loadWeather();
     }, [location]);
 
+    // Subsequent forecast calculation when dependencies change
     useEffect(() => {
-        async function loadForecast() {
-            if (!weatherData) return;
-            setIsForecastLoading(true);
-            const forecastResult = await getFishingForecastAction({
-                species: selectedSpecies,
-                location: location,
-                date: selectedDate.toISOString(),
-            });
-
-            if (forecastResult.data) {
-                 // We need to calculate the recommended window on the client from hourly data
-                const scoredHours: ScoredHour[] = forecastResult.data.hourlyChartData.map((h: any) => ({
-                    time: h.time, // This is just a label 'ha', need full date for recommendWindows
-                    score: h.success,
-                    condition: h.condition,
-                    temperature: h.temperature,
-                }));
-                
-                // The above mapping is problematic. recommendWindows needs full date strings.
-                // Let's assume for now the server action will provide what's needed or we get it from weatherData
-                const now = new Date();
-                const detailedScoredHours = weatherData.hourly
-                    .filter(h => new Date(h.t) >= now) // Only future hours
-                    .map((h, index) => ({
-                        time: h.t,
-                        score: forecastResult.data?.hourlyChartData[index]?.success || 0,
-                        condition: forecastResult.data?.hourlyChartData[index]?.condition || 'Clear',
-                        temperature: forecastResult.data?.hourlyChartData[index]?.temperature || 0,
-                    }));
-
-                const recWindow = await recommendWindows(detailedScoredHours);
-                setRecommendedWindow(recWindow);
-
-                setThreeHourScores(forecastResult.data.threeHourScores || null);
-                setOverallDayScore(forecastResult.data.overallDayScore || null);
-            } else {
-                setRecommendedWindow(null);
-                setThreeHourScores(null);
-                setOverallDayScore(null);
-            }
-            setIsForecastLoading(false);
+        if (weatherData && !isWeatherLoading) {
+            loadForecast(selectedSpecies, selectedDate, location);
         }
-        loadForecast();
-    }, [location, selectedSpecies, weatherData, selectedDate]);
+    }, [weatherData, isWeatherLoading, selectedSpecies, selectedDate, location, loadForecast]);
 
 
      const mapThumbnails = [
@@ -121,7 +120,7 @@ export default function SpotDetailsPage() {
                         <TabsTrigger value="map">Map</TabsTrigger>
                     </TabsList>
                     <TabsContent value="forecast" className="space-y-4 pt-4">
-                        {isLoading || !weatherData ? (
+                        {isWeatherLoading || !weatherData ? (
                             <Skeleton className="h-12 w-full" />
                         ) : (
                             <DaySelector 
@@ -131,29 +130,35 @@ export default function SpotDetailsPage() {
                             />
                         )}
 
-                        {isForecastLoading || !threeHourScores || !overallDayScore ? (
+                        <SpeciesSelector 
+                           selectedSpecies={selectedSpecies}
+                           onSelectSpecies={setSelectedSpecies}
+                           disabled={isForecastLoading}
+                        />
+
+                        {isForecastLoading ? (
                            <Skeleton className="h-[180px] w-full rounded-xl" />
+                        ) : forecastError ? (
+                           <Card className="h-[180px] w-full rounded-xl bg-destructive/10 border-destructive/50 flex items-center justify-center p-4">
+                               <p className="text-center text-destructive-foreground">{forecastError}</p>
+                           </Card>
                         ) : (
                            <DaypartScorePanel
                                speciesKey={selectedSpecies.toLowerCase() as any}
                                spotName={spot.name}
-                               dayAvgScore={overallDayScore.dayAvgScore}
-                               dayStatus={overallDayScore.dayStatus}
+                               dayAvgScore={overallDayScore?.dayAvgScore ?? 0}
+                               dayStatus={overallDayScore?.dayStatus ?? 'Poor'}
                                intervals={threeHourScores}
                            />
                         )}
 
                        <div className="pt-3 space-y-3">
-                           <SpeciesSelector 
-                               selectedSpecies={selectedSpecies}
-                               onSelectSpecies={setSelectedSpecies}
-                               disabled={isForecastLoading}
-                           />
-                            {isForecastLoading || !recommendedWindow ? (
+                           
+                            {isForecastLoading ? (
                                 <Skeleton className="h-[88px] w-full rounded-xl" />
-                            ) : (
+                            ) : recommendedWindow ? (
                                 <RecommendedTimeCard window={recommendedWindow} />
-                            )}
+                            ) : null }
                        </div>
                     </TabsContent>
                     <TabsContent value="map" className="pt-4">

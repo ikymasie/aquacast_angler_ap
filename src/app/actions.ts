@@ -4,7 +4,7 @@
 import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
-import { format, parseISO, startOfDay, endOfDay, isWithinInterval } from "date-fns";
+import { format, parseISO, startOfDay, endOfDay, isWithinInterval, isToday, isFuture } from "date-fns";
 
 interface GetScoreActionPayload {
   species: Species;
@@ -17,32 +17,41 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     const { species, location, date } = payload;
     const weatherData = await fetchWeatherData(location);
 
-    const selectedDay = startOfDay(parseISO(date));
+    const selectedDate = parseISO(date);
+    const selectedDayStart = startOfDay(selectedDate);
 
     // Find the daily data for the selected day
-    const dayIndex = weatherData.daily.findIndex(d => startOfDay(parseISO(d.sunrise)) >= selectedDay);
+    const dayIndex = weatherData.daily.findIndex(d => startOfDay(parseISO(d.sunrise)) >= selectedDayStart);
     const selectedDayData = weatherData.daily[dayIndex >= 0 ? dayIndex : 0];
 
     if (!selectedDayData) {
         return { data: null, error: "Could not retrieve daily forecast data for the selected date."};
     }
 
-    // Filter hourly data for the selected 24-hour period
-    const dayStart = startOfDay(selectedDay);
-    const dayEnd = endOfDay(selectedDay);
+    let hoursForDay: any[];
 
-    let hoursForDay = weatherData.hourly.filter(h => 
-        isWithinInterval(parseISO(h.t), { start: dayStart, end: dayEnd })
-    );
-
-    // If no hours are found for today, it might be because the API returned only future hours.
-    // In this case, we can use the start of the hourly forecast as our data.
-    if (hoursForDay.length === 0 && isWithinInterval(new Date(), { start: dayStart, end: dayEnd })) {
-        hoursForDay = weatherData.hourly;
+    if (isToday(selectedDate)) {
+        // For today, get all hours from now until the end of the day.
+        hoursForDay = weatherData.hourly.filter(h => {
+            const hourTime = parseISO(h.t);
+            return isFuture(hourTime) && isWithinInterval(hourTime, { start: new Date(), end: endOfDay(selectedDate) });
+        });
+        
+        // Fallback: If no future hours are left for today, just grab all available future hours.
+        if (hoursForDay.length === 0) {
+            hoursForDay = weatherData.hourly.filter(h => isFuture(parseISO(h.t)));
+        }
+    } else {
+        // For future dates, get all hours for that day.
+        const dayStart = startOfDay(selectedDate);
+        const dayEnd = endOfDay(selectedDate);
+        hoursForDay = weatherData.hourly.filter(h => 
+            isWithinInterval(parseISO(h.t), { start: dayStart, end: dayEnd })
+        );
     }
     
     if (hoursForDay.length === 0) {
-      return { data: null, error: "Could not retrieve future forecast data."};
+      return { data: null, error: "Not enough forecast data is available to create a forecast for the selected date."};
     }
 
     const scoredHours: ScoredHour[] = await Promise.all(hoursForDay.map(async (hour) => ({
