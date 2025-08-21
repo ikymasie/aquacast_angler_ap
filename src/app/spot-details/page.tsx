@@ -5,15 +5,15 @@ import { Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { Header } from '@/components/header';
 import { SpotHeaderCard } from '@/components/spot-header-card';
 import { MapCard } from '@/components/map-card';
-import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, ScoredHour, LureFamily } from '@/lib/types';
+import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, ScoredHour, LureFamily, CastingConditions } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
 import { getCachedWeatherData } from '@/services/weather/client';
-import { getFishingForecastAction, getCastingAdviceAction } from '../actions';
+import { getFishingForecastAction } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SpeciesSelector } from '@/components/species-selector';
 import { RecommendedTimeCard } from '@/components/recommended-time-card';
 import { DaySelector } from '@/components/day-selector';
-import { startOfToday, isFuture } from 'date-fns';
+import { startOfToday, isFuture, getHours } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DaypartScorePanel } from '@/components/daypart-score-panel';
 import { recommendWindows } from '@/lib/scoring';
@@ -44,9 +44,7 @@ export default function SpotDetailsPage() {
     const [forecastError, setForecastError] = useState<string | null>(null);
     
     // Casting advice state
-    const [selectedLure, setSelectedLure] = useState<LureFamily>('Live');
-    const [castingAdvice, setCastingAdvice] = useState<any>(null);
-    const [isAdviceLoading, setIsAdviceLoading] = useState(false);
+    const [castingConditions, setCastingConditions] = useState<CastingConditions | null>(null);
     
     // General weather state
     const [weatherData, setWeatherData] = useState<WeatherApiResponse | null>(null);
@@ -99,10 +97,35 @@ export default function SpotDetailsPage() {
             setIsWeatherLoading(true);
             const weather = await getCachedWeatherData(location);
             setWeatherData(weather);
+
+            // Set casting conditions from the most recent weather data
+            if (weather && weather.hourly.length > 0 && weather.recent) {
+                 const nowHour = weather.hourly.find(h => isFuture(new Date(h.t))) || weather.hourly[0];
+                 const hourOfDay = getHours(new Date(nowHour.t));
+                 
+                 let daypart: CastingConditions['daypart'] = 'midday';
+                 if (hourOfDay >= 5 && hourOfDay < 12) daypart = 'morning';
+                 else if (hourOfDay >= 12 && hourOfDay < 17) daypart = 'midday';
+                 else if (hourOfDay >= 17 && hourOfDay < 21) daypart = 'evening';
+                 else daypart = 'night';
+
+                 setCastingConditions({
+                     windKph: nowHour.windKph,
+                     windDirDeg: nowHour.windDeg,
+                     cloudPct: nowHour.cloudPct,
+                     pressureTrendHpaPer3h: nowHour.derived.pressureTrend3h,
+                     rainMm24h: 0, // This needs to be calculated properly if available
+                     waterLevel: 'stable', // Placeholder
+                     body: spot.waterbody_type.includes('river') ? 'river' : 'lake',
+                     season: new Date().getMonth() > 3 && new Date().getMonth() < 10 ? 'hot' : 'cool',
+                     daypart: daypart,
+                     stability72h: weather.recent.stdTempPressure < 1.0 ? 'low' : weather.recent.stdTempPressure < 2.0 ? 'medium' : 'high',
+                 });
+            }
             setIsWeatherLoading(false);
         }
         loadWeather();
-    }, [location]);
+    }, [location, spot.waterbody_type]);
 
     // Subsequent forecast calculation when dependencies change
     useEffect(() => {
@@ -113,27 +136,6 @@ export default function SpotDetailsPage() {
         }
     }, [weatherData, isWeatherLoading, selectedSpecies, selectedDate, location, loadForecast]);
 
-    // Fetch casting advice when species or lure selection changes
-    useEffect(() => {
-        if (weatherData && threeHourScores.length > 0) {
-            setIsAdviceLoading(true);
-            getCastingAdviceAction({
-                species: selectedSpecies,
-                location: location,
-                lureFamily: selectedLure,
-                dayContext: weatherData.daily[0], // Use today's context for advice
-                scoredHours: threeHourScores,
-            }).then(result => {
-                if(result.data) {
-                   setCastingAdvice(result.data);
-                } else {
-                   console.error("Casting advice error:", result.error);
-                   setCastingAdvice(null);
-                }
-                setIsAdviceLoading(false);
-            });
-        }
-    }, [selectedSpecies, selectedLure, location, weatherData, threeHourScores]);
 
      const mapThumbnails = [
         { id: 'map', imageUrl: 'https://placehold.co/100x100.png?text=Map', hint: 'map view' },
@@ -207,15 +209,11 @@ export default function SpotDetailsPage() {
                     </TabsContent>
 
                      <TabsContent value="advisor" className="space-y-4 pt-4">
-                        {isAdviceLoading || !castingAdvice ? (
-                            <Skeleton className="h-[400px] w-full rounded-xl" />
-                        ) : (
-                            <CastingAdvisorPanel
-                                advice={castingAdvice}
-                                selectedLure={selectedLure}
-                                onLureSelect={setSelectedLure}
-                            />
-                        )}
+                        <CastingAdvisorPanel 
+                            isLoading={isWeatherLoading}
+                            conditions={castingConditions}
+                            species={selectedSpecies.toLowerCase() as any}
+                        />
                     </TabsContent>
 
                     <TabsContent value="map" className="pt-4">

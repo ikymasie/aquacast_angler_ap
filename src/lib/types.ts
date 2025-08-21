@@ -1,6 +1,7 @@
 
 
 export type Species = 'Bream' | 'Bass' | 'Carp';
+export type LureFamily = 'Live' | 'Crank/Swim' | 'Spinner' | 'Soft';
 
 export interface Location {
   name: string;
@@ -91,6 +92,46 @@ export interface RecommendedWindow {
     start: string;
     end: string;
     avgScore: number;
+}
+
+// --- Casting Advisor Types ---
+
+export type SpotKey = 
+  | 'windward_bank' | 'windward_point' | 'shade_cover' | 'flats_weeds'
+  | 'inflow_creek' | 'transition_line' | 'current_seam' | 'behind_structure'
+  | 'drop_off' | 'thermocline';
+
+export interface CastingConditions {
+  windKph: number;
+  windDirDeg: number;
+  cloudPct: number;
+  pressureTrendHpaPer3h: number;
+  rainMm24h: number;
+  waterLevel: "rising" | "falling" | "stable";
+  body: "lake" | "river";
+  season: "cool" | "hot";
+  daypart: "morning" | "midday" | "afternoon" | "evening" | "night";
+  stability72h: "low" | "medium" | "high";
+}
+
+export interface RankedSpot {
+    spotKey: SpotKey;
+    label: string;
+    score: number;
+    band: ScoreStatus;
+    primaryLure: LureFamily;
+    altLure?: LureFamily;
+    reasons: string[];
+}
+
+export interface RankingOutput {
+    topPicks: RankedSpot[];
+    confidenceScore: number;
+    topPick: {
+        spotKey: SpotKey;
+        label: string;
+        primaryLure: LureFamily;
+    };
 }
 
 
