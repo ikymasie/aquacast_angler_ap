@@ -1,13 +1,10 @@
 
 'use client';
 
-import { Button } from "@/components/ui/button";
 import type { Species } from "@/lib/types";
-import { FishBassIcon } from "@/components/icons/fish-bass";
-import { FishBreamIcon } from "@/components/icons/fish-bream";
-import { FishCarpIcon } from "@/components/icons/fish-carp";
 import { cn } from "@/lib/utils";
 import { Card } from "./ui/card";
+import Image from "next/image";
 
 interface SpeciesSelectorProps {
   selectedSpecies: Species;
@@ -15,16 +12,16 @@ interface SpeciesSelectorProps {
   disabled?: boolean;
 }
 
-const speciesOptions: { name: Species; icon: React.FC<React.SVGProps<SVGSVGElement>> }[] = [
-  { name: 'Bream', icon: FishBreamIcon },
-  { name: 'Bass', icon: FishBassIcon },
-  { name: 'Carp', icon: FishCarpIcon },
+const speciesOptions: { name: Species; image: string }[] = [
+  { name: 'Bream', image: '/images/bream.png' },
+  { name: 'Bass', image: '/images/bass.png' },
+  { name: 'Carp', image: '/images/carp.png' },
 ];
 
 export function SpeciesSelector({ selectedSpecies, onSelectSpecies, disabled }: SpeciesSelectorProps) {
   return (
     <div className="grid grid-cols-3 gap-3">
-      {speciesOptions.map(({ name, icon: Icon }) => (
+      {speciesOptions.map(({ name, image }) => (
         <Card
           key={name}
           onClick={() => !disabled && onSelectSpecies(name)}
@@ -39,7 +36,9 @@ export function SpeciesSelector({ selectedSpecies, onSelectSpecies, disabled }: 
           aria-pressed={selectedSpecies === name}
           tabIndex={disabled ? -1 : 0}
         >
-          <Icon className="h-8 w-8 mx-auto text-foreground/80" />
+          <div className="relative h-8 w-8 mx-auto">
+            <Image src={image} alt={name} layout="fill" objectFit="contain" />
+          </div>
           <p className="mt-2 text-xs font-semibold text-foreground">{name}</p>
         </Card>
       ))}

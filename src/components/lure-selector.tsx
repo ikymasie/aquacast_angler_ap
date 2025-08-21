@@ -4,10 +4,8 @@
 import { Card } from "./ui/card";
 import { cn } from "@/lib/utils";
 import type { LureFamily } from "@/lib/types";
-import { LureCrankSwimIcon } from './icons/lure-crank-swim';
-import { LureLiveIcon } from './icons/lure-live';
-import { LureSoftIcon } from './icons/lure-soft';
-import { LureSpinnerIcon } from './icons/lure-spinner';
+import Image from "next/image";
+
 
 interface LureSelectorProps {
   selectedLure: LureFamily;
@@ -15,17 +13,17 @@ interface LureSelectorProps {
   disabled?: boolean;
 }
 
-const lureOptions: { name: LureFamily; icon: React.FC<React.SVGProps<SVGSVGElement>> }[] = [
-    { name: 'Live', icon: LureLiveIcon },
-    { name: 'Crank/Swim', icon: LureCrankSwimIcon },
-    { name: 'Spinner', icon: LureSpinnerIcon },
-    { name: 'Soft', icon: LureSoftIcon },
+const lureOptions: { name: LureFamily; image: string }[] = [
+    { name: 'Live', image: '/images/live.png' },
+    { name: 'Crank/Swim', image: '/images/crank-swim.png' },
+    { name: 'Spinner', image: '/images/spinner.png' },
+    { name: 'Soft', image: '/images/soft.png' },
 ];
 
 export function LureSelector({ selectedLure, onLureSelect, disabled }: LureSelectorProps) {
   return (
     <div className="grid grid-cols-4 gap-2">
-      {lureOptions.map(({ name, icon: Icon }) => (
+      {lureOptions.map(({ name, image }) => (
         <Card
           key={name}
           onClick={() => !disabled && onLureSelect(name)}
@@ -40,7 +38,9 @@ export function LureSelector({ selectedLure, onLureSelect, disabled }: LureSelec
           aria-pressed={selectedLure === name}
           tabIndex={disabled ? -1 : 0}
         >
-          <Icon className="h-6 w-6 mx-auto text-foreground/70" />
+          <div className="relative h-8 w-8 mx-auto">
+             <Image src={image} alt={name} layout="fill" objectFit="contain" />
+          </div>
           <p className="mt-2 text-[11px] font-semibold text-foreground">{name}</p>
         </Card>
       ))}
