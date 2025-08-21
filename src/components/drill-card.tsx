@@ -16,9 +16,10 @@ interface DrillCardProps {
     name: string;
     techniques: string[];
     requiredFamilies?: string[];
-    ui: {
-        whatYouLearn: string;
-        proTip: string;
+    coachingTemplates: {
+        biteConsiderations?: string[];
+        possibleStrategies?: string[];
+        insights?: string[];
     }
   };
   onStart: (drill: any) => void;
@@ -26,6 +27,10 @@ interface DrillCardProps {
 
 export function DrillCard({ drill, onStart }: DrillCardProps) {
   const families = drill.requiredFamilies || [];
+  
+  // A more robust way to get a description.
+  // It takes the first 'biteConsideration' as the description.
+  const description = drill.coachingTemplates?.biteConsiderations?.[0] || 'A drill to improve your skills.';
 
   return (
     <Card className="p-4 rounded-xl shadow-sm border-line-200 flex flex-col justify-between">
@@ -38,7 +43,7 @@ export function DrillCard({ drill, onStart }: DrillCardProps) {
                 <Badge key={tech} variant="outline" className="text-xs capitalize">{tech.replace(/_/g, ' ')}</Badge>
             ))}
         </div>
-         <p className="text-sm text-muted-foreground mt-3">{drill.ui?.whatYouLearn || 'A drill to improve your skills.'}</p>
+         <p className="text-sm text-muted-foreground mt-3">{description}</p>
       </div>
       <div className="flex justify-end mt-4">
         <Button size="sm" onClick={() => onStart(drill)}>
