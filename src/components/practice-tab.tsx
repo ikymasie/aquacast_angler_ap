@@ -12,7 +12,8 @@ import type { Species } from '@/lib/types';
 
 export function PracticeTab() {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
-  const { techniqueCatalog, drillCatalog } = catalog;
+  const { techniqueCatalog } = catalog.taxonomies;
+  const { drillCatalog } = catalog;
 
   return (
     <div className="space-y-6">
