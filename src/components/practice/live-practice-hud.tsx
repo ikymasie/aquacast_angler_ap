@@ -252,7 +252,7 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                     attempt={currentAttempt}
                     onLog={() => handleLogGenericAttempt('hit', 'good')} 
                     onMiss={() => handleLogGenericAttempt('miss', 'miss')}
-                    onFishCaught={() => handleLogGenericAttempt('hit', 'bullseye')}
+                    onBite={() => handleLogGenericAttempt('hit', 'bullseye')}
                     onUndo={undoLastAttempt}
                     canUndo={sessionState.history.length > 0 && sessionState.history[sessionState.history.length - 1].attempts.length > 0}
                 />
