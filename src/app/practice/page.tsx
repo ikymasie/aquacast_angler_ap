@@ -13,7 +13,10 @@ function PracticePageContent() {
 
     useEffect(() => {
         // On component mount, try to read the drill state.
+        console.log("Practice page mounted. Current history state:", window.history.state);
+
         if (typeof window !== 'undefined' && window.history.state?.drill) {
+            console.log("Drill data found in history state:", window.history.state.drill);
             setDrill(window.history.state.drill);
         } else {
              // If state isn't available, it suggests a direct navigation or a bug.
