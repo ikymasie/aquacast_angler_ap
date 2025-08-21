@@ -459,14 +459,19 @@ export async function getPracticeSessionsAction(userId: string): Promise<{ data:
             throw new Error("User not authenticated.");
         }
         const sessionsRef = collection(db, 'users', userId, 'practiceSessions');
-        // Fetch all sessions and order by start time
         const q = query(sessionsRef, orderBy('startTime', 'desc'), limit(100));
         const querySnapshot = await getDocs(q);
 
-        const sessions = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        const sessions = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                // Convert Timestamps to ISO strings for serialization
+                startTime: data.startTime?.toDate().toISOString() || null,
+                endTime: data.endTime?.toDate().toISOString() || null,
+            };
+        });
 
         return { data: sessions, error: null };
 

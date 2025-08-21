@@ -25,7 +25,7 @@ import { TrendsChart } from '../progress/trends-chart';
 import { AiCoachCard } from '../progress/ai-coach-card';
 import { QuestsCard } from '../progress/quests-card';
 import { HistoryCard } from '../progress/history-card';
-import { differenceInDays, startOfWeek, format, addDays, isSameDay, differenceInMinutes } from 'date-fns';
+import { differenceInDays, startOfWeek, format, addDays, isSameDay, differenceInMinutes, parseISO } from 'date-fns';
 
 export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetails?: boolean }) {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
@@ -56,24 +56,31 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
 
   const weeklyStats = useMemo(() => {
     const now = new Date();
-    const startOfThisWeek = startOfWeek(now, { weekStartsOn: 1 });
     // Filter for sessions that started within the last 7 days
-    const thisWeeksSessions = sessions.filter(s => s.startTime && differenceInDays(now, s.startTime.toDate()) <= 7);
+    const thisWeeksSessions = sessions.filter(s => {
+        if (!s.startTime) return false;
+        const startTimeDate = parseISO(s.startTime);
+        return differenceInDays(now, startTimeDate) <= 7;
+    });
 
     const totalCasts = thisWeeksSessions.reduce((sum, s) => sum + (s.rounds?.reduce((rSum: number, r: any) => rSum + r.attempts.length, 0) || 0), 0);
     
     // Only calculate minutes for completed sessions with a valid endTime
     const totalMinutes = thisWeeksSessions.reduce((sum, s) => {
-        if (!s.startTime?.toDate() || !s.endTime?.toDate()) return sum;
-        return sum + differenceInMinutes(s.endTime.toDate(), s.startTime.toDate());
+        if (!s.startTime || !s.endTime) return sum;
+        const startTimeDate = parseISO(s.startTime);
+        const endTimeDate = parseISO(s.endTime);
+        return sum + differenceInMinutes(endTimeDate, startTimeDate);
     }, 0);
-
+    
+    const startOfThisWeek = startOfWeek(now, { weekStartsOn: 1 });
     const trend = Array(7).fill(0).map((_, i) => {
-        const day = format(addDays(startOfThisWeek, i), 'E');
+        const day = addDays(startOfThisWeek, i);
+        const dayStr = format(day, 'E');
         const dayCasts = thisWeeksSessions
-            .filter(s => s.startTime && isSameDay(s.startTime.toDate(), addDays(startOfThisWeek, i)))
+            .filter(s => s.startTime && isSameDay(parseISO(s.startTime), day))
             .reduce((sum, s) => sum + (s.rounds?.reduce((rSum: number, r: any) => rSum + r.attempts.length, 0) || 0), 0);
-        return { day: day.charAt(0), casts: dayCasts };
+        return { day: dayStr.charAt(0), casts: dayCasts };
     });
 
     return {
