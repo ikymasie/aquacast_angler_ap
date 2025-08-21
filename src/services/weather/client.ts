@@ -6,7 +6,6 @@ import { format, subDays, isAfter } from "date-fns";
 
 const FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast";
 const CACHE_KEY_PREFIX = 'weather-cache-';
-const CACHE_EXPIRATION_HOURS = 1; // Cache for 1 hour
 
 // Re-using parts of the server-side fetcher for consistency
 const HOURLY_FORECAST_VARS = [
@@ -96,65 +95,65 @@ async function fetchWeatherDataFromServer(location: Location): Promise<WeatherAp
     };
 }
 
+
 /**
- * Fetches weather data for a location, using local storage for caching.
+ * Caches the provided weather data in local storage.
+ * @param location The location used to generate the cache key.
+ * @param data The weather data to cache.
+ */
+function cacheWeatherData(location: Location, data: WeatherApiResponse) {
+    const cacheKey = getCacheKey(location);
+    const cacheEntry: CachedWeatherData = {
+        timestamp: new Date().toISOString(),
+        data: data,
+    };
+    try {
+        localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+        console.log("Successfully cached new weather data for", location.name);
+    } catch (error) {
+        console.error("Failed to cache weather data in localStorage:", error);
+    }
+}
+
+
+/**
+ * Fetches weather data for a location, using an "online-first" strategy.
+ * It attempts to fetch fresh data, and falls back to the cache if the network fails.
  * @param location The location for which to retrieve weather data.
  * @returns A promise that resolves to the weather data.
  */
 export async function getCachedWeatherData(location: Location): Promise<WeatherApiResponse> {
     if (typeof window === 'undefined') {
-        // If called on the server, just fetch without caching
+        // If on the server, there's no cache. Just fetch.
         return fetchWeatherDataFromServer(location);
     }
 
-    const cacheKey = getCacheKey(location);
-    const cachedItem = localStorage.getItem(cacheKey);
-
-    if (cachedItem) {
-        try {
-            const { timestamp, data } = JSON.parse(cachedItem) as CachedWeatherData;
-            const cacheDate = new Date(timestamp);
-            const expirationDate = new Date(cacheDate.getTime() + CACHE_EXPIRATION_HOURS * 60 * 60 * 1000);
-
-            if (isAfter(new Date(), expirationDate)) {
-                // Cache is expired, fetch new data in the background
-                console.log("Cache expired, fetching new data for", location.name);
-                fetchAndCache(location); 
-                return data; // Return stale data for immediate UI response
-            }
-
-            console.log("Returning cached data for", location.name);
-            return data;
-        } catch (error) {
-            console.error("Failed to parse cached weather data:", error);
-            localStorage.removeItem(cacheKey);
-        }
-    }
-
-    // No valid cache, fetch fresh data
-    return fetchAndCache(location);
-}
-
-/**
- * Fetches data from the server and caches it in local storage.
- * @param location The location to fetch and cache.
- * @returns The newly fetched weather data.
- */
-async function fetchAndCache(location: Location): Promise<WeatherApiResponse> {
-    console.log("Fetching and caching new weather data for", location.name);
-    const data = await fetchWeatherDataFromServer(location);
-    const cacheKey = getCacheKey(location);
-    
-    const cacheEntry: CachedWeatherData = {
-        timestamp: new Date().toISOString(),
-        data: data,
-    };
-
     try {
-        localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+        console.log("Attempting to fetch fresh weather data for", location.name);
+        const freshData = await fetchWeatherDataFromServer(location);
+        cacheWeatherData(location, freshData);
+        return freshData;
     } catch (error) {
-        console.error("Failed to cache weather data in localStorage:", error);
+        console.warn("Failed to fetch fresh weather data, attempting to use cache.", error);
+        
+        // Network request failed, try to use the cache as a fallback.
+        const cacheKey = getCacheKey(location);
+        const cachedItem = localStorage.getItem(cacheKey);
+
+        if (cachedItem) {
+            try {
+                const { data } = JSON.parse(cachedItem) as CachedWeatherData;
+                console.log("Returning cached data as fallback for", location.name);
+                return data;
+            } catch (parseError) {
+                console.error("Failed to parse cached weather data:", parseError);
+                // If parsing fails, remove the corrupted item.
+                localStorage.removeItem(cacheKey);
+            }
+        }
+        
+        // If we reach here, the network failed AND there was no valid cache.
+        // We must re-throw the original error to be handled by the caller.
+        throw error;
     }
-    
-    return data;
 }
