@@ -102,14 +102,23 @@ export function PracticeTab() {
         ?.find((family: any) => family.label.toLowerCase().includes(selectedLureFamily.toLowerCase().split('/')[0]))
         ?.drills || [];
 
+  const renderSessionHeader = () => {
+    if (isUserLoading) {
+      return <Skeleton className="h-[96px] w-full rounded-xl" />;
+    }
+    
+    if (user?.practiceProfile) {
+      return <SessionHeader profile={user.practiceProfile} />;
+    }
+    
+    // Fallback for new users or if profile fails to load
+    const defaultProfile = { level: 1, xp: 0, nextLevelXp: 1000, streak: 0, coins: 100, isFallback: true };
+    return <SessionHeader profile={defaultProfile} />;
+  }
 
   return (
     <div className="space-y-6">
-      {isUserLoading ? (
-          <Skeleton className="h-[96px] w-full rounded-xl" />
-      ) : (
-          user?.practiceProfile && <SessionHeader profile={user.practiceProfile} />
-      )}
+      {renderSessionHeader()}
       
       <div className="sticky top-[56px] z-10 bg-background/95 backdrop-blur-sm py-4 -mx-4 px-4 border-b">
           <div className="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">

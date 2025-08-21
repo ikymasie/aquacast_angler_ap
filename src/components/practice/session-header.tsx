@@ -3,7 +3,9 @@
 
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Flame, Star, Shield } from 'lucide-react';
+import { Flame, Star, Shield, HelpCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 
 interface PracticeProfile {
     level: number;
@@ -11,6 +13,7 @@ interface PracticeProfile {
     streak: number;
     coins: number;
     nextLevelXp: number;
+    isFallback?: boolean;
 }
 
 interface SessionHeaderProps {
@@ -18,7 +21,7 @@ interface SessionHeaderProps {
 }
 
 export function SessionHeader({ profile }: SessionHeaderProps) {
-  const { level, xp, nextLevelXp, streak, coins } = profile;
+  const { level, xp, nextLevelXp, streak, coins, isFallback = false } = profile;
   const progress = (xp / nextLevelXp) * 100;
 
   return (
@@ -34,7 +37,21 @@ export function SessionHeader({ profile }: SessionHeaderProps) {
             </div>
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-sm">Level {level}</p>
+            <p className="font-semibold text-sm flex items-center gap-1">
+              Level {level}
+              {isFallback && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>This is your starting profile. Complete drills to save your progress!</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </p>
             <Progress value={progress} className="h-2 mt-1" />
             <p className="text-xs text-muted-foreground mt-1">{xp} / {nextLevelXp} XP</p>
           </div>
