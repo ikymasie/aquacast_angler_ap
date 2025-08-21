@@ -70,26 +70,34 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const password = '123456'; // Default password
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
-      
-      // Create a corresponding user profile in Firestore
-      const userRef = doc(db, 'users', firebaseUser.uid);
-      const newUserProfile = {
-          displayName,
-          email,
-          phone,
-      };
-      await setDoc(userRef, newUserProfile);
-      
-      setUser({ uid: firebaseUser.uid, ...newUserProfile });
-
+      // First, try to sign in. This will work if the user already exists.
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
-        if (error.code === 'auth/email-already-in-use') {
-            // If user exists, just sign them in.
-            await signInWithEmailAndPassword(auth, email, password);
+        // If the error is that the user is not found, then create the account.
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const firebaseUser = userCredential.user;
+                
+                // Create a corresponding user profile in Firestore
+                const userRef = doc(db, 'users', firebaseUser.uid);
+                const newUserProfile = {
+                    displayName,
+                    email,
+                    phone,
+                };
+                await setDoc(userRef, newUserProfile);
+                
+                // Manually set the user in state, as onAuthStateChanged might not fire immediately.
+                setUser({ uid: firebaseUser.uid, ...newUserProfile });
+            } catch (createError) {
+                // Handle errors during creation (e.g., email already in use by another flow)
+                console.error("Error creating user after sign-in failed:", createError);
+                throw createError;
+            }
         } else {
-            // Re-throw other errors
+            // Re-throw other sign-in errors (e.g., wrong password, network issues)
+            console.error("Sign-in error:", error);
             throw error;
         }
     }
