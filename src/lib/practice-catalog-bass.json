@@ -34,6 +34,7 @@
           {
             "drillKey": "bass_spinner_lane_cadence_v1",
             "name": "Spinner Lane Cadence",
+            "learningOutcome": "Learning to control spinnerbait speed and position along weed lines and banks.",
             "difficulty": 2,
             "unlockAtLevel": 1,
             "requires": { "family": "spinner", "baits": ["spinner_willow_1_2oz", "spinner_inline_size3"] },
@@ -74,6 +75,7 @@
           {
             "drillKey": "bass_windward_edge_sweep_v1",
             "name": "Windward Edge Sweep",
+            "learningOutcome": "Learning to use wind to your advantage for a natural lure presentation on productive edges.",
             "difficulty": 3,
             "unlockAtLevel": 3,
             "requires": { "family": "spinner", "baits": ["spinner_willow_1_2oz"] },
@@ -105,6 +107,7 @@
           {
             "drillKey": "bass_flash_thump_modulation_v1",
             "name": "Flash & Thump Modulation",
+            "learningOutcome": "Learning to adjust retrieve speed to maintain lure action and depth in changing conditions.",
             "difficulty": 3,
             "unlockAtLevel": 5,
             "requires": { "family": "spinner", "baits": ["spinner_willow_1_2oz"] },
@@ -153,6 +156,7 @@
           {
             "drillKey": "bass_squarebill_contact_course_v1",
             "name": "Squarebill Contact Course",
+            "learningOutcome": "Learning to deflect a crankbait off cover to trigger reaction strikes.",
             "difficulty": 3,
             "unlockAtLevel": 2,
             "requires": { "family": "crank_swim", "baits": ["crank_squarebill_1_5"] },
@@ -184,6 +188,7 @@
           {
             "drillKey": "bass_depth_ladder_hold_v1",
             "name": "Depth Ladder Hold",
+            "learningOutcome": "Learning to hold a swimbait at a precise depth where bass are suspended.",
             "difficulty": 2,
             "unlockAtLevel": 3,
             "requires": { "family": "crank_swim", "baits": ["swimbait_paddle_4in"] },
@@ -215,6 +220,7 @@
           {
             "drillKey": "bass_stop_go_trigger_sets_v1",
             "name": "Stop–Go Trigger Sets",
+            "learningOutcome": "Learning to use a stop-and-go retrieve to convert following fish into biting fish.",
             "difficulty": 3,
             "unlockAtLevel": 4,
             "requires": { "family": "crank_swim", "baits": ["crank_squarebill_1_5", "swimbait_paddle_4in"] },
@@ -261,6 +267,7 @@
           {
             "drillKey": "bass_soft_skip_precision_v1",
             "name": "Soft Bait Skip Precision",
+            "learningOutcome": "Learning to skip soft plastics far under cover with a quiet entry.",
             "difficulty": 3,
             "unlockAtLevel": 2,
             "requires": { "family": "soft", "baits": ["soft_stickbait_5in"] },
@@ -292,6 +299,7 @@
           {
             "drillKey": "bass_quiet_entry_pitch_v1",
             "name": "Quiet Entry Pitch",
+            "learningOutcome": "Learning to pitch lures silently into tight cover to avoid spooking bass.",
             "difficulty": 2,
             "unlockAtLevel": 3,
             "requires": { "family": "soft", "baits": ["soft_stickbait_5in", "soft_ned_2_75in"] },
@@ -323,6 +331,7 @@
           {
             "drillKey": "bass_bottom_clock_slack_read_v1",
             "name": "Bottom Clock & Slack Read",
+            "learningOutcome": "Learning to detect subtle bites by managing slack line and feeling for ticks.",
             "difficulty": 3,
             "unlockAtLevel": 4,
             "requires": { "family": "soft", "baits": ["soft_ned_2_75in"] },
@@ -368,6 +377,7 @@
           {
             "drillKey": "bass_live_pitch_quiet_entry_v1",
             "name": "Live Pitch — Quiet Entry",
+            "learningOutcome": "Learning to place live bait quietly into cover without spooking fish.",
             "difficulty": 2,
             "unlockAtLevel": 1,
             "requires": { "family": "live", "baits": ["live_worm_float"] },

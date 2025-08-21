@@ -15,6 +15,7 @@ interface DrillCardProps {
   drill: {
     name: string;
     techniques: string[];
+    learningOutcome?: string;
     requiredFamilies?: string[];
     coachingTemplates: {
         biteConsiderations?: string[];
@@ -28,9 +29,8 @@ interface DrillCardProps {
 export function DrillCard({ drill, onStart }: DrillCardProps) {
   const families = drill.requiredFamilies || [];
   
-  // A more robust way to get a description.
-  // It takes the first 'biteConsideration' as the description.
-  const description = drill.coachingTemplates?.biteConsiderations?.[0] || 'A drill to improve your skills.';
+  // Use the new learningOutcome field as the description.
+  const description = drill.learningOutcome || 'A drill to improve your skills.';
 
   return (
     <Card className="p-4 rounded-xl shadow-sm border-line-200 flex flex-col justify-between">

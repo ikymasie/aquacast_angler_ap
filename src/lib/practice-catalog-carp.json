@@ -36,6 +36,7 @@
           {
             "drillKey": "carp_hair_rig_accuracy_v1",
             "name": "Hair-Rig Pad Accuracy",
+            "learningOutcome": "Learning to accurately cast a hair rig to a specific feeding spot.",
             "difficulty": 3,
             "unlockAtLevel": 2,
             "requires": { "family": "live", "baits": ["carp_hair_rig_boilie"] },
@@ -75,6 +76,7 @@
           {
             "drillKey": "carp_drift_lane_control_v1",
             "name": "Inflow / River Drift Lane",
+            "learningOutcome": "Learning to control a float rig in current to present bait naturally.",
             "difficulty": 3,
             "unlockAtLevel": 3,
             "requires": { "family": "live", "baits": ["live_worm_float"] },
@@ -107,6 +109,7 @@
           {
             "drillKey": "carp_hookset_timing_sim_v1",
             "name": "Carp Hookset Timing Sim",
+            "learningOutcome": "Learning the patience required to let a carp fully take the bait before setting the hook.",
             "difficulty": 2,
             "unlockAtLevel": 1,
             "requires": { "family": "live", "baits": ["carp_hair_rig_boilie", "live_worm_float"] },
@@ -138,6 +141,7 @@
           {
             "drillKey": "carp_clip_distance_grouping_v1",
             "name": "Feeder — Clip & Grouping",
+            "learningOutcome": "Learning to cast to the same spot repeatedly to build a concentrated bait area.",
             "difficulty": 3,
             "unlockAtLevel": 4,
             "requires": { "family": "live", "baits": ["carp_hair_rig_boilie"] },
@@ -183,6 +187,7 @@
           {
             "drillKey": "carp_soft_graze_precision_v1",
             "name": "Soft Grazing Precision",
+            "learningOutcome": "Learning to make quiet, precise casts to grazing carp without spooking them.",
             "difficulty": 2,
             "unlockAtLevel": 2,
             "requires": { "family": "soft", "baits": ["soft_ned_2_75in"] },
@@ -223,6 +228,7 @@
           {
             "drillKey": "carp_soft_distance_grouping_v1",
             "name": "Soft — Distance & Grouping",
+            "learningOutcome": "Learning to cast soft baits to a consistent distance for effective area coverage.",
             "difficulty": 2,
             "unlockAtLevel": 3,
             "requires": { "family": "soft", "baits": ["soft_ned_2_75in"] },

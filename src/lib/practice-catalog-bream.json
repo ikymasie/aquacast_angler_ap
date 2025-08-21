@@ -33,6 +33,7 @@
           {
             "drillKey": "bream_live_quiet_entry_v1",
             "name": "Float Pitch — Quiet Entry",
+            "learningOutcome": "Learning to place a float rig quietly and accurately near cover.",
             "difficulty": 2,
             "unlockAtLevel": 1,
             "requires": { "family": "live", "baits": ["live_worm_float"] },
@@ -73,6 +74,7 @@
           {
             "drillKey": "bream_live_drift_lane_v1",
             "name": "Inlet Drift Lane Control",
+            "learningOutcome": "Learning to manage a drift to keep your bait in a productive feeding lane.",
             "difficulty": 3,
             "unlockAtLevel": 3,
             "requires": { "family": "live", "baits": ["live_worm_float"] },
@@ -120,6 +122,7 @@
           {
             "drillKey": "bream_soft_skip_precision_v1",
             "name": "Soft Skip Precision",
+            "learningOutcome": "Learning to skip soft plastics under docks and overhanging cover.",
             "difficulty": 3,
             "unlockAtLevel": 2,
             "requires": { "family": "soft", "baits": ["soft_stickbait_5in"] },
@@ -160,6 +163,7 @@
           {
             "drillKey": "bream_soft_bottom_clock_v1",
             "name": "Bottom Clock & Slack Read",
+            "learningOutcome": "Learning to detect subtle bottom bites by feeling for changes in line tension.",
             "difficulty": 3,
             "unlockAtLevel": 4,
             "requires": { "family": "soft", "baits": ["soft_ned_2_75in"] },
@@ -206,6 +210,7 @@
           {
             "drillKey": "bream_spinner_edge_glide_v1",
             "name": "Inline Spinner Edge Glide",
+            "learningOutcome": "Learning to maintain a consistent retrieve speed to keep a spinner in the strike zone.",
             "difficulty": 2,
             "unlockAtLevel": 2,
             "requires": { "family": "spinner", "baits": ["spinner_inline_size3"] },
@@ -250,6 +255,7 @@
           {
             "drillKey": "bream_micro_crank_edge_track_v1",
             "name": "Micro Crank Edge Track",
+            "learningOutcome": "Learning to run a micro-crankbait along a weed edge at a consistent depth.",
             "difficulty": 2,
             "unlockAtLevel": 5,
             "requires": { "family": "crank_swim", "baits": ["micro_squarebill_1_0"] },
