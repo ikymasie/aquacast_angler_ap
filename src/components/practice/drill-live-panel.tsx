@@ -157,7 +157,7 @@ function GoalArc({ progress, attempts, castsPerRound, band }: { progress: number
                     initial={{ rotate: -180 }}
                     animate={{ rotate: -180 + progress * 180 }}
                     transition={{ duration: 0.28, ease: "easeOut" }}
-                    transform-origin="center"
+                    style={{ transformOrigin: "center" }}
                  >
                     <circle cx={size / 2 + radius} cy={size / 2} r="8" fill="#FFD348" stroke="white" strokeWidth="2" />
                  </motion.g>
