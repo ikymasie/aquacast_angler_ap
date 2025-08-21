@@ -25,19 +25,16 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     // Find the daily data for the selected day from the 7-day forecast data
     const dayIndex = weatherData.daily.findIndex(d => new Date(d.sunrise).toDateString() === selectedDate.toDateString());
     
-    // Check if we have daily data for the selected date
     if (dayIndex === -1) {
         return { data: null, error: `Daily forecast data is not available for ${selectedDateString}.`};
     }
     const selectedDayData = weatherData.daily[dayIndex];
 
-    // Robustly filter hours by comparing the date part of the timestamp.
     const hoursForDay = weatherData.hourly.filter(h => {
         return h.t.startsWith(selectedDateString);
     });
 
-    // We can proceed even with a few hours, but we need at least one.
-    if (!hoursForDay || hoursForDay.length === 0) { 
+    if (hoursForDay.length === 0) { 
       return { data: null, error: "Not enough forecast data is available to create a forecast for the selected date."};
     }
 
@@ -48,12 +45,6 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
       temperature: Math.round(hour.tempC)
     })));
     
-    // Check if we have any scores to process
-    if (scoredHours.length === 0) {
-        return { data: null, error: "Not enough data to create a forecast." };
-    }
-
-    // Format hourly data for the chart, ensuring we have data
     const hourlyChartData = scoredHours.map(h => ({
         time: format(parseISO(h.time), 'ha'),
         success: Math.round(h.score),
@@ -61,11 +52,10 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         temperature: h.temperature
     }));
 
-    // Only calculate intervals and daily score if we have enough data
     let threeHourScores: ThreeHourIntervalScore[] = [];
     let overallDayScore: OverallDayScore | null = null;
 
-    if (scoredHours.length >= 12) {
+    if (scoredHours.length > 0) {
       threeHourScores = await calculate3HourIntervalScores(scoredHours);
       overallDayScore = await getOverallDayScore(scoredHours);
     }
