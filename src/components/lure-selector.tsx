@@ -28,7 +28,7 @@ export function LureSelector({ selectedLure, onLureSelect, disabled, showAllOpti
     : lureOptions;
 
   return (
-    <div className={cn("grid gap-2", showAllOption ? "grid-cols-5" : "grid-cols-4")}>
+    <div className={cn("grid gap-2 w-full", showAllOption ? "grid-cols-5" : "grid-cols-4")}>
       {options.map(({ name, image }) => (
         <Card
           key={name}

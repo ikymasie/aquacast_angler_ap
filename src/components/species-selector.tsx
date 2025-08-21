@@ -20,7 +20,7 @@ const speciesOptions: { name: Species; image: string }[] = [
 
 export function SpeciesSelector({ selectedSpecies, onSelectSpecies, disabled }: SpeciesSelectorProps) {
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-3 w-full">
       {speciesOptions.map(({ name, image }) => (
         <Card
           key={name}
