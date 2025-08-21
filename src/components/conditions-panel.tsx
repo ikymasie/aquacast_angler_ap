@@ -40,7 +40,7 @@ function transformWeatherData(apiData: WeatherApiResponse, location: Location) {
             weekday: format(parseISO(currentHour.t), 'EEEE'),
             wind: { speed: currentHour.windKph, dirDeg: currentHour.windDeg }
         },
-        hours: apiData.hourly.slice(nowIndex, nowIndex + 5).map((h, i) => ({
+        hours: apiData.hourly.slice(nowIndex, nowIndex + 8).map((h, i) => ({
             timeISO: h.t,
             label: i === 0 ? "Now" : format(parseISO(h.t), 'p').replace(':00',''),
             condition: getConditionFromHour(h),
@@ -114,32 +114,34 @@ export function ConditionsPanel({location, initialData}: {location: Location, in
             </div>
 
             {/* Right Column: Hourly Strip */}
-            <div className="flex-1 flex justify-end items-stretch gap-2">
-                {hours.map((hour: any, index: number) => (
-                    <div 
-                        key={hour.timeISO} 
-                        className={cn(
-                            "flex-shrink-0 w-16 h-full flex flex-col items-center justify-between text-center p-2 rounded-lg transition-all",
-                            index === 0 && "bg-white/20"
-                        )}
-                        aria-label={`${hour.label}, ${hour.condition}, ${hour.tempC} degrees, wind ${hour.wind.speed.toFixed(1)} kilometers per hour`}
-                    >
-                         <span className="font-body text-sm font-medium text-white/85">{hour.label}</span>
-                         <WeatherIcon 
-                            condition={hour.condition}
-                            className="w-8 h-8 text-white"
-                        />
-                         <span className="font-headline font-semibold text-lg">{hour.tempC}°</span>
-                         <div className="flex flex-col items-center gap-0.5">
-                            <WeatherIcon 
-                                condition="Wind" 
-                                className="w-5 h-5 text-white/90" 
-                                windDeg={hour.wind.dirDeg}
+            <div className="flex-1 overflow-x-auto no-scrollbar">
+                <div className="flex h-full items-stretch gap-2">
+                    {hours.map((hour: any, index: number) => (
+                        <div 
+                            key={hour.timeISO} 
+                            className={cn(
+                                "flex-shrink-0 w-16 h-full flex flex-col items-center justify-between text-center p-2 rounded-lg transition-all",
+                                index === 0 && "bg-white/20"
+                            )}
+                            aria-label={`${hour.label}, ${hour.condition}, ${hour.tempC} degrees, wind ${hour.wind.speed.toFixed(1)} kilometers per hour`}
+                        >
+                             <span className="font-body text-sm font-medium text-white/85">{hour.label}</span>
+                             <WeatherIcon 
+                                condition={hour.condition}
+                                className="w-8 h-8 text-white"
                             />
-                            <span className="font-body text-xs text-white/90">{hour.wind.speed.toFixed(1)}</span>
-                         </div>
-                    </div>
-                ))}
+                             <span className="font-headline font-semibold text-lg">{hour.tempC}°</span>
+                             <div className="flex flex-col items-center gap-0.5">
+                                <WeatherIcon 
+                                    condition="Wind" 
+                                    className="w-5 h-5 text-white/90" 
+                                    windDeg={hour.wind.dirDeg}
+                                />
+                                <span className="font-body text-xs text-white/90">{hour.wind.speed.toFixed(1)}</span>
+                             </div>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* Top-right Label */}
@@ -147,6 +149,10 @@ export function ConditionsPanel({location, initialData}: {location: Location, in
                 <span className="font-body text-lg font-semibold text-white/90 capitalize">{locationName.split(',')[0]}</span>
             </div>
         </div>
+         <style jsx>{`
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        `}</style>
     </Card>
   );
 }
