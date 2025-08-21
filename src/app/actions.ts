@@ -4,7 +4,7 @@
 import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
-import { format, parseISO, startOfDay, endOfDay, isWithinInterval, isToday, isFuture, addHours } from "date-fns";
+import { format, parseISO, startOfDay, endOfDay, isWithinInterval, isToday, isFuture, addHours, subDays } from "date-fns";
 import type { CastingAdviceInput } from "@/ai/flows/casting-advice-flow";
 import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
 
@@ -33,14 +33,14 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     let hoursForDay: any[];
 
     if (isToday(selectedDate)) {
-        // For today, get a full 24-hour forecast starting from the current hour.
-        const now = new Date();
-        const next24HoursEnd = addHours(now, 24);
+        // For today, get a full 24-hour forecast starting from yesterday.
+        const yesterday = subDays(new Date(), 1);
+        const next24HoursEnd = addHours(new Date(), 24);
         
         hoursForDay = weatherData.hourly.filter(h => {
             const hourTime = parseISO(h.t);
             // We need a full 24 hour block, even if some hours are slightly in the past, for trends.
-            return isWithinInterval(hourTime, { start: now, end: next24HoursEnd });
+            return isWithinInterval(hourTime, { start: yesterday, end: next24HoursEnd });
         });
         
         // Fallback: If for some reason that yields nothing, just grab all available future hours.
