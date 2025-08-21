@@ -73,7 +73,8 @@ export default function SpotDetailsPage() {
     }, [weatherData, selectedDate]);
 
 
-    const loadForecast = useCallback(async (species: Species, date: Date, loc: Location, currentWeatherData: WeatherApiResponse) => {
+    const loadForecast = useCallback(async (species: Species, date: Date, loc: Location) => {
+        if (!weatherData) return;
         setIsForecastLoading(true);
         setForecastError(null);
         
@@ -84,8 +85,9 @@ export default function SpotDetailsPage() {
         });
 
         if (forecastResult.data) {
-             const allScoredHours: ScoredHour[] = (forecastResult.data.hourlyChartData || []).map((d: any) => {
-                const correspondingHour = currentWeatherData.hourly.find(h => format(parseISO(h.t), 'ha') === d.time);
+             const allScoredHours: ScoredHour[] = (forecastResult.data.hourlyChartData || []).map((d: any, index: number) => {
+                // Find corresponding full hour data point, safer than time string matching
+                const correspondingHour = weatherData.hourly.find(h => h.t.startsWith(format(date, 'yyyy-MM-dd')) && format(parseISO(h.t), 'ha') === d.time);
                 return {
                     time: correspondingHour?.t || new Date().toISOString(),
                     score: d.success ?? 0,
@@ -109,7 +111,7 @@ export default function SpotDetailsPage() {
         }
 
         setIsForecastLoading(false);
-    }, []);
+    }, [weatherData]);
 
     const loadCastingAdvice = useCallback(async (lure: LureFamily, currentDayContext: DayContext, currentThreeHourScores: ThreeHourIntervalScore[]) => {
         if (!currentDayContext || !currentThreeHourScores.length) return;
@@ -133,32 +135,32 @@ export default function SpotDetailsPage() {
     }, [selectedSpecies, location]);
 
 
-    // Data loading logic
+    // Effect 1: Fetch initial weather data for the location
     useEffect(() => {
-        async function loadInitialData() {
+        async function loadInitialWeather() {
             setIsWeatherLoading(true);
             const weather = await getCachedWeatherData(location);
             setWeatherData(weather);
             setIsWeatherLoading(false);
-            
-            // Chain the forecast loading to ensure weatherData is available
-            const initialDate = startOfToday();
-            setSelectedDate(initialDate);
-            await loadForecast(selectedSpecies, initialDate, location, weather);
         }
-        loadInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location]); // Only re-run when location changes
+        loadInitialWeather();
+    }, [location]);
 
-    // Recalculate forecast when species or date changes
+    // Effect 2: Load forecast when dependencies change (species, date, or after weather loads)
     useEffect(() => {
         if (weatherData && !isWeatherLoading) {
-            loadForecast(selectedSpecies, selectedDate, location, weatherData);
+            // Check if the selectedDate is valid within the new weatherData
+            const firstDayOfForecast = startOfToday();
+            if (selectedDate < firstDayOfForecast) {
+                 setSelectedDate(firstDayOfForecast); // Reset to today if invalid
+            } else {
+                 loadForecast(selectedSpecies, selectedDate, location);
+            }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedSpecies, selectedDate]);
+    }, [selectedSpecies, selectedDate, weatherData, isWeatherLoading]);
     
-    // Load casting advice when its dependencies are ready
+    // Effect 3: Load casting advice when its dependencies are ready
     useEffect(() => {
         if (!isForecastLoading && dayContext && threeHourScores.length > 0) {
             loadCastingAdvice(selectedLure, dayContext, threeHourScores);
