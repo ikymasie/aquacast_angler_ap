@@ -4,7 +4,7 @@
 import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
-import { format, parseISO, startOfDay, endOfDay, isWithinInterval, isToday, startOfHour } from "date-fns";
+import { format, parseISO, startOfToday, endOfDay, isWithinInterval, isToday, startOfHour } from "date-fns";
 import type { CastingAdviceInput } from "@/ai/flows/casting-advice-flow";
 import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
 
@@ -23,18 +23,15 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     const selectedDateString = format(selectedDate, 'yyyy-MM-dd');
 
     // Find the daily data for the selected day from the 7-day forecast data
-    const dayIndex = weatherData.daily.findIndex(d => new Date(d.sunrise).toDateString() === selectedDate.toDateString());
+    const selectedDayData = weatherData.daily.find(d => d.sunrise.startsWith(selectedDateString));
     
-    if (dayIndex === -1) {
+    if (!selectedDayData) {
         return { data: null, error: `Daily forecast data is not available for ${selectedDateString}.`};
     }
-    const selectedDayData = weatherData.daily[dayIndex];
+    
+    const hoursForDay = weatherData.hourly.filter(h => h.t.startsWith(selectedDateString));
 
-    const hoursForDay = weatherData.hourly.filter(h => {
-        return h.t.startsWith(selectedDateString);
-    });
-
-    if (hoursForDay.length === 0) { 
+    if (hoursForDay.length === 0) {
       return { data: null, error: "Not enough forecast data is available to create a forecast for the selected date."};
     }
 
