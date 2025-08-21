@@ -5,10 +5,10 @@ import { Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { Header } from '@/components/header';
 import { SpotHeaderCard } from '@/components/spot-header-card';
 import { MapCard } from '@/components/map-card';
-import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, ScoredHour, LureFamily, DayContext } from '@/lib/types';
+import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, ScoredHour, LureFamily, DayContext, UserSpot } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
 import { getCachedWeatherData } from '@/services/weather/client';
-import { getFishingForecastAction, getCastingAdviceAction, getLureAdviceAction } from '../actions';
+import { getFishingForecastAction, getCastingAdviceAction, getLureAdviceAction, getUserSpotsAction } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SpeciesSelector } from '@/components/species-selector';
 import { RecommendedTimeCard } from '@/components/recommended-time-card';
@@ -31,25 +31,21 @@ import { PracticeTab } from '@/components/practice-tab';
 import { useUser } from '@/hooks/use-user';
 
 
-// Find a spot by name, or return the first one as a fallback.
-function getSpotByName(name?: string | null) {
-  if (!name) return allSpotsData[0];
-  // Handle user-added spots from localStorage
-  if (typeof window !== 'undefined') {
-      const userSpots = JSON.parse(localStorage.getItem('user-spots') || '[]');
-      const userSpot = userSpots.find((s: any) => s.name === name);
-      if (userSpot) return userSpot;
-  }
-  const spot = allSpotsData.find(s => s.name === name);
+// Find a spot by name from a combined list of static and user spots.
+function getSpotByName(name: string | null, allSpots: any[]) {
+  if (!name || allSpots.length === 0) return allSpotsData[0];
+  const spot = allSpots.find(s => s.name === name);
   return spot || allSpotsData[0];
 }
 
 export default function SpotDetailsPage() {
     const searchParams = useSearchParams();
     const spotName = searchParams.get('name');
-    const [spot, setSpot] = useState(() => getSpotByName(spotName));
     const { user } = useUser();
     
+    const [allAvailableSpots, setAllAvailableSpots] = useState<any[]>([...allSpotsData]);
+    const [spot, setSpot] = useState(() => getSpotByName(spotName, allAvailableSpots));
+
     // Forecast state
     const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
     const [selectedDate, setSelectedDate] = useState(startOfToday());
@@ -69,6 +65,31 @@ export default function SpotDetailsPage() {
     // General weather state
     const [weatherData, setWeatherData] = useState<WeatherApiResponse | null>(null);
     const [isWeatherLoading, setIsWeatherLoading] = useState(true);
+
+    // Effect to fetch user spots and combine with static spots
+    useEffect(() => {
+        async function loadSpots() {
+            if (user) {
+                const { data: userSpots } = await getUserSpotsAction(user.uid);
+                const combinedSpots = [
+                    ...allSpotsData,
+                    ...(userSpots || []).map(s => ({
+                        ...s,
+                        id: s.id,
+                        isUserSpot: true,
+                    }))
+                ];
+                setAllAvailableSpots(combinedSpots);
+            }
+        }
+        loadSpots();
+    }, [user]);
+
+    // Effect to update the spot when the name in URL or the list of available spots changes
+    useEffect(() => {
+        const newSpot = getSpotByName(spotName, allAvailableSpots);
+        setSpot(newSpot);
+    }, [spotName, allAvailableSpots]);
 
     const location: Location = useMemo(() => ({
         name: spot.name,
@@ -218,7 +239,9 @@ export default function SpotDetailsPage() {
                 setIsWeatherLoading(false);
             }
         }
-        loadInitialData();
+        if (location.latitude && location.longitude) {
+           loadInitialData();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location]);
 
@@ -349,5 +372,3 @@ export default function SpotDetailsPage() {
     </div>
   );
 }
-
-    
