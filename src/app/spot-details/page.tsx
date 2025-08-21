@@ -8,7 +8,7 @@ import { MapCard } from '@/components/map-card';
 import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, ScoredHour, LureFamily, DayContext } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
 import { getCachedWeatherData } from '@/services/weather/client';
-import { getFishingForecastAction, getCastingAdviceAction } from '../actions';
+import { getFishingForecastAction, getCastingAdviceAction, getLureAdviceAction } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SpeciesSelector } from '@/components/species-selector';
 import { RecommendedTimeCard } from '@/components/recommended-time-card';
@@ -23,6 +23,9 @@ import { CastingAdvisorPanel } from '@/components/casting-advisor-panel';
 import { QuickMetricsPanel } from '@/components/quick-metrics-panel';
 import { LureSelector } from '@/components/lure-selector';
 import type { CastingAdviceInput, CastingAdviceOutput } from '@/ai/flows/casting-advice-flow';
+import { CastingConditionsCard } from '@/components/casting-conditions-card';
+import type { LureAdviceInput, LureAdviceOutput } from '@/ai/flows/lure-advice-flow';
+
 
 // Find a spot by name, or return the first one as a fallback.
 function getSpotByName(name?: string | null) {
@@ -55,6 +58,8 @@ export default function SpotDetailsPage() {
     const [selectedLure, setSelectedLure] = useState<LureFamily>('Soft');
     const [advice, setAdvice] = useState<CastingAdviceOutput | null>(null);
     const [isAdviceLoading, setIsAdviceLoading] = useState(false);
+    const [lureAdvice, setLureAdvice] = useState<LureAdviceOutput | null>(null);
+    const [isLureAdviceLoading, setIsLureAdviceLoading] = useState(false);
     
     // General weather state
     const [weatherData, setWeatherData] = useState<WeatherApiResponse | null>(null);
@@ -134,6 +139,38 @@ export default function SpotDetailsPage() {
         setIsAdviceLoading(false);
     }, [selectedSpecies, location]);
 
+    const loadLureAdvice = useCallback(async (lure: LureFamily, currentDayContext: DayContext) => {
+        if (!currentDayContext || !weatherData) return;
+        setIsLureAdviceLoading(true);
+
+        const now = new Date();
+        const currentHour = weatherData.hourly.find(h => isFuture(parseISO(h.t)) || format(parseISO(h.t), 'yyyy-MM-dd-HH') === format(now, 'yyyy-MM-dd-HH'));
+        
+        if (!currentHour) {
+            setIsLureAdviceLoading(false);
+            return;
+        }
+
+        const payload: LureAdviceInput = {
+            species: selectedSpecies,
+            lureFamily: lure,
+            dayContext: currentDayContext,
+            currentHour: currentHour,
+            recentWindow: weatherData.recent,
+        }
+        
+        const result = await getLureAdviceAction(payload);
+        if (result.data) {
+            setLureAdvice(result.data);
+        } else {
+            console.error("Lure Advice Error:", result.error);
+            setLureAdvice(null);
+        }
+        
+        setIsLureAdviceLoading(false);
+
+    }, [selectedSpecies, weatherData]);
+
 
     // Effect 1: Fetch initial weather data for the location, then chain forecast loading
     useEffect(() => {
@@ -172,6 +209,7 @@ export default function SpotDetailsPage() {
     useEffect(() => {
         if (!isForecastLoading && dayContext && threeHourScores.length > 0) {
             loadCastingAdvice(selectedLure, dayContext, threeHourScores);
+            loadLureAdvice(selectedLure, dayContext);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isForecastLoading, selectedLure, dayContext]); // Simplified dependencies
@@ -251,10 +289,14 @@ export default function SpotDetailsPage() {
                     </TabsContent>
 
                      <TabsContent value="advisor" className="space-y-4 pt-4">
+                        <CastingConditionsCard 
+                            isLoading={isLureAdviceLoading || isForecastLoading}
+                            advice={lureAdvice}
+                        />
                         <LureSelector 
                             selectedLure={selectedLure}
                             onLureSelect={setSelectedLure}
-                            disabled={isAdviceLoading || isForecastLoading}
+                            disabled={isAdviceLoading || isForecastLoading || isLureAdviceLoading}
                         />
                         <CastingAdvisorPanel 
                             isLoading={isAdviceLoading || isForecastLoading}
@@ -274,3 +316,5 @@ export default function SpotDetailsPage() {
     </div>
   );
 }
+
+    

@@ -76,9 +76,9 @@ export default {
         'ink-300': '#A0A4A8',
         'line-200': '#E6E9EE',
         'line-300': '#D6DAE1',
-        good: 'hsl(var(--good))',
+        'score-good': '#27AE60',
         fair: 'hsl(var(--fair))',
-        poor: 'hsl(var(--poor))',
+        'score-poor': '#EB5757',
         'score-bad': 'hsl(var(--score-bad))',
         'score-fair': 'hsl(var(--score-fair))',
         'score-great': 'hsl(var(--score-great))',
@@ -123,3 +123,5 @@ export default {
   },
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
+
+    

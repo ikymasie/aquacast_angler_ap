@@ -185,3 +185,5 @@ export const MOCK_FORECAST_GRAPHS = {
     { day: 'Sun', success: 78, uv: 7 },
   ]
 };
+
+    

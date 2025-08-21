@@ -7,6 +7,9 @@ import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/l
 import { format, parseISO, startOfToday, endOfDay, isWithinInterval, isToday, startOfHour } from "date-fns";
 import type { CastingAdviceInput } from "@/ai/flows/casting-advice-flow";
 import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
+import type { LureAdviceInput } from "@/ai/flows/lure-advice-flow";
+import { getLureAdvice } from "@/ai/flows/lure-advice-flow";
+
 
 interface GetScoreActionPayload {
   species: Species;
@@ -21,10 +24,9 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
 
     // Use the date part of the ISO string directly to avoid timezone issues.
     const selectedDateString = date.substring(0, 10); // e.g., "2025-08-21"
-    console.log("Selected Date", selectedDateString)
+    
     // Find the daily data for the selected day from the 7-day forecast data
     const selectedDayData = weatherData.daily.find(d => d.sunrise.startsWith(selectedDateString));
-    console.log("Selected Data", selectedDayData)
 
     if (!selectedDayData) {
         return { data: null, error: `Daily forecast data is not available for ${selectedDateString}.`};
@@ -146,3 +148,17 @@ export async function getCastingAdviceAction(payload: CastingAdviceInput) {
         return { data: null, error: errorMessage };
     }
 }
+
+
+export async function getLureAdviceAction(payload: LureAdviceInput) {
+    try {
+        const advice = await getLureAdvice(payload);
+        return { data: advice, error: null };
+    } catch (err) {
+        console.error("Failed to get lure advice:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while getting lure advice.";
+        return { data: null, error: errorMessage };
+    }
+}
+
+    
