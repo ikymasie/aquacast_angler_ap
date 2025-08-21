@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { usePracticeState } from '@/hooks/use-practice-state';
 
 export function PracticeTab() {
-  const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
+  const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
   const [selectedLureFamily, setSelectedLureFamily] = useState<LureFamily | 'All'>('All');
   const [catalog, setCatalog] = useState<any>(null);
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(true);
