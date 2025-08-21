@@ -103,6 +103,36 @@
                 "Wind from behind increases over-drag risk; shorten exposed line."
               ]
             }
+          },
+          {
+            "drillKey": "bream_float_hookset_timing_v1",
+            "name": "Float Hookset Timing",
+            "learningOutcome": "Learning to distinguish a real bite from a nibble on a float rig.",
+            "difficulty": 1,
+            "unlockAtLevel": 1,
+            "requires": { "family": "live", "baits": ["live_worm_float"] },
+            "techniques": ["hookset_timing"],
+            "params": { "events": 20, "promptTypes": ["float_dip", "float_slide"], "delayProfile_ms": 600 },
+            "metrics": ["correct_timing_rate", "premature_late_index"],
+            "scoring": { "weights": { "correct_timing_rate": 0.75, "premature_late_index": 0.25 } },
+            "recommendedConditions": [{ "label": "Anytime training", "season": "hot|cool|transition" }],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Bream often 'peck' at bait before committing; a short delay ensures the hook is in.",
+                "A sliding float indicates a confident take that requires a faster response.",
+                "Setting the hook too early spooks the school."
+              ],
+              "possibleStrategies": [
+                "For a 'dip,' wait for the float to go fully under before lifting.",
+                "For a 'slide,' reel up slack and sweep the rod sideways.",
+                "Keep your rod tip pointed towards the float to feel the line tighten."
+              ],
+              "insights": [
+                "Your best hookset timing was between 500-700ms after the prompt.",
+                "Premature sets were more common on 'dip' events.",
+                "Correct rate improved when focusing on the rod tip, not just the float."
+              ]
+            }
           }
         ]
       },
@@ -192,6 +222,36 @@
                 "Heavier heads needed shorter pauses to maintain bottom contact."
               ]
             }
+          },
+          {
+            "drillKey": "bream_soft_shake_drag_v1",
+            "name": "Micro-Jig Shake & Drag",
+            "learningOutcome": "Mastering a slow drag-and-shake retrieve to trigger bites from finicky bream.",
+            "difficulty": 2,
+            "unlockAtLevel": 3,
+            "requires": { "family": "soft", "baits": ["soft_ned_2_75in"] },
+            "techniques": ["slack_management", "pitch_flip"],
+            "params": { "rounds": 3, "runsPerRound": 4, "pattern_s": { "drag": 3, "shake": 2, "pause": 2 } },
+            "metrics": ["bottom_contact_time", "rhythm_variance", "bite_detection"],
+            "scoring": { "weights": { "bottom_contact_time": 0.5, "rhythm_variance": 0.3, "bite_detection": 0.2 } },
+            "recommendedConditions": [{ "label": "Post-front high pressure", "pressureTrendHpaPer3h": ">=0.8", "windKph": "<=12" }],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "High pressure makes bream lethargic, requiring slow, deliberate presentations on the bottom.",
+                "A shake-and-pause rhythm creates puffs of silt that attract curious fish.",
+                "Most bites will feel like a slight 'tick' or mushy weight during the pause."
+              ],
+              "possibleStrategies": [
+                "Use the rod to slowly drag the jig, keeping the line tight enough to feel the bottom.",
+                "After a drag, create slack and gently shake the rod tip to vibrate the bait in place.",
+                "Watch your line intently during the pause for any tell-tale jumps or twitches."
+              ],
+              "insights": [
+                "Your bite detection rate improved when the 'drag' phase was smooth and continuous.",
+                "Keeping over 90% bottom contact time is key to high scores in this drill.",
+                "The highest scoring rhythms had a pause duration between 1.8 and 2.2 seconds."
+              ]
+            }
           }
         ]
       },
@@ -236,6 +296,36 @@
                 "Your lane-hit streaks increased when cadence stayed within ±8 spm.",
                 "Most misses occurred when entry was downwind—add slight upwind aim.",
                 "Depth drifted shallower above 70 spm; trim speed to maintain track."
+              ]
+            }
+          },
+          {
+            "drillKey": "bream_spinner_flutter_drop_v1",
+            "name": "Spinner Flutter Drop",
+            "learningOutcome": "Learning to 'flutter' a spinner down a vertical structure to entice bites.",
+            "difficulty": 3,
+            "unlockAtLevel": 4,
+            "requires": { "family": "spinner", "baits": ["spinner_inline_size3"] },
+            "techniques": ["pitch_flip", "slack_management"],
+            "params": { "rounds": 3, "castsPerRound": 8, "target": "vertical_pole", "dropDepth_m": 2, "maxRadius_cm": 40 },
+            "metrics": ["precision", "flutter_control", "bite_detection"],
+            "scoring": { "weights": { "flutter_control": 0.5, "precision": 0.3, "bite_detection": 0.2 } },
+            "recommendedConditions": [{ "label": "Calm, sunny days", "windKph": "<=8", "cloudPct": "<=40" }],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "On sunny days, bream hold tight to vertical cover like dock poles or trees.",
+                "A 'fluttering' spinner imitates a dying baitfish, triggering a reaction.",
+                "Bites on the drop are often just a 'tick' or slight line jump."
+              ],
+              "possibleStrategies": [
+                "Pitch past the target and let the spinner swing in close as it sinks.",
+                "Maintain a semi-slack line—enough to feel the bite but not enough to drag the lure away.",
+                "Watch where your line enters the water for any sign of a bite."
+              ],
+              "insights": [
+                "Your highest scores came when you landed the lure within 30cm of the pole.",
+                "Successful flutter control means you can feel the blade spinning on the drop.",
+                "Most missed bites happened when the line had too much slack."
               ]
             }
           }
