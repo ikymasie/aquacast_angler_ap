@@ -5,27 +5,38 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Wind } from 'lucide-react';
 
-export function AccuracyPack() {
+interface AccuracyPackProps {
+    drill: any;
+}
+
+export function AccuracyPack({ drill }: AccuracyPackProps) {
+    const params = drill.params || {};
+    const target = params.targets?.[0] || { distance_m: 15, radius_cm: 45 };
+    const windHint = params.windHint_kph ? `Upwind ${params.windHint_kph[0]}-${params.windHint_kph[1]}kph` : 'Upwind';
+
     return (
         <div className="h-full flex flex-col justify-between">
-            <TargetCard />
+            <TargetCard 
+                distance={target.distance_m}
+                radius={target.radius_cm}
+            />
             <RingDiagram />
             <div className="text-center">
                  <Badge variant="secondary" className="bg-secondary">
                     <Wind className="w-3 h-3 mr-1.5"/>
-                    Upwind
+                    {windHint}
                 </Badge>
             </div>
         </div>
     );
 }
 
-function TargetCard() {
+function TargetCard({ distance, radius, angle = 45 }: { distance: number, radius: number, angle?: number }) {
     return (
         <div className="text-center mb-4">
             <p className="text-sm text-muted-foreground">Target</p>
-            <p className="font-headline text-3xl font-bold text-foreground">15m at 45°</p>
-            <p className="text-xs text-muted-foreground">Radius: 45cm</p>
+            <p className="font-headline text-3xl font-bold text-foreground">{distance}m at {angle}°</p>
+            <p className="text-xs text-muted-foreground">Radius: {radius}cm</p>
         </div>
     );
 }

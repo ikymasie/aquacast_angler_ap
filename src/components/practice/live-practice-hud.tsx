@@ -81,7 +81,7 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
     const [isSaving, startSaving] = useTransition();
 
     // This would be driven by drill type state
-    const drillType = drill.techniques.includes('cast_sidearm') ? 'accuracy' : 'cadence'; 
+    const drillType = drill.techniques.includes('cast_sidearm') || drill.techniques.includes('pitch_flip') || drill.techniques.includes('skip_sidearm') ? 'accuracy' : 'cadence'; 
 
     const handleLogAttempt = (attemptData: any) => {
         if (!user || !drill.sessionId) return;
@@ -138,8 +138,8 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
             
             <div className="bg-white rounded-xl p-4 min-h-[320px] shadow-sm border border-line-200">
                  {/* This is where the drill-specific panel will go */}
-                 {drillType === 'accuracy' && <AccuracyPack />}
-                 {drillType === 'cadence' && <CadencePack />}
+                 {drillType === 'accuracy' && <AccuracyPack drill={drill} />}
+                 {drillType === 'cadence' && <CadencePack drill={drill} />}
             </div>
             
             {/* The real AttemptControls would open a sheet to gather data before calling handleLogAttempt */}
