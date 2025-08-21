@@ -26,6 +26,7 @@ import type { CastingAdviceInput, CastingAdviceOutput } from '@/ai/flows/casting
 import { CastingConditionsCard } from '@/components/casting-conditions-card';
 import type { LureAdviceOutput } from '@/ai/flows/lure-advice-flow';
 import { RecommendedSpotCard } from '@/components/recommended-spot-card';
+import { PhotoGallery } from '@/components/photo-gallery';
 
 
 // Find a spot by name, or return the first one as a fallback.
@@ -93,11 +94,13 @@ export default function SpotDetailsPage() {
              const selectedDateString = date.toISOString().substring(0, 10);
              const allScoredHours: ScoredHour[] = (forecastResult.data.hourlyChartData || []).map((d: any) => {
                 if (!weatherData) return null;
+                // Correct way to find corresponding hour without timezone issues
                 const correspondingHour = weatherData.hourly.find(h => 
                      h.t.startsWith(selectedDateString) && format(parseISO(h.t), 'ha') === d.time
                 );
+                if (!correspondingHour) return null;
                 return {
-                    time: correspondingHour?.t || new Date().toISOString(),
+                    time: correspondingHour.t,
                     score: d.success ?? 0,
                     condition: d.condition ?? 'Clear',
                     temperature: d.temperature ?? 0
@@ -176,15 +179,14 @@ export default function SpotDetailsPage() {
             return;
         }
 
-        const payload: LureAdviceInput = {
+        const result = await getLureAdviceAction({
             species: selectedSpecies,
             lureFamily: lure,
             dayContext: currentDayContext,
             currentHour: currentHour,
             recentWindow: weatherData.recent,
-        }
-        
-        const result = await getLureAdviceAction(payload);
+        });
+
         if (result.data) {
             setLureAdvice(result.data);
         } else {
@@ -324,10 +326,11 @@ export default function SpotDetailsPage() {
                         />
                     </TabsContent>
 
-                    <TabsContent value="map" className="pt-4">
+                    <TabsContent value="map" className="pt-4 space-y-4">
                         <MapCard
                            center={{ lat: spot.coordinates.lat, lng: spot.coordinates.lon }}
                        />
+                       <PhotoGallery spotName={spot.name} />
                     </TabsContent>
                 </Tabs>
             </Suspense>

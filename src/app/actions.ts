@@ -8,8 +8,16 @@ import { format, parseISO, startOfToday, endOfDay, isWithinInterval, isToday, st
 import type { CastingAdviceInput } from "@/ai/flows/casting-advice-flow";
 import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
 import { getLureAdvice } from "@/ai/flows/lure-advice-flow";
-import type { LureAdviceInput } from "@/ai/flows/lure-advice-flow";
+import { z } from 'zod';
+import { analyzePhoto, type PhotoAnalysisInput } from "@/ai/flows/photo-analysis-flow";
 
+const LureAdviceInputSchema = z.object({
+  species: z.custom<Species>(),
+  lureFamily: z.custom<LureFamily>(),
+  dayContext: z.custom<DayContext>(),
+  currentHour: z.custom<HourPoint>(),
+  recentWindow: z.custom<RecentWindow>(),
+});
 
 interface GetScoreActionPayload {
   species: Species;
@@ -150,13 +158,25 @@ export async function getCastingAdviceAction(payload: CastingAdviceInput) {
 }
 
 
-export async function getLureAdviceAction(payload: LureAdviceInput) {
+export async function getLureAdviceAction(payload: z.infer<typeof LureAdviceInputSchema>) {
     try {
-        const advice = await getLureAdvice(payload);
+        const validatedPayload = LureAdviceInputSchema.parse(payload);
+        const advice = await getLureAdvice(validatedPayload);
         return { data: advice, error: null };
     } catch (err) {
         console.error("Failed to get lure advice:", err);
         const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while getting lure advice.";
+        return { data: null, error: errorMessage };
+    }
+}
+
+export async function analyzePhotoAction(payload: PhotoAnalysisInput) {
+    try {
+        const result = await analyzePhoto(payload);
+        return { data: result, error: null };
+    } catch (err) {
+        console.error("Failed to analyze photo:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred during photo analysis.";
         return { data: null, error: errorMessage };
     }
 }
