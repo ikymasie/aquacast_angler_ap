@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { SectionHeader } from './section-header';
 import { DrillCard } from './drill-card';
 import { SpeciesSelector } from './species-selector';
@@ -12,14 +12,20 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from './ui/skeleton';
 import { SessionSetupSheet } from './practice/session-setup-sheet';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/hooks/use-user';
+import { startPracticeSessionAction } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
 
 export function PracticeTab() {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
   const [selectedLureFamily, setSelectedLureFamily] = useState<LureFamily | 'All'>('All');
   const [catalog, setCatalog] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isStartingSession, startSessionTransition] = useTransition();
   const [drillForSetup, setDrillForSetup] = useState<any | null>(null);
   const router = useRouter();
+  const { user } = useUser();
+  const { toast } = useToast();
 
 
   useEffect(() => {
@@ -56,15 +62,31 @@ export function PracticeTab() {
   };
 
   const handleBeginFromSheet = () => {
-    if (drillForSetup) {
-      const speciesKey = selectedSpecies.toLowerCase();
-      const drillData = { ...drillForSetup, speciesKey };
-      
-      // Navigate to the dynamic route, passing drill data in state
-      router.push(`/practice/${drillData.drillKey}`, { state: { drill: drillData } } as any);
-
-      setDrillForSetup(null);
+    if (!drillForSetup || !user) {
+        toast({ variant: 'destructive', title: 'Could not start session', description: 'User or drill data is missing.' });
+        return;
     }
+
+    startSessionTransition(async () => {
+        const speciesKey = selectedSpecies.toLowerCase();
+        const drillData = { ...drillForSetup, speciesKey };
+
+        const { data: sessionData, error } = await startPracticeSessionAction({
+            userId: user.uid,
+            drill: drillData,
+        });
+
+        if (error || !sessionData) {
+            toast({ variant: 'destructive', title: 'Failed to Start', description: error || 'Could not create a new practice session.' });
+            return;
+        }
+
+        const fullDrillData = { ...drillData, sessionId: sessionData.sessionId };
+
+        // Navigate to the dynamic route, passing drill data in state
+        router.push(`/practice/${drillData.drillKey}`, { state: { drill: fullDrillData } } as any);
+        setDrillForSetup(null);
+    });
   };
 
   const allDrills = catalog?.speciesCatalog?.families?.flatMap((family: any) => family.drills) || [];
@@ -117,6 +139,7 @@ export function PracticeTab() {
           isOpen={!!drillForSetup}
           onOpenChange={(isOpen) => !isOpen && setDrillForSetup(null)}
           onBegin={handleBeginFromSheet}
+          isPending={isStartingSession}
        />
     </div>
   );

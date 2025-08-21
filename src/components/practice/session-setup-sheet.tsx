@@ -13,16 +13,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { TechniqueCard } from '../technique-card';
-import { Play } from 'lucide-react';
+import { Play, Loader2 } from 'lucide-react';
 
 interface SessionSetupSheetProps {
   drill: any;
   isOpen: boolean;
+  isPending: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onBegin: () => void;
 }
 
-export function SessionSetupSheet({ drill, isOpen, onOpenChange, onBegin }: SessionSetupSheetProps) {
+export function SessionSetupSheet({ drill, isOpen, isPending, onOpenChange, onBegin }: SessionSetupSheetProps) {
   if (!drill) return null;
 
   const relevantTechniques = drill.techniques || [];
@@ -63,9 +64,13 @@ export function SessionSetupSheet({ drill, isOpen, onOpenChange, onBegin }: Sess
             </div>
         </div>
         <SheetFooter className="pt-4">
-          <Button onClick={onBegin} className="w-full">
-            <Play className="mr-2 h-4 w-4" />
-            Begin Drill
+          <Button onClick={onBegin} className="w-full" disabled={isPending}>
+            {isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+                <Play className="mr-2 h-4 w-4" />
+            )}
+            {isPending ? 'Starting...' : 'Begin Drill'}
           </Button>
         </SheetFooter>
       </SheetContent>

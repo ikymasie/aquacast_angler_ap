@@ -7,6 +7,10 @@ import { CadencePack } from './cadence-pack';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Pause, MoreVertical } from 'lucide-react';
+import { savePracticeAttemptAction, completePracticeSessionAction } from '@/app/actions';
+import { useUser } from '@/hooks/use-user';
+import { useToast } from '@/hooks/use-toast';
+import { useTransition } from 'react';
 
 interface LivePracticeHUDProps {
     drill: any;
@@ -72,12 +76,63 @@ function ScoreStrip() {
 
 
 export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
+    const { user } = useUser();
+    const { toast } = useToast();
+    const [isSaving, startSaving] = useTransition();
+
     // This would be driven by drill type state
     const drillType = drill.techniques.includes('cast_sidearm') ? 'accuracy' : 'cadence'; 
 
+    const handleLogAttempt = () => {
+        if (!user || !drill.sessionId) return;
+        
+        startSaving(async () => {
+            // This is a placeholder for real attempt data from the AttemptSheet
+            const attemptData = {
+                roundNumber: 1,
+                castNumber: 1,
+                outcome: 'hit',
+                ring: 'inner',
+                points: 85,
+                timestamp: new Date().toISOString()
+            };
+
+            const { success, error } = await savePracticeAttemptAction({
+                userId: user.uid,
+                sessionId: drill.sessionId,
+                attemptData,
+            });
+
+            if (error) {
+                toast({ variant: 'destructive', title: 'Save Failed', description: error });
+            } else {
+                toast({ variant: 'success', title: 'Attempt Logged!' });
+            }
+        });
+    };
+
+    const handleCompleteSession = () => {
+        if (!user || !drill.sessionId) return;
+
+        startSaving(async () => {
+             const { success, error } = await completePracticeSessionAction({
+                userId: user.uid,
+                sessionId: drill.sessionId,
+                finalScore: 8500,
+                finalGrade: 'A'
+            });
+             if (error) {
+                toast({ variant: 'destructive', title: 'Failed to Complete', description: error });
+            } else {
+                toast({ variant: 'default', title: 'Session Complete!' });
+                onExit();
+            }
+        });
+    }
+
     return (
         <div className="space-y-3">
-            <PracticeTopBar drillName={drill.name} onExit={onExit} />
+            <PracticeTopBar drillName={drill.name} onExit={handleCompleteSession} />
             <ScoreStrip />
             
             <div className="bg-white rounded-xl p-4 min-h-[320px] shadow-sm border border-line-200">
@@ -86,7 +141,8 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                  {drillType === 'cadence' && <CadencePack />}
             </div>
             
-            <AttemptControls />
+            {/* The real AttemptControls would open a sheet to gather data before calling handleLogAttempt */}
+            <AttemptControls onLog={handleLogAttempt} />
         </div>
     );
 }

@@ -11,7 +11,7 @@ import { getLureAdvice } from "@/ai/flows/lure-advice-flow";
 import { z } from 'zod';
 import { analyzePhoto, type PhotoAnalysisInput } from "@/ai/flows/photo-analysis-flow";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 
 const LureAdviceInputSchema = z.object({
@@ -242,4 +242,110 @@ export async function analyzePhotoAction(payload: PhotoAnalysisInput) {
     }
 }
 
+
+// Practice Session Actions
+
+interface StartPracticeSessionPayload {
+  userId: string;
+  drill: any; // The full drill object
+}
+
+export async function startPracticeSessionAction(payload: StartPracticeSessionPayload): Promise<{ data: { sessionId: string } | null; error: string | null }> {
+    try {
+        const { userId, drill } = payload;
+        if (!userId) throw new Error("User not authenticated.");
+
+        const sessionData = {
+            userId,
+            drillKey: drill.drillKey,
+            drillName: drill.name,
+            speciesKey: drill.speciesKey,
+            status: 'in-progress',
+            startTime: serverTimestamp(),
+            endTime: null,
+            finalScore: 0,
+            finalGrade: null,
+            rounds: [],
+        };
+
+        const sessionRef = await addDoc(collection(db, 'users', userId, 'practiceSessions'), sessionData);
+        
+        return { data: { sessionId: sessionRef.id }, error: null };
+    } catch (err) {
+        console.error("Failed to start practice session:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+        return { data: null, error: errorMessage };
+    }
+}
+
+
+interface SavePracticeAttemptPayload {
+    userId: string;
+    sessionId: string;
+    attemptData: any; // Define a proper type for this
+}
+
+export async function savePracticeAttemptAction(payload: SavePracticeAttemptPayload): Promise<{ success: boolean; error: string | null }> {
+    try {
+        const { userId, sessionId, attemptData } = payload;
+        if (!userId || !sessionId) throw new Error("User or session ID missing.");
+        
+        const sessionRef = doc(db, 'users', userId, 'practiceSessions', sessionId);
+        const sessionSnap = await getDoc(sessionRef);
+        if (!sessionSnap.exists()) throw new Error("Practice session not found.");
+        
+        const session = sessionSnap.data();
+        const currentRounds = session.rounds || [];
+        const { roundNumber, ...restOfAttemptData } = attemptData;
+        
+        const roundIndex = currentRounds.findIndex((r: any) => r.roundNumber === roundNumber);
+        
+        if (roundIndex > -1) {
+            currentRounds[roundIndex].attempts = [...(currentRounds[roundIndex].attempts || []), restOfAttemptData];
+        } else {
+            currentRounds.push({
+                roundNumber,
+                attempts: [restOfAttemptData],
+                roundScore: 0 // Will be calculated later
+            });
+        }
+        
+        await updateDoc(sessionRef, { rounds: currentRounds });
+
+        return { success: true, error: null };
+    } catch (err) {
+        console.error("Failed to save practice attempt:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+        return { success: false, error: errorMessage };
+    }
+}
+
+
+interface CompletePracticeSessionPayload {
+  userId: string;
+  sessionId: string;
+  finalScore: number;
+  finalGrade: string;
+}
+
+export async function completePracticeSessionAction(payload: CompletePracticeSessionPayload): Promise<{ success: boolean; error: string | null }> {
+    try {
+        const { userId, sessionId, finalScore, finalGrade } = payload;
+        if (!userId || !sessionId) throw new Error("User or session ID missing.");
+
+        const sessionRef = doc(db, 'users', userId, 'practiceSessions', sessionId);
+        await updateDoc(sessionRef, {
+            status: 'completed',
+            endTime: serverTimestamp(),
+            finalScore,
+            finalGrade,
+        });
+
+        return { success: true, error: null };
+    } catch (err) {
+        console.error("Failed to complete practice session:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+        return { success: false, error: errorMessage };
+    }
+}
     
