@@ -14,10 +14,10 @@ interface LureSelectorProps {
 }
 
 const lureOptions: { name: LureFamily; image: string }[] = [
-    { name: 'Live', image: '/images/live.png' },
-    { name: 'Crank/Swim', image: '/images/crank-swim.png' },
-    { name: 'Spinner', image: '/images/spinner.png' },
-    { name: 'Soft', image: '/images/soft.png' },
+    { name: 'Live', image: '/images/baits/live.png' },
+    { name: 'Crank/Swim', image: '/images/baits/crank.webp' },
+    { name: 'Spinner', image: '/images/baits/spinner.webp' },
+    { name: 'Soft', image: '/images/baits/soft.png' },
 ];
 
 export function LureSelector({ selectedLure, onLureSelect, disabled }: LureSelectorProps) {

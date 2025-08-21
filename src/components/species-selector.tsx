@@ -13,9 +13,9 @@ interface SpeciesSelectorProps {
 }
 
 const speciesOptions: { name: Species; image: string }[] = [
-  { name: 'Bream', image: '/images/bream.png' },
-  { name: 'Bass', image: '/images/bass.png' },
-  { name: 'Carp', image: '/images/carp.png' },
+  { name: 'Bream', image: '/images/fish/bream.png' },
+  { name: 'Bass', image: '/images/fish/bass.webp' },
+  { name: 'Carp', image: '/images/fish/carp.png' },
 ];
 
 export function SpeciesSelector({ selectedSpecies, onSelectSpecies, disabled }: SpeciesSelectorProps) {
