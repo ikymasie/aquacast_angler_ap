@@ -22,14 +22,10 @@ interface UserAuthDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// NOTE: This component is currently not used in the new /welcome onboarding flow,
-// but is being kept in case it's needed for other purposes, like editing a user profile.
-// The main registration flow is now at /auth/create.
-
 export function UserAuthDialog({ isOpen, onOpenChange }: UserAuthDialogProps) {
-  const { createAndSignInUser, user } = useUser();
+  const { createAndSignInUser } = useUser();
   const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState(user?.email || '');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -57,52 +53,55 @@ export function UserAuthDialog({ isOpen, onOpenChange }: UserAuthDialogProps) {
       }
     });
   };
-
-  const handleInteractOutside = (e: Event) => {
-    // Prevent closing the dialog by clicking outside if it's essential.
-    // e.preventDefault();
-  };
-
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent onInteractOutside={handleInteractOutside} className="sm:max-w-[425px]">
+      <DialogContent hideCloseButton className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Complete Your Profile</DialogTitle>
+          <DialogTitle>Welcome to AquaCast</DialogTitle>
           <DialogDescription>
-            Set your display name to personalize your experience.
+            Create an account to get personalized fishing forecasts.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className="col-span-3"
-              placeholder="e.g., John Angler"
-            />
+           <div className="grid w-full items-center gap-1.5">
+              <Label htmlFor="name">Full Name</Label>
+              <Input 
+                  type="text" 
+                  id="name" 
+                  placeholder="John Angler" 
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  required
+              />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              readOnly
-              disabled
-              className="col-span-3"
-            />
+            <div className="grid w-full items-center gap-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                  type="email" 
+                  id="email" 
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+              />
+          </div>
+            <div className="grid w-full items-center gap-1.5">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input 
+                  type="tel" 
+                  id="phone" 
+                  placeholder="+1 555-123-4567"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+              />
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSubmit} disabled={isPending || !displayName} className="w-full">
+          <Button onClick={handleSubmit} disabled={isPending || !isFormValid} className="w-full">
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Profile
+            Create Account
           </Button>
         </DialogFooter>
       </DialogContent>

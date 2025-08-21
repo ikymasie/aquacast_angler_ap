@@ -4,7 +4,6 @@
 import { Header } from '@/components/header';
 import { BottomNav } from '@/components/bottom-nav';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, MapPin, Save, Loader2, Edit } from 'lucide-react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -107,22 +106,9 @@ export default function AddSpotPage() {
                   Save Spot
               </Button>
           </div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-headline text-h2 flex items-center gap-2">
-                  <MapPin className="w-6 h-6 text-primary"/>
-                  Add a New Fishing Spot
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Use the map to find and select your fishing spot. Pan and zoom to find the exact location, then tap to place a pin.
-              </p>
-              <div className="aspect-video w-full bg-secondary rounded-lg overflow-hidden">
-                  <LocationPickerMap onLocationSelect={handleLocationSelect} />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="relative aspect-video w-full bg-secondary rounded-lg overflow-hidden">
+              <LocationPickerMap onLocationSelect={handleLocationSelect} />
+          </div>
         </main>
         <BottomNav />
       </div>
