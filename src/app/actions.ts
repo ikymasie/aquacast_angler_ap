@@ -20,6 +20,7 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     const weatherData = await fetchWeatherData(location);
 
     const selectedDate = parseISO(date);
+    const selectedDateString = format(selectedDate, 'yyyy-MM-dd');
 
     // Find the daily data for the selected day from the 7-day forecast data
     const dayIndex = weatherData.daily.findIndex(d => new Date(d.sunrise).toDateString() === selectedDate.toDateString());
@@ -28,14 +29,13 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     if (!selectedDayData) {
         return { data: null, error: "Could not retrieve daily forecast data for the selected date."};
     }
-
-    // For all dates, get all hours for that day.
-    const dayStart = startOfDay(selectedDate);
-    const dayEnd = endOfDay(selectedDate);
-    const hoursForDay = weatherData.hourly.filter(h => 
-        isWithinInterval(parseISO(h.t), { start: dayStart, end: dayEnd })
-    );
     
+    // Robustly filter hours by comparing the date part of the timestamp.
+    // This avoids timezone issues that caused previous errors.
+    const hoursForDay = weatherData.hourly.filter(h => {
+        return h.t.startsWith(selectedDateString);
+    });
+
     // Ensure we have a reasonable number of hours to create a forecast.
     if (!hoursForDay || hoursForDay.length < 12) { 
       return { data: null, error: "Not enough forecast data is available to create a forecast for the selected date."};
