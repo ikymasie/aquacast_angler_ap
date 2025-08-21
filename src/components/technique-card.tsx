@@ -4,11 +4,6 @@
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Target, Wind, Gauge, HardHat } from 'lucide-react';
-import type { LureFamily } from '@/lib/types';
-import { LureCrankSwimIcon } from './icons/lure-crank-swim';
-import { LureLiveIcon } from './icons/lure-live';
-import { LureSoftIcon } from './icons/lure-soft';
-import { LureSpinnerIcon } from './icons/lure-spinner';
 
 interface TechniqueCardProps {
   technique: {

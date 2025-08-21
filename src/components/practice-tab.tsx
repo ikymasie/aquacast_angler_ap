@@ -10,8 +10,8 @@ import { LureSelector } from './lure-selector';
 import { SessionHeader } from './practice/session-header';
 import { cn } from '@/lib/utils';
 import { Skeleton } from './ui/skeleton';
-import { LivePracticeHUD } from './practice/live-practice-hud';
 import { SessionSetupSheet } from './practice/session-setup-sheet';
+import { useRouter } from 'next/navigation';
 
 export function PracticeTab() {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
@@ -19,25 +19,24 @@ export function PracticeTab() {
   const [catalog, setCatalog] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [drillForSetup, setDrillForSetup] = useState<any | null>(null);
-  const [activeDrill, setActiveDrill] = useState<any | null>(null);
+  const router = useRouter();
+
 
   useEffect(() => {
     const loadCatalog = async () => {
       setIsLoading(true);
       try {
         const speciesKey = selectedSpecies.toLowerCase();
-        // Dynamically import the correct catalog based on the selected species
         const catalogModule = await import(`@/lib/practice-catalog-${speciesKey}.json`);
         setCatalog(catalogModule.default);
       } catch (error) {
         console.error(`Failed to load catalog for ${selectedSpecies}:`, error);
-        // Fallback to a default catalog (e.g., bream) if the selected one fails to load
         try {
             const fallbackModule = await import(`@/lib/practice-catalog-bream.json`);
             setCatalog(fallbackModule.default);
         } catch (fallbackError) {
             console.error('Failed to load fallback catalog:', fallbackError);
-            setCatalog(null); // Set to null if even fallback fails
+            setCatalog(null);
         }
       } finally {
         setIsLoading(false);
@@ -57,13 +56,14 @@ export function PracticeTab() {
   };
 
   const handleBeginFromSheet = () => {
-    setActiveDrill(drillForSetup);
-    setDrillForSetup(null);
-  }
-  
-  if (activeDrill) {
-    return <LivePracticeHUD drill={activeDrill} onExit={() => setActiveDrill(null)} />;
-  }
+    if (drillForSetup) {
+      // Use router to navigate and pass drill data in state
+      const speciesKey = selectedSpecies.toLowerCase();
+      const drillData = { ...drillForSetup, speciesKey };
+      router.push('/practice', { state: { drill: drillData } } as any);
+      setDrillForSetup(null);
+    }
+  };
 
   const allDrills = catalog?.speciesCatalog?.families?.flatMap((family: any) => family.drills) || [];
 
@@ -78,11 +78,11 @@ export function PracticeTab() {
     <div className="space-y-6">
       <SessionHeader />
       
-      <div className="sticky top-[56px] z-10 bg-background py-4 -mx-4 px-4 border-b">
+      <div className="sticky top-[56px] z-10 bg-background/95 backdrop-blur-sm py-4 -mx-4 px-4 border-b">
           <div className="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
-              <p className="text-sm font-medium text-muted-foreground">Fishing for</p>
+               <p className="text-sm font-medium text-muted-foreground">Fishing for</p>
               <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} />
-              <p className="text-sm font-medium text-muted-foreground mt-2">with</p>
+               <p className="text-sm font-medium text-muted-foreground mt-2">with</p>
               <LureSelector selectedLure={selectedLureFamily} onLureSelect={handleLureSelect as any} showAllOption />
           </div>
       </div>
