@@ -109,7 +109,6 @@ export default function SpotDetailsPage() {
 
         if (forecastResult.data) {
              const allHours = forecastResult.data.hourlyChartData || [];
-             const futureHours = allHours.filter((h: any) => isFuture(parseISO(h.time)));
              
              const allScoredHours: ScoredHour[] = allHours.map((d: any, i: number) => {
                  if (!weatherData) return null;
@@ -128,6 +127,7 @@ export default function SpotDetailsPage() {
                  };
              }).filter((h): h is ScoredHour => h !== null);
 
+            const futureHours = allScoredHours.filter((h: any) => isFuture(parseISO(h.time)));
             const recWindow = await recommendWindows(allScoredHours, futureHours);
             
             setRecommendedWindow(recWindow);
@@ -186,6 +186,19 @@ export default function SpotDetailsPage() {
 
     const loadLureAdvice = useCallback(async (lure: LureFamily, currentDayContext: DayContext) => {
         if (!currentDayContext || !weatherData) return;
+        
+        const cacheKey = `lure-advice-${spot.name}-${selectedSpecies}-${lure}-${format(selectedDate, 'yyyy-MM-dd')}`;
+        const cachedData = localStorage.getItem(cacheKey);
+
+        if (cachedData) {
+            try {
+                setLureAdvice(JSON.parse(cachedData));
+                // Optional: add a timestamp check to re-fetch if cache is old
+            } catch (e) {
+                localStorage.removeItem(cacheKey);
+            }
+        }
+        
         setIsLureAdviceLoading(true);
 
         const now = new Date();
@@ -196,24 +209,34 @@ export default function SpotDetailsPage() {
             return;
         }
 
-        const result = await getLureAdviceAction({
-            species: selectedSpecies,
-            lureFamily: lure,
-            dayContext: currentDayContext,
-            currentHour: currentHour,
-            recentWindow: weatherData.recent,
-        });
+        try {
+            const result = await getLureAdviceAction({
+                species: selectedSpecies,
+                lureFamily: lure,
+                dayContext: currentDayContext,
+                currentHour: currentHour,
+                recentWindow: weatherData.recent,
+            });
 
-        if (result.data) {
-            setLureAdvice(result.data);
-        } else {
-            console.error("Lure Advice Error:", result.error);
-            setLureAdvice(null);
+            if (result.data) {
+                setLureAdvice(result.data);
+                 try {
+                    localStorage.setItem(cacheKey, JSON.stringify(result.data));
+                } catch(e) {
+                    console.error("Failed to cache lure advice", e);
+                }
+            } else {
+                console.error("Lure Advice Error:", result.error);
+                if (!cachedData) setLureAdvice(null); // Only clear if no cache fallback
+            }
+        } catch (error) {
+            console.error("Lure Advice Fetch Error:", error);
+            if (!cachedData) setLureAdvice(null); // Only clear if no cache fallback
+        } finally {
+            setIsLureAdviceLoading(false);
         }
-        
-        setIsLureAdviceLoading(false);
 
-    }, [selectedSpecies, weatherData]);
+    }, [selectedSpecies, weatherData, spot.name, selectedDate]);
 
 
     useEffect(() => {
@@ -235,10 +258,10 @@ export default function SpotDetailsPage() {
     }, [location]);
 
     useEffect(() => {
-        if (weatherData && !isWeatherLoading) {
+        if (weatherData && !isWeatherLoading && user) {
             loadForecast(selectedSpecies, selectedDate, location);
         }
-    }, [weatherData, selectedSpecies, selectedDate, user, loadForecast, location]);
+    }, [weatherData, isWeatherLoading, selectedSpecies, selectedDate, user, loadForecast, location]);
     
     useEffect(() => {
         if (!isForecastLoading && dayContext && threeHourScores.length > 0) {
