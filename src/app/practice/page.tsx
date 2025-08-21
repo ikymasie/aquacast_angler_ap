@@ -15,24 +15,19 @@ function PracticePageContent() {
     useEffect(() => {
         // This effect runs on the client-side after the component mounts.
         // The drill data is expected to be in the navigation state.
-        if (typeof window !== 'undefined' && window.history.state && window.history.state.drill) {
-            setDrill(window.history.state.drill);
-            setIsLoading(false);
-        } else {
-            // It might take a moment for the state to be available.
-            // We'll now wait indefinitely for the drill data to appear.
-            const checkState = () => {
-                if (window.history.state && window.history.state.drill) {
-                    setDrill(window.history.state.drill);
-                    setIsLoading(false);
-                } else {
-                    // If not found, check again on the next animation frame.
-                    requestAnimationFrame(checkState);
-                }
-            };
-            requestAnimationFrame(checkState);
-        }
-    }, [router]);
+        // We will now wait indefinitely for the drill data to appear
+        // to prevent a race condition that was causing a redirect.
+        const checkState = () => {
+            if (window.history.state && window.history.state.drill) {
+                setDrill(window.history.state.drill);
+                setIsLoading(false);
+            } else {
+                // If not found, check again on the next animation frame.
+                requestAnimationFrame(checkState);
+            }
+        };
+        checkState();
+    }, []);
 
     const handleExit = () => {
         router.back();

@@ -2,7 +2,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useParams, useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { LivePracticeHUD } from '@/components/practice/live-practice-hud';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/header';
@@ -28,6 +28,14 @@ export default function PracticeDrillPage() {
         } else {
              // In a real app, you might fetch the drill data here if it's not in the state.
              // For now, we'll just wait for it. If the user navigated directly, they'll see a loading state.
+             // If no drill data is found after a short period, redirect.
+            const timer = setTimeout(() => {
+                if (!window.history.state?.drill) {
+                    console.warn("No drill data found in state, redirecting home.");
+                    router.replace('/');
+                }
+            }, 500); // Wait 500ms before redirecting
+            return () => clearTimeout(timer);
         }
     }, [router]);
 
