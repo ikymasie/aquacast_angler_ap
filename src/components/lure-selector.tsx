@@ -17,8 +17,8 @@ interface LureSelectorProps {
 
 const lureOptions: { name: LureFamily; image: string }[] = [
     { name: 'Live', image: '/images/baits/live.png' },
-    { name: 'Crank/Swim', image: '/images/baits/crank.webp' },
-    { name: 'Spinner', image: '/images/baits/spinner.webp' },
+    { name: 'Crank/Swim', image: '/images/baits/crank.png' },
+    { name: 'Spinner', image: '/images/baits/spinner.png' },
     { name: 'Soft', image: '/images/baits/soft.png' },
 ];
 
