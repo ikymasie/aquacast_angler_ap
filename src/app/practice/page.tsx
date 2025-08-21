@@ -2,7 +2,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { LivePracticeHUD } from '@/components/practice/live-practice-hud';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/header';
@@ -42,9 +42,8 @@ function PracticePageContent() {
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-background">
-            <Header />
-            <main className="flex-1 p-4 md:p-6">
+        <div className="flex flex-col min-h-screen bg-secondary/30">
+            <main className="flex-1 p-4 md:p-6 pb-24">
                 <LivePracticeHUD drill={drill} onExit={handleExit} />
             </main>
         </div>
