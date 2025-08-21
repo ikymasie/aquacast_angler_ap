@@ -9,6 +9,7 @@ import { getUsersAction } from '@/app/actions';
 import { useUser } from '@/hooks/use-user';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import rankingLadder from '@/lib/ranking-ladder.json';
 
 
 interface RankedUser {
@@ -36,6 +37,18 @@ export function RankingsList() {
 
         fetchRankings();
     }, []);
+
+    const getRankTitle = (level: number): string => {
+        let currentRank = `Level ${level}`;
+        // Iterate backwards to find the highest rank achieved
+        for (let i = rankingLadder.ranks.length - 1; i >= 0; i--) {
+            if (level >= rankingLadder.ranks[i].level) {
+                currentRank = rankingLadder.ranks[i].title;
+                break;
+            }
+        }
+        return currentRank;
+    };
 
     if (isLoading) {
         return (
@@ -80,7 +93,7 @@ export function RankingsList() {
                         </Avatar>
                         <div className="flex-1">
                             <p className={cn("font-semibold", isCurrentUser && "text-primary-dark")}>{rankedUser.displayName}</p>
-                            <p className="text-xs text-muted-foreground">Level {rankedUser.rank}</p>
+                            <p className="text-xs text-muted-foreground">{getRankTitle(rankedUser.rank)}</p>
                         </div>
                         <div className="w-8 h-8 flex items-center justify-center">
                             {rankIcon}
