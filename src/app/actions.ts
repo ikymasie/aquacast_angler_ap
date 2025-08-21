@@ -29,20 +29,12 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         return { data: null, error: "Could not retrieve daily forecast data for the selected date."};
     }
 
-    let hoursForDay: any[];
-
-    if (isToday(selectedDate)) {
-        // For today, the hourly data from the API already starts from the current day.
-        // We can simply take the first 24 hours available.
-        hoursForDay = weatherData.hourly.slice(0, 24);
-    } else {
-        // For future dates, get all hours for that day.
-        const dayStart = startOfDay(selectedDate);
-        const dayEnd = endOfDay(selectedDate);
-        hoursForDay = weatherData.hourly.filter(h => 
-            isWithinInterval(parseISO(h.t), { start: dayStart, end: dayEnd })
-        );
-    }
+    // For all dates, get all hours for that day.
+    const dayStart = startOfDay(selectedDate);
+    const dayEnd = endOfDay(selectedDate);
+    const hoursForDay = weatherData.hourly.filter(h => 
+        isWithinInterval(parseISO(h.t), { start: dayStart, end: dayEnd })
+    );
     
     // Ensure we have a reasonable number of hours to create a forecast.
     if (!hoursForDay || hoursForDay.length < 12) { 
