@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useTransition, useMemo } from 'react';
+import { useState, useEffect, useMemo, useTransition } from 'react';
 import { Header } from '@/components/header';
 import { SectionHeader } from '@/components/section-header';
 import { DrillCard } from '@/components/drill-card';
@@ -25,7 +25,7 @@ import { TrendsChart } from '../progress/trends-chart';
 import { AiCoachCard } from '../progress/ai-coach-card';
 import { QuestsCard } from '../progress/quests-card';
 import { HistoryCard } from '../progress/history-card';
-import { differenceInDays, startOfWeek, format, addDays, isSameDay, differenceInMinutes, parseISO, subDays } from 'date-fns';
+import { differenceInDays, startOfWeek, format, addDays, isSameDay, differenceInMinutes, parseISO, subDays, isAfter } from 'date-fns';
 
 export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetails?: boolean }) {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
