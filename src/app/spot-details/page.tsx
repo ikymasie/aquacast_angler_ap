@@ -25,6 +25,7 @@ import { LureSelector } from '@/components/lure-selector';
 import type { CastingAdviceInput, CastingAdviceOutput } from '@/ai/flows/casting-advice-flow';
 import { CastingConditionsCard } from '@/components/casting-conditions-card';
 import type { LureAdviceInput, LureAdviceOutput } from '@/ai/flows/lure-advice-flow';
+import { RecommendedSpotCard } from '@/components/recommended-spot-card';
 
 
 // Find a spot by name, or return the first one as a fallback.
@@ -309,6 +310,12 @@ export default function SpotDetailsPage() {
                             isLoading={isLureAdviceLoading || isForecastLoading}
                             advice={lureAdvice}
                         />
+
+                        <RecommendedSpotCard 
+                            isLoading={isAdviceLoading || isForecastLoading}
+                            advice={advice}
+                        />
+                        
                         <LureSelector 
                             selectedLure={selectedLure}
                             onLureSelect={setSelectedLure}

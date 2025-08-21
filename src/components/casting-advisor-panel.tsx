@@ -15,16 +15,6 @@ import { SpotInflowIcon } from './icons/spot-inflow';
 import { SpotPointIcon } from './icons/spot-point';
 import { Fish } from 'lucide-react';
 
-const SPOT_ICONS: Record<string, React.FC<any>> = {
-    "Drop-offs": SpotDropOffIcon,
-    "Weed Beds": SpotFlatIcon,
-    "Windward Bank": SpotBankIcon,
-    "Points": SpotPointIcon,
-    "Sunken Cover": SpotCoverIcon,
-    "Creek Mouths": SpotInflowIcon,
-    "default": SpotBankIcon,
-};
-
 const getIconForSpot = (spotName: string): React.FC<any> => {
     const keywords: Record<string, React.FC<any>> = {
         "drop-off": SpotDropOffIcon,
@@ -39,6 +29,9 @@ const getIconForSpot = (spotName: string): React.FC<any> => {
         "seam": SpotInflowIcon,
         "structure": SpotCoverIcon,
         "transition": SpotBankIcon,
+        "vegetation": SpotCoverIcon,
+        "rocky": SpotPointIcon,
+        "dam": SpotDropOffIcon,
     };
 
     const lowerCaseName = spotName.toLowerCase();
@@ -47,19 +40,9 @@ const getIconForSpot = (spotName: string): React.FC<any> => {
             return keywords[keyword];
         }
     }
-    return SPOT_ICONS["default"];
+    return SpotBankIcon; // Default icon
 };
 
-
-const statusColors: Record<ScoreStatus, string> = {
-    "Prime": "text-score-prime",
-    "Very Good": "text-score-very-good",
-    "Good": "text-score-good",
-    "Fair": "text-score-fair",
-    "Fair-Slow": "text-score-fair-slow",
-    "Poor": "text-score-poor",
-    "Very Poor": "text-score-very-poor",
-};
 
 interface CastingAdvisorPanelProps {
     isLoading: boolean;
@@ -94,10 +77,10 @@ export function CastingAdvisorPanel({ isLoading, advice }: CastingAdvisorPanelPr
                     {topSpots.map(spot => {
                         const Icon = getIconForSpot(spot.name);
                         return (
-                            <div key={spot.name} className="bg-white/15 rounded-lg p-2 text-center flex flex-col items-center justify-center aspect-square">
-                                <Icon className="w-6 h-6 text-white/90" />
-                                <span className="font-headline font-bold text-xl mt-1">{spot.score}</span>
-                                <span className="text-[11px] leading-tight font-medium text-white/80">{spot.name}</span>
+                             <div key={spot.name} className="bg-white/15 rounded-lg p-2 text-center flex flex-col items-center justify-center aspect-[4/3]">
+                                <Icon className="w-5 h-5 text-white/90" />
+                                <span className="font-headline font-bold text-lg mt-1">{spot.score}</span>
+                                <span className="text-[10px] leading-tight font-medium text-white/80 mt-0.5">{spot.name}</span>
                             </div>
                         );
                     })}
@@ -134,12 +117,12 @@ function CastingAdvisorSkeleton() {
                  <Skeleton className="h-4 w-full" />
                  <Skeleton className="h-4 w-3/4" />
                  <div className="grid grid-cols-3 gap-2 pt-2">
-                    <Skeleton className="w-full aspect-square rounded-lg" />
-                    <Skeleton className="w-full aspect-square rounded-lg" />
-                    <Skeleton className="w-full aspect-square rounded-lg" />
-                    <Skeleton className="w-full aspect-square rounded-lg" />
-                    <Skeleton className="w-full aspect-square rounded-lg" />
-                    <Skeleton className="w-full aspect-square rounded-lg" />
+                    <Skeleton className="w-full aspect-[4/3] rounded-lg" />
+                    <Skeleton className="w-full aspect-[4/3] rounded-lg" />
+                    <Skeleton className="w-full aspect-[4/3] rounded-lg" />
+                    <Skeleton className="w-full aspect-[4/3] rounded-lg" />
+                    <Skeleton className="w-full aspect-[4/3] rounded-lg" />
+                    <Skeleton className="w-full aspect-[4/3] rounded-lg" />
                  </div>
              </div>
               <div className="space-y-2 pt-4 border-t">
