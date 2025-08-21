@@ -30,6 +30,14 @@ interface LivePracticeHUDProps {
     onExit: () => void;
 }
 
+const RING_LABELS: Record<Ring, string> = {
+    bullseye: 'Bullseye!',
+    good: 'Good Cast',
+    okay: 'Okay',
+    miss: 'Miss',
+};
+
+
 const medicalPalette: Record<string, string> = {
     "Prime": "#0FB67F",
     "Very Good": "#26C6DA",
@@ -131,8 +139,8 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
         let points = 0;
         if (outcome === 'hit') {
             if (ring === 'bullseye') points = 100;
-            else if (ring === 'inner') points = 85;
-            else if (ring === 'outer') points = 70;
+            else if (ring === 'good') points = 85;
+            else if (ring === 'okay') points = 70;
         }
 
         startSaving(async () => {
@@ -224,6 +232,7 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                              lastAttempt={lastAttempt}
                              performanceBand={performanceBand}
                              isPaused={status === 'paused'}
+                             ringLabels={RING_LABELS}
                          />
                      )}
                 </div>
@@ -241,8 +250,9 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                 <AttemptControls 
                     round={currentRound}
                     attempt={currentAttempt}
-                    onLog={() => handleLogGenericAttempt('hit', 'inner')} 
+                    onLog={() => handleLogGenericAttempt('hit', 'good')} 
                     onMiss={() => handleLogGenericAttempt('miss', 'miss')}
+                    onFishCaught={() => handleLogGenericAttempt('hit', 'bullseye')}
                     onUndo={undoLastAttempt}
                     canUndo={sessionState.history.length > 0 && sessionState.history[sessionState.history.length - 1].attempts.length > 0}
                 />

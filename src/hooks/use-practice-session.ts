@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, useReducer } from 'react';
 
 // State and Types
-export type Ring = 'bullseye' | 'inner' | 'outer' | 'miss';
+export type Ring = 'bullseye' | 'good' | 'okay' | 'miss';
 
 export interface Attempt {
   outcome: 'hit' | 'miss';

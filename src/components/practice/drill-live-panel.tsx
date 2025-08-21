@@ -24,17 +24,12 @@ interface DrillLivePanelProps {
     lastAttempt: Attempt | null;
     performanceBand: string;
     isPaused: boolean;
+    ringLabels: Record<Ring, string>;
 }
 
-const RING_LABELS: Record<Ring, string> = {
-    bullseye: 'Bullseye!',
-    inner: 'Good Cast',
-    outer: 'Okay',
-    miss: 'Miss',
-};
 
 
-export function DrillLivePanel({ drill, drillType, sessionState, lastAttempt, performanceBand, isPaused }: DrillLivePanelProps) {
+export function DrillLivePanel({ drill, drillType, sessionState, lastAttempt, performanceBand, isPaused, ringLabels }: DrillLivePanelProps) {
     const params = drill.params || {};
     const target = params.targets?.[0] || { distance_m: 15, radius_cm: 45 };
     const windHint = params.windHint_kph ? `Upwind ${params.windHint_kph[0]}-${params.windHint_kph[1]}kph` : 'Upwind';
@@ -47,9 +42,9 @@ export function DrillLivePanel({ drill, drillType, sessionState, lastAttempt, pe
     return (
         <div className="h-full flex flex-col justify-between text-white">
             <HeaderRow distance={target.distance_m} radius={target.radius_cm} windHint={windHint} />
-            <TargetCanvas lastAttempt={lastAttempt} key={sessionState.currentAttempt} />
+            <TargetCanvas lastAttempt={lastAttempt} key={sessionState.currentAttempt} ringLabels={ringLabels}/>
             <GoalArc progress={progress} attempts={currentRoundAttempts} castsPerRound={castsPerRound} band={performanceBand} />
-            <StatusRow lastAttempt={lastAttempt} sessionState={sessionState} />
+            <StatusRow lastAttempt={lastAttempt} sessionState={sessionState} ringLabels={ringLabels} />
         </div>
     );
 }
@@ -69,11 +64,11 @@ function HeaderRow({ distance, radius, windHint }: { distance: number, radius: n
     );
 }
 
-function TargetCanvas({ lastAttempt }: { lastAttempt: Attempt | null }) {
-    const ringColors = {
+function TargetCanvas({ lastAttempt, ringLabels }: { lastAttempt: Attempt | null, ringLabels: Record<Ring, string> }) {
+    const ringColors: Record<Ring, string> = {
         bullseye: '#26C6DA',
-        inner: '#7BD389',
-        outer: '#FFD666',
+        good: '#7BD389',
+        okay: '#FFD666',
         miss: '#FF7A70',
     };
     
@@ -94,7 +89,7 @@ function TargetCanvas({ lastAttempt }: { lastAttempt: Attempt | null }) {
                     transition={{ duration: 0.7, ease: "easeOut" }}
                     className="absolute rounded-full"
                     style={{
-                        inset: lastAttempt.ring === 'bullseye' ? '46.5%' : lastAttempt.ring === 'inner' ? '37.5%' : '25%',
+                        inset: lastAttempt.ring === 'bullseye' ? '46.5%' : lastAttempt.ring === 'good' ? '37.5%' : '25%',
                         backgroundColor: lastAttempt.ring ? ringColors[lastAttempt.ring] : 'transparent',
                         display: lastAttempt.outcome === 'hit' ? 'block' : 'none'
                     }}
@@ -112,7 +107,7 @@ function TargetCanvas({ lastAttempt }: { lastAttempt: Attempt | null }) {
                         className="absolute"
                     >
                         <Badge variant="default" className="text-sm border border-black/10" style={{ backgroundColor: lastAttempt.ring ? ringColors[lastAttempt.ring] : 'transparent' }}>
-                           {RING_LABELS[lastAttempt.ring]} +{lastAttempt.points}
+                           {ringLabels[lastAttempt.ring]} +{lastAttempt.points}
                         </Badge>
                     </motion.div>
                 )}
@@ -176,7 +171,7 @@ function GoalArc({ progress, attempts, castsPerRound, band }: { progress: number
     )
 }
 
-function StatusRow({ lastAttempt, sessionState }: { lastAttempt: Attempt | null, sessionState: PracticeSessionState }) {
+function StatusRow({ lastAttempt, sessionState, ringLabels }: { lastAttempt: Attempt | null, sessionState: PracticeSessionState, ringLabels: Record<Ring, string> }) {
     const currentRoundData = sessionState.history.find(r => r.roundNumber === sessionState.currentRound);
     const streak = currentRoundData?.attempts.reduce((acc, attempt) => attempt.outcome === 'hit' ? acc + 1 : 0, 0) || 0;
     
@@ -192,7 +187,7 @@ function StatusRow({ lastAttempt, sessionState }: { lastAttempt: Attempt | null,
                     transition={{ duration: 0.2 }}
                 >
                     <p className="font-bold text-lg text-white">
-                        {RING_LABELS[lastAttempt.ring || 'miss']}
+                        {ringLabels[lastAttempt.ring || 'miss']}
                         <span className="font-medium text-white/70"> +{lastAttempt.points}pts</span>
                     </p>
                     <p className="text-xs text-white/60">
