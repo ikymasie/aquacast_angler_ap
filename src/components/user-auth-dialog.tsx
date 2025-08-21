@@ -85,25 +85,3 @@ export function UserAuthDialog({ isOpen, onOpenChange }: UserAuthDialogProps) {
     </Dialog>
   );
 }
-
-// A small modification to the base DialogContent to allow hiding the close button
-const OriginalDialogContent = require('@/components/ui/dialog').DialogContent;
-
-OriginalDialogContent.defaultProps = {
-    ...OriginalDialogContent.defaultProps,
-    hideCloseButton: false
-};
-
-const PatchedDialogContent = ({ hideCloseButton, children, ...props }: any) => {
-    return (
-        <OriginalDialogContent {...props}>
-            {children}
-            {!hideCloseButton && OriginalDialogContent.defaultProps.children}
-        </OriginalDialogContent>
-    );
-};
-
-module.exports = {
-    ...require('@/components/ui/dialog'),
-    DialogContent: PatchedDialogContent
-};
