@@ -15,11 +15,13 @@ export default function PracticeDrillPage() {
     const drillKey = params.drillKey as string;
 
     // In a real scenario, you'd fetch drill data using the drillKey.
-    // For now, we redirect to the main practice page logic.
-    
-    // This page is a placeholder for a potential future refactor where each drill
-    // might have its own URL. The current implementation uses a single /practice
-    // page and passes data via state.
+    // For now, this is a placeholder. If a user lands here directly,
+    // we can redirect them or show a "drill not found" message.
+    useEffect(() => {
+        if (!window.history.state?.drill) {
+            router.replace('/');
+        }
+    }, [router]);
     
     return (
         <div className="flex flex-col min-h-screen bg-background">

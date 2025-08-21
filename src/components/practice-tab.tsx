@@ -57,10 +57,13 @@ export function PracticeTab() {
 
   const handleBeginFromSheet = () => {
     if (drillForSetup) {
-      // Use router to navigate and pass drill data in state
       const speciesKey = selectedSpecies.toLowerCase();
       const drillData = { ...drillForSetup, speciesKey };
-      router.push('/practice', { state: { drill: drillData } } as any);
+      
+      // Use history.pushState to pass complex data without cluttering the URL
+      window.history.pushState({ drill: drillData }, '', '/practice');
+      router.push('/practice');
+      
       setDrillForSetup(null);
     }
   };
