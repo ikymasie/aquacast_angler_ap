@@ -21,18 +21,18 @@ export function PracticeTab() {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
   const [selectedLureFamily, setSelectedLureFamily] = useState<LureFamily | 'All'>('All');
   const [catalog, setCatalog] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingCatalog, setIsLoadingCatalog] = useState(true);
   const [isStartingSession, startSessionTransition] = useTransition();
   const [drillForSetup, setDrillForSetup] = useState<any | null>(null);
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isLoading: isUserLoading } = useUser();
   const { toast } = useToast();
   const { setActiveDrill } = usePracticeState();
 
 
   useEffect(() => {
     const loadCatalog = async () => {
-      setIsLoading(true);
+      setIsLoadingCatalog(true);
       try {
         const speciesKey = selectedSpecies.toLowerCase();
         const catalogModule = await import(`@/lib/practice-catalog-${speciesKey}.json`);
@@ -47,7 +47,7 @@ export function PracticeTab() {
             setCatalog(null);
         }
       } finally {
-        setIsLoading(false);
+        setIsLoadingCatalog(false);
       }
     };
 
@@ -105,10 +105,10 @@ export function PracticeTab() {
 
   return (
     <div className="space-y-6">
-      {user?.practiceProfile ? (
-          <SessionHeader profile={user.practiceProfile} />
-      ) : (
+      {isUserLoading ? (
           <Skeleton className="h-[96px] w-full rounded-xl" />
+      ) : (
+          user?.practiceProfile && <SessionHeader profile={user.practiceProfile} />
       )}
       
       <div className="sticky top-[56px] z-10 bg-background/95 backdrop-blur-sm py-4 -mx-4 px-4 border-b">
@@ -126,7 +126,7 @@ export function PracticeTab() {
               Select a species and lure to see relevant drills.
           </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {isLoading ? (
+            {isLoadingCatalog ? (
                 <>
                     <Skeleton className="h-[150px] w-full rounded-xl" />
                     <Skeleton className="h-[150px] w-full rounded-xl" />
