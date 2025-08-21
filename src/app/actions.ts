@@ -4,7 +4,7 @@
 import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
-import { format, parseISO, startOfDay, endOfDay, isWithinInterval, isToday, isFuture, addHours, subDays } from "date-fns";
+import { format, parseISO, startOfDay, endOfDay, isWithinInterval, isToday, startOfHour } from "date-fns";
 import type { CastingAdviceInput } from "@/ai/flows/casting-advice-flow";
 import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
 
@@ -25,7 +25,6 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     const dayIndex = weatherData.daily.findIndex(d => new Date(d.sunrise).toDateString() === selectedDate.toDateString());
     const selectedDayData = weatherData.daily[dayIndex >= 0 ? dayIndex : 0];
 
-
     if (!selectedDayData) {
         return { data: null, error: "Could not retrieve daily forecast data for the selected date."};
     }
@@ -33,19 +32,16 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     let hoursForDay: any[];
 
     if (isToday(selectedDate)) {
-        // For today, get a full 24-hour forecast starting from yesterday.
-        const yesterday = subDays(new Date(), 1);
-        const next24HoursEnd = addHours(new Date(), 24);
+        // For today, find the current hour and take the next 24 hours.
+        const now = startOfHour(new Date());
+        const nowIndex = weatherData.hourly.findIndex(h => parseISO(h.t) >= now);
         
-        hoursForDay = weatherData.hourly.filter(h => {
-            const hourTime = parseISO(h.t);
-            // We need a full 24 hour block, even if some hours are slightly in the past, for trends.
-            return isWithinInterval(hourTime, { start: yesterday, end: next24HoursEnd });
-        });
-        
-        // Fallback: If for some reason that yields nothing, just grab all available future hours.
-        if (hoursForDay.length === 0) {
-            hoursForDay = weatherData.hourly.filter(h => isFuture(parseISO(h.t)));
+        if (nowIndex !== -1) {
+             // Take a 24-hour slice from the current hour onwards.
+             hoursForDay = weatherData.hourly.slice(nowIndex, nowIndex + 24);
+        } else {
+            // Fallback: if we can't find the current hour, just use the first 24 hours available.
+            hoursForDay = weatherData.hourly.slice(0, 24);
         }
 
     } else {
@@ -57,7 +53,8 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         );
     }
     
-    if (hoursForDay.length < 4) { // Ensure we have at least a few hours to work with
+    // Ensure we have a reasonable number of hours to create a forecast.
+    if (hoursForDay.length < 12) { 
       return { data: null, error: "Not enough forecast data is available to create a forecast for the selected date."};
     }
 
