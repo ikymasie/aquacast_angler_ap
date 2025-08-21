@@ -28,6 +28,7 @@ import type { LureAdviceOutput } from '@/ai/flows/lure-advice-flow';
 import { RecommendedSpotCard } from '@/components/recommended-spot-card';
 import { PhotoGallery } from '@/components/photo-gallery';
 import { PracticeTab } from '@/components/practice-tab';
+import { useUser } from '@/hooks/use-user';
 
 
 // Find a spot by name, or return the first one as a fallback.
@@ -47,6 +48,7 @@ export default function SpotDetailsPage() {
     const searchParams = useSearchParams();
     const spotName = searchParams.get('name');
     const [spot, setSpot] = useState(() => getSpotByName(spotName));
+    const { user } = useUser();
     
     // Forecast state
     const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
@@ -82,10 +84,12 @@ export default function SpotDetailsPage() {
 
 
     const loadForecast = useCallback(async (species: Species, date: Date, loc: Location) => {
+        if (!user) return;
         setIsForecastLoading(true);
         setForecastError(null);
         
         const forecastResult = await getFishingForecastAction({
+            userId: user.uid,
             species: species,
             location: loc,
             date: date.toISOString(),
@@ -123,7 +127,7 @@ export default function SpotDetailsPage() {
         }
 
         setIsForecastLoading(false);
-    }, [weatherData]);
+    }, [weatherData, user]);
 
     const loadCastingAdvice = useCallback(async (lure: LureFamily, currentDayContext: DayContext, currentThreeHourScores: ThreeHourIntervalScore[]) => {
         if (!currentDayContext || !currentThreeHourScores.length) return;
@@ -225,7 +229,7 @@ export default function SpotDetailsPage() {
             loadForecast(selectedSpecies, selectedDate, location);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [weatherData, selectedSpecies, selectedDate]); // `loadForecast` is stable via useCallback
+    }, [weatherData, selectedSpecies, selectedDate, user]); // `loadForecast` is stable via useCallback
     
     // Effect 3: Load casting and lure advice when dependencies are ready
     useEffect(() => {
@@ -345,3 +349,5 @@ export default function SpotDetailsPage() {
     </div>
   );
 }
+
+    

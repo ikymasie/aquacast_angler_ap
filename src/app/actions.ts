@@ -1,17 +1,17 @@
 
 'use server';
 
-import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext, HourPoint, RecentWindow, UserSpot } from "@/lib/types";
+import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext, HourPoint, RecentWindow, UserSpot, WeatherApiResponse } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
-import { format, parseISO, startOfToday, endOfDay, isWithinInterval, isToday, startOfHour } from "date-fns";
+import { format, parseISO, startOfToday, endOfDay, isWithinInterval, isToday, startOfHour, isBefore, addHours } from "date-fns";
 import type { CastingAdviceInput } from "@/ai/flows/casting-advice-flow";
 import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
 import { getLureAdvice } from "@/ai/flows/lure-advice-flow";
 import { z } from 'zod';
 import { analyzePhoto, type PhotoAnalysisInput } from "@/ai/flows/photo-analysis-flow";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, doc } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
 
 
 const LureAdviceInputSchema = z.object({
@@ -23,6 +23,7 @@ const LureAdviceInputSchema = z.object({
 });
 
 interface GetScoreActionPayload {
+  userId: string;
   species: Species;
   location: Location;
   date: string; // ISO string for the selected date
@@ -30,13 +31,29 @@ interface GetScoreActionPayload {
 
 export async function getFishingForecastAction(payload: GetScoreActionPayload) {
   try {
-    const { species, location, date } = payload;
-    const weatherData = await fetchWeatherData(location);
+    const { userId, species, location, date } = payload;
 
-    // Use the date part of the ISO string directly to avoid timezone issues.
-    const selectedDateString = date.substring(0, 10); // e.g., "2025-08-21"
-    
-    // Find the daily data for the selected day from the 7-day forecast data
+    const selectedDateString = date.substring(0, 10);
+    const locationKey = `${location.latitude.toFixed(4)}_${location.longitude.toFixed(4)}`;
+    const weatherCacheRef = doc(db, 'weather_cache', `${locationKey}_${selectedDateString}`);
+    const weatherCacheSnap = await getDoc(weatherCacheRef);
+    let weatherData: WeatherApiResponse;
+    const CACHE_EXPIRATION_HOURS = 4;
+
+    if (weatherCacheSnap.exists()) {
+        const cachedData = weatherCacheSnap.data();
+        const cacheTimestamp = cachedData.timestamp.toDate();
+        if (isBefore(new Date(), addHours(cacheTimestamp, CACHE_EXPIRATION_HOURS))) {
+            weatherData = cachedData.data as WeatherApiResponse;
+        } else {
+            weatherData = await fetchWeatherData(location);
+            await setDoc(weatherCacheRef, { data: weatherData, timestamp: new Date() });
+        }
+    } else {
+        weatherData = await fetchWeatherData(location);
+        await setDoc(weatherCacheRef, { data: weatherData, timestamp: new Date() });
+    }
+
     const selectedDayData = weatherData.daily.find(d => d.sunrise.startsWith(selectedDateString));
 
     if (!selectedDayData) {
@@ -52,7 +69,7 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     const scoredHours: ScoredHour[] = await Promise.all(hoursForDay.map(async (hour) => ({
       time: hour.t,
       score: await scoreHour(species, hour, selectedDayData, weatherData.recent),
-      condition: hour.derived.light > 0.5 ? 'Clear' : 'Cloudy', // Simple condition for the icon
+      condition: hour.derived.light > 0.5 ? 'Clear' : 'Cloudy',
       temperature: Math.round(hour.tempC)
     })));
     
@@ -69,6 +86,18 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     if (scoredHours.length > 0) {
       threeHourScores = await calculate3HourIntervalScores(scoredHours);
       overallDayScore = await getOverallDayScore(scoredHours);
+
+      // Save the scores to Firestore for the user
+      const userForecastRef = doc(db, 'users', userId, 'forecasts', `${locationKey}_${selectedDateString}_${species}`);
+      await setDoc(userForecastRef, {
+        species,
+        location,
+        date: selectedDateString,
+        threeHourScores,
+        overallDayScore,
+        hourlyChartData,
+        timestamp: new Date()
+      });
     }
 
     return { 
@@ -212,3 +241,5 @@ export async function analyzePhotoAction(payload: PhotoAnalysisInput) {
         return { data: null, error: errorMessage };
     }
 }
+
+    
