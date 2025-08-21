@@ -255,8 +255,8 @@ export async function calculate3HourIntervalScores(hourlyScores: ScoredHour[]): 
 
     const results: ThreeHourIntervalScore[] = [];
 
-    // Create at least 6 intervals (18 hours)
-    for (let i = 0; i < relevantScores.length && results.length < 6; i += 3) {
+    // Create up to 8 intervals (24 hours)
+    for (let i = 0; i < relevantScores.length && results.length < 8; i += 3) {
         const chunk = relevantScores.slice(i, i + 3);
         if (chunk.length === 0) continue;
 
