@@ -56,7 +56,7 @@ export async function getCastingAdvice(input: CastingAdviceInput): Promise<Casti
 
 const prompt = ai.definePrompt({
     name: 'castingAdvicePrompt',
-    input: { schema: CastingAdviceInputSchema },
+    input: { schema: CastingAdviceInputSchema.extend({ isBream: z.boolean() }) },
     output: { schema: CastingAdviceOutputSchema },
     prompt: `
         You are a world-class fishing guide AI. Your task is to provide concise, actionable advice for an angler based on the provided data.
@@ -77,7 +77,7 @@ const prompt = ai.definePrompt({
         - **{{label}}**: Score {{score}}/100 ({{status}}), Conditions: {{condition}}
         {{/each}}
 
-        {{#if (eq species "Bream")}}
+        {{#if isBream}}
         **Zambezi & Okavango Bream Fishing Pocket Guide:**
         This is critical local knowledge. You MUST use this to inform your recommendations for Bream.
 
@@ -137,7 +137,8 @@ const getCastingAdviceFlow = ai.defineFlow(
         outputSchema: CastingAdviceOutputSchema,
     },
     async (input) => {
-        const { output } = await prompt(input);
+        const isBream = input.species === 'Bream';
+        const { output } = await prompt({ ...input, isBream });
         return output!;
     }
 );

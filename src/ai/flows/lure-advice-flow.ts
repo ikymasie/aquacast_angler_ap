@@ -38,7 +38,7 @@ export async function getLureAdvice(input: LureAdviceInput): Promise<LureAdviceO
 
 const prompt = ai.definePrompt({
     name: 'lureAdvicePrompt',
-    input: { schema: LureAdviceInputSchema },
+    input: { schema: LureAdviceInputSchema.extend({ isBream: z.boolean() }) },
     output: { schema: LureAdviceOutputSchema },
     prompt: `
         You are an expert fishing guide AI. Your task is to provide a quick, actionable analysis of the current conditions for a specific lure type.
@@ -58,7 +58,7 @@ const prompt = ai.definePrompt({
         - **Sunset:** {{{dayContext.sunset}}}
         - **Est. Water Temp:** {{{recentWindow.waterTempC}}}°C
         
-        {{#if (eq species "Bream")}}
+        {{#if isBream}}
         **Expert Bream Knowledge:**
         *   **Lures:** Orange Paddletails for reeds, Mepps Black Fury for eddies, Football Jigs for timber, Rattlin' Hornets for drop-offs.
         *   **Behavior:** Three-Spots are aggressive in eddies. Nembwe are in timber/reeds. Thinface prefer shade. Humpbacks like current transitions. Pike are in rapids and calm backwaters.
@@ -84,7 +84,8 @@ const getLureAdviceFlow = ai.defineFlow(
         outputSchema: LureAdviceOutputSchema,
     },
     async (input) => {
-        const { output } = await prompt(input);
+        const isBream = input.species === 'Bream';
+        const { output } = await prompt({ ...input, isBream });
         return output!;
     }
 );
