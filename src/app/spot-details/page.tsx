@@ -85,36 +85,32 @@ export default function SpotDetailsPage() {
         });
 
         if (forecastResult.data && weatherData?.hourly) {
-            const allScoredHours: ScoredHour[] = weatherData.hourly.map((h, i) => {
-                const correspondingForecast = forecastResult.data.hourlyChartData.find(d => d.time === format(parseISO(h.t), 'ha'));
+             const allScoredHours: ScoredHour[] = (forecastResult.data.hourlyChartData || []).map((d: any) => {
+                const correspondingHour = weatherData.hourly.find(h => format(parseISO(h.t), 'ha') === d.time);
                 return {
-                    time: h.t,
-                    score: correspondingForecast?.success ?? 0,
-                    condition: correspondingForecast?.condition ?? 'Clear',
-                    temperature: correspondingForecast?.temperature ?? 0
+                    time: correspondingHour?.t || new Date().toISOString(),
+                    score: d.success ?? 0,
+                    condition: d.condition ?? 'Clear',
+                    temperature: d.temperature ?? 0
                 };
-             });
+            });
 
-            const futureScoredHours = allScoredHours.filter(h => isFuture(new Date(h.time)));
-            const recWindow = await recommendWindows(futureScoredHours);
+            const recWindow = await recommendWindows(allScoredHours.filter(h => isFuture(parseISO(h.time))));
             
             setRecommendedWindow(recWindow);
             setThreeHourScores(forecastResult.data.threeHourScores || []);
             setOverallDayScore(forecastResult.data.overallDayScore || null);
-            
-        } 
-        
-        if (forecastResult.error) {
-            console.error("Forecast Error:", forecastResult.error);
-            setForecastError(forecastResult.error);
-            // Clear previous results on error
-            setRecommendedWindow(null);
-            setThreeHourScores([]);
-            setOverallDayScore(null);
+            setForecastError(null);
+        } else {
+             console.error("Forecast Error:", forecastResult.error);
+             setForecastError(forecastResult.error);
+             setRecommendedWindow(null);
+             setThreeHourScores([]);
+             setOverallDayScore(null);
         }
 
         setIsForecastLoading(false);
-    }, [weatherData?.hourly]);
+    }, [weatherData]);
 
     const loadCastingAdvice = useCallback(async (lure: LureFamily) => {
         if (!dayContext || !threeHourScores.length) return;
@@ -152,8 +148,7 @@ export default function SpotDetailsPage() {
     // Subsequent forecast calculation when dependencies change
     useEffect(() => {
         if (weatherData && !isWeatherLoading) {
-            // --- FIX: Add guardrail to ensure date is valid ---
-            const firstForecastDate = parseISO(weatherData.daily[0].sunrise);
+            const firstForecastDate = startOfToday();
             let dateToLoad = selectedDate;
 
             if (selectedDate < firstForecastDate) {
@@ -161,7 +156,6 @@ export default function SpotDetailsPage() {
                 dateToLoad = startOfToday();
                 setSelectedDate(dateToLoad);
             }
-            // --- END FIX ---
             loadForecast(selectedSpecies, dateToLoad, location);
         }
     }, [weatherData, isWeatherLoading, selectedSpecies, selectedDate, location, loadForecast]);
