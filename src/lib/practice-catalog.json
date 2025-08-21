@@ -114,8 +114,297 @@
         "subtype": "worm_float",
         "name": "Live Worm under Float",
         "weight_g": 4,
-        "size": "std"
+        "size": "std",
+        "speciesAffinity": { "bass": 0.4, "bream": 0.9, "carp": 0.7 },
+        "recommendedTechniques": ["pitch_flip", "rig_prep", "retrieve_control"],
+        "presentationAxes": ["quiet_entry", "drift_lane_control", "hookset_timing"]
+      },
+      {
+        "baitKey": "carp_hair_rig_boilie",
+        "family": "live",
+        "subtype": "hair_rig",
+        "name": "Carp Hair-Rig (Boilie)",
+        "weight_g": 18,
+        "size": "15mm",
+        "speciesAffinity": { "bass": 0.05, "bream": 0.2, "carp": 0.95 },
+        "recommendedTechniques": ["rig_prep", "pitch_flip"],
+        "presentationAxes": ["rig_accuracy", "quiet_entry", "strike_delay_discipline"]
       }
+    ],
+    "speciesProfiles": [
+      {
+        "speciesKey": "bass",
+        "preferredFamilies": ["crank_swim", "spinner", "soft"],
+        "recommendedBaits": ["spinner_willow_1_2oz", "crank_squarebill_1_5", "swimbait_paddle_4in", "soft_stickbait_5in"],
+        "techniqueBias": { "cast_sidearm": 0.2, "retrieve_control": 0.2, "pitch_flip": 0.1 }
+      },
+      {
+        "speciesKey": "bream",
+        "preferredFamilies": ["soft", "live"],
+        "recommendedBaits": ["soft_ned_2_75in", "live_worm_float"],
+        "techniqueBias": { "pitch_flip": 0.2, "retrieve_control": 0.1 }
+      },
+      {
+        "speciesKey": "carp",
+        "preferredFamilies": ["live", "soft"],
+        "recommendedBaits": ["carp_hair_rig_boilie", "live_worm_float", "soft_ned_2_75in"],
+        "techniqueBias": { "rig_prep": 0.25, "pitch_flip": 0.15 }
+      }
+    ]
+  },
+  "drillCatalog": [
+    {
+      "drillKey": "spinner_lane_cadence_v1",
+      "name": "Spinner Lane Cadence",
+      "speciesKeys": ["bass", "bream"],
+      "requiredFamilies": ["spinner"],
+      "techniques": ["cast_sidearm", "retrieve_control"],
+      "params": { "rounds": 3, "castsPerRound": 10, "laneWidth_m": 4, "distance_m": [12, 18], "targetCadence_spm": 60, "tolerance_spm": 6 },
+      "metrics": ["cadence_consistency", "lane_hits", "contact_cover"],
+      "scoring": {
+        "weights": { "cadence_consistency": 0.5, "lane_hits": 0.3, "contact_cover": 0.2 },
+        "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
+      }
+    },
+    {
+      "drillKey": "squarebill_contact_course_v1",
+      "name": "Squarebill Contact Course",
+      "speciesKeys": ["bass"],
+      "requiredBaits": ["crank_squarebill_1_5"],
+      "techniques": ["cast_overhead", "retrieve_control"],
+      "params": { "rounds": 3, "castsPerRound": 8, "targets": [{ "distance_m": 12 }, { "distance_m": 15 }], "obstacles": 6 },
+      "metrics": ["cover_deflection", "depth_track_error", "accuracy"],
+      "scoring": {
+        "weights": { "cover_deflection": 0.45, "depth_track_error": 0.35, "accuracy": 0.2 },
+        "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
+      }
+    },
+    {
+      "drillKey": "soft_skip_precision_v1",
+      "name": "Soft Bait Skip Precision",
+      "speciesKeys": ["bass", "bream"],
+      "requiredBaits": ["soft_stickbait_5in"],
+      "techniques": ["cast_sidearm", "pitch_flip"],
+      "params": { "rounds": 4, "castsPerRound": 6, "targets": [{ "distance_m": 8, "radius_cm": 45 }, { "distance_m": 10, "radius_cm": 45 }], "minSkips": 2 },
+      "metrics": ["skip_distance", "quiet_entry", "ring_hits"],
+      "scoring": {
+        "weights": { "skip_distance": 0.4, "quiet_entry": 0.3, "ring_hits": 0.3 },
+        "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
+      }
+    },
+    {
+      "drillKey": "live_pitch_quiet_entry_v1",
+      "name": "Live Pitch — Quiet Entry",
+      "speciesKeys": ["bream", "carp", "bass"],
+      "requiredFamilies": ["live"],
+      "techniques": ["pitch_flip", "rig_prep"],
+      "params": { "rounds": 3, "castsPerRound": 10, "targets": [{ "distance_m": 3, "radius_cm": 25 }, { "distance_m": 5, "radius_cm": 30 }] },
+      "metrics": ["quiet_entry", "precision", "hookset_timing"],
+      "scoring": {
+        "weights": { "quiet_entry": 0.45, "precision": 0.35, "hookset_timing": 0.2 },
+        "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
+      }
+    },
+    {
+      "drillKey": "carp_hair_rig_accuracy_v1",
+      "name": "Carp Hair-Rig Accuracy",
+      "speciesKeys": ["carp"],
+      "requiredBaits": ["carp_hair_rig_boilie"],
+      "techniques": ["rig_prep", "pitch_flip"],
+      "params": { "rounds": 3, "castsPerRound": 8, "targets": [{ "distance_m": 15, "radius_cm": 60 }, { "distance_m": 20, "radius_cm": 60 }] },
+      "metrics": ["rig_accuracy", "quiet_entry", "strike_delay_discipline"],
+      "scoring": {
+        "weights": { "rig_accuracy": 0.5, "quiet_entry": 0.3, "strike_delay_discipline": 0.2 },
+        "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
+      }
+    }
+  ],
+  "evaluationRubrics": {
+    "byBaitFamily": {
+      "spinner": {
+        "axes": ["cadence_consistency", "lane_hits", "depth_control", "contact_cover"],
+        "weights": { "cadence_consistency": 0.35, "lane_hits": 0.25, "depth_control": 0.2, "contact_cover": 0.2 }
+      },
+      "crank_swim": {
+        "axes": ["cover_deflection", "depth_track_error", "cadence_consistency"],
+        "weights": { "cover_deflection": 0.4, "depth_track_error": 0.4, "cadence_consistency": 0.2 }
+      },
+      "soft": {
+        "axes": ["skip_distance", "quiet_entry", "line_control", "bottom_contact_time"],
+        "weights": { "skip_distance": 0.35, "quiet_entry": 0.3, "line_control": 0.2, "bottom_contact_time": 0.15 }
+      },
+      "live": {
+        "axes": ["quiet_entry", "drift_lane_control", "hookset_timing", "rig_accuracy"],
+        "weights": { "quiet_entry": 0.35, "drift_lane_control": 0.25, "hookset_timing": 0.2, "rig_accuracy": 0.2 }
+      }
+    }
+  },
+  "practiceTab": {
+    "uiDefaults": {
+      "gutter_px": 16,
+      "cardRadius_px": 16,
+      "tileRadius_px": 14
+    },
+    "filters": {
+      "species": ["bass", "bream", "carp"],
+      "baitFamily": ["spinner", "crank_swim", "soft", "live"],
+      "techniqueCategory": ["casting", "short_range", "presentation", "rigging"]
+    }
+  },
+  "session": {
+    "sessionId": "string",
+    "userId": "string",
+    "startedAtISO": "string",
+    "endedAtISO": "string|null",
+    "mode": "drill|free",
+    "speciesFocus": "bream|bass|carp|null",
+    "drillKey": "string|null",
+    "techniqueKey": "string|null",
+    "bait": {
+      "baitKey": "string|null",
+      "family": "live|crank_swim|spinner|soft|null",
+      "subtype": "string|null",
+      "weight_g": "number|null",
+      "color": "string|null",
+      "size": "string|null",
+      "rig": {
+        "style": "texas|carolina|jighead|dropshot|hair_rig|float|free_rig|null",
+        "leader_lb": "number|null",
+        "hook_size": "string|null"
+      }
+    },
+    "equipment": {
+      "rod_len_ft": "number|null",
+      "line_type": "mono|fluoro|braid|null",
+      "line_lb": "number|null"
+    },
+    "conditions": {
+      "body": "lake|river|null",
+      "season": "hot|cool|transition|null",
+      "windKph": "number|null",
+      "windDirDeg": "number|null",
+      "cloudPct": "number|null",
+      "pressureTrendHpaPer3h": "number|null",
+      "rainMm24h": "number|null",
+      "waterLevel": "rising|falling|stable|null",
+      "tempAirC": "number|null",
+      "tempWaterC": "number|null"
+    },
+    "attempts": [
+      {
+        "attemptId": "string",
+        "timestampISO": "string",
+        "target": { "distance_m": "number", "bearing_deg": "number|null", "radius_cm": "number|null" },
+        "baitUsed": { "baitKey": "string", "family": "live|crank_swim|spinner|soft" },
+        "cast": {
+          "techniqueKey": "string",
+          "releaseAngle_deg": "number|null",
+          "trajectory": "low|medium|high|null",
+          "skipCount": "number|null",
+          "retrieveStyle": "steady|yo-yo|burn|slow-roll|twitch|null",
+          "retrieveCadence_spm": "number|null",
+          "depthTrack_m": "number|null",
+          "contactCover": "boolean|null",
+          "duration_s": "number|null"
+        },
+        "outcome": {
+          "ring": "center|inner|outer|miss|null",
+          "distanceError_cm": "number|null",
+          "angleError_deg": "number|null",
+          "quietEntry": "boolean|null",
+          "bottomContactTime_s": "number|null",
+          "biteSimulated": "boolean|null",
+          "hookset": "n/a|miss|landed",
+          "landedFish": "boolean|null"
+        },
+        "score": { "points": "number", "comboMultiplier": "number" },
+        "notes": "string|null",
+        "mediaRef": "string|null"
+      }
+    ],
+    "totals": {
+      "casts": "number",
+      "hits": "number",
+      "accuracy_pct": "number",
+      "avgDistanceError_cm": "number|null",
+      "avgCadence_spm": "number|null",
+      "contactCoverRate_pct": "number|null",
+      "quietEntryRate_pct": "number|null",
+      "sessionPoints": "number",
+      "grade": "S|A|B|C|D",
+      "xpEarned": "number",
+      "coinsEarned": "number"
+    },
+    "aiCoaching": {
+      "biteConsiderations": ["string", "string", "string"],
+      "possibleStrategies": ["string", "string", "string"],
+      "insights": ["string", "string", "string"]
+    }
+  },
+  "progress": {
+    "level": "number",
+    "xp": "number",
+    "nextLevelXp": "number",
+    "streakDays": "number",
+    "techniqueMastery": [
+      { "speciesKey": "bass", "techniqueKey": "cast_sidearm", "rating_0_100": 72, "trend": "up|flat|down" }
+    ],
+    "baitMastery": [
+      { "speciesKey": "bass", "baitKey": "spinner_willow_1_2oz", "rating_0_100": 78, "trend": "up|flat|down" },
+      { "speciesKey": "carp", "baitKey": "carp_hair_rig_boilie", "rating_0_100": 84, "trend": "up|flat|down" }
+    ],
+    "speciesMastery": [
+      { "speciesKey": "bass", "rating_0_100": 76, "trend": "up|flat|down" }
+    ],
+    "achievements": [
+      { "badgeKey": "spinner_cadence_pro", "tier": "bronze|silver|gold|elite", "unlockedAtISO": "string" },
+      { "badgeKey": "carp_rigsmith", "tier": "bronze|silver|gold|elite", "unlockedAtISO": "string" }
+    ]
+  },
+  "quests": {
+    "daily": [
+      {
+        "questId": "q_spin_5_lane_hits",
+        "title": "Spinner: 5 perfect lane hits",
+        "expiresAtISO": "string",
+        "requirements": { "baitFamily": "spinner", "lane_hits": 5 },
+        "rewards": { "xp": 120, "coins": 30, "badgeKey": null },
+        "progress": { "lane_hits": 0, "completed": false }
+      }
+    ],
+    "weekly": [
+      {
+        "questId": "q_carp_rig_accuracy",
+        "title": "Carp: 10 hair-rig accuracy hits",
+        "expiresAtISO": "string",
+        "requirements": { "speciesKey": "carp", "baitKey": "carp_hair_rig_boilie", "rig_accuracy_hits": 10 },
+        "rewards": { "xp": 500, "coins": 120, "badgeKey": "carp_rigsmith" },
+        "progress": { "rig_accuracy_hits": 0, "completed": false }
+      }
+    ]
+  },
+  "leaderboards": [
+    {
+      "scope": "global|spot|friends",
+      "metricKey": "sessionPoints|accuracy_pct|maxHitStreak|grade|baitMastery",
+      "dimension": { "speciesKey": "bass", "baitFamily": "spinner" },
+      "period": "daily|weekly|alltime",
+      "entries": [
+        { "rank": 1, "userId": "string", "displayName": "string", "value": "number|string", "userCountry": "string|null" }
+      ]
+    }
+  ],
+  "rewardStore": {
+    "coins": "number",
+    "inventory": [
+      { "itemKey": "pro_tip_pack_spinner", "type": "consumable", "owned": 0, "costCoins": 200 },
+      { "itemKey": "rod_skin_teal_medical", "type": "cosmetic", "owned": 1, "costCoins": 300 }
+    ]
+  },
+  "safety": {
+    "disclaimers": [
+      "Practice casting only in safe, clear areas and use eye protection.",
+      "Avoid lightning, strong wind, and crowded spaces while practicing."
     ]
   }
 }
