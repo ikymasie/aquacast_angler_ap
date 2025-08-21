@@ -51,7 +51,8 @@ function PracticeTopBar({ drillName, onExit }: { drillName: string, onExit: () =
 
 function ScoreStrip() {
     const currentBand = "Good";
-    const color = medicalPalette[currentBand];
+    const color = medicalPalette[currentBand as keyof typeof medicalPalette] || '#FFD666';
+
 
     return (
         <div className="h-10 px-3 bg-white rounded-lg flex items-center justify-between text-sm shadow-sm border border-line-200">

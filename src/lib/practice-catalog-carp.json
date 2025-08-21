@@ -1,3 +1,4 @@
+
 {
   "schemaVersion": "2.0-practice-catalog",
   "lastUpdatedISO": "2025-08-21T00:00:00Z",
@@ -160,7 +161,7 @@
               ],
               "insights": [
                 "Grouping under 1 m radius produced the highest round scores.",
-                "Most long casts came from early release—delay by a split second.",
+                "Most long casts came from early release—delay by a fraction.",
                 "Quiet entries increased when trajectory angle stayed below 35°."
               ]
             }
