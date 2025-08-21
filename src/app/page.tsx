@@ -6,13 +6,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { BottomNav } from '@/components/bottom-nav';
 import { HomeTab } from '@/components/tabs/home-tab';
 import { FavoritesTab } from '@/components/tabs/favorites-tab';
-import { SearchTab } from '@/components/tabs/search-tab';
+import { ProgressTab } from '@/components/tabs/progress-tab';
 import { MapsTab } from '@/components/tabs/maps-tab';
 
 const tabs: { [key: string]: React.ComponentType } = {
   home: HomeTab,
   favorites: FavoritesTab,
-  search: SearchTab,
+  progress: ProgressTab,
   maps: MapsTab,
 };
 

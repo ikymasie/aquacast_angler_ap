@@ -1,14 +1,14 @@
 
 'use client'
 
-import { Heart, Map, Search, Home } from "lucide-react";
+import { Heart, Map, Target, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SVGProps } from "react";
 
 const navItems = [
     { key: 'home', icon: Home, label: 'Home' },
     { key: 'favorites', icon: Heart, label: 'Favorites' },
-    { key: 'search', icon: Search, label: 'Search' },
+    { key: 'progress', icon: Target, label: 'Progress' },
     { key: 'maps', icon: Map, label: 'Maps' },
 ]
 
@@ -23,6 +23,13 @@ const HeartIconSolid = (props: SVGProps<SVGSVGElement>) => (
     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
   </svg>
 );
+
+const TargetIconSolid = (props: SVGProps<SVGSVGElement>) => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="currentColor"/>
+    </svg>
+);
+
 
 interface BottomNavProps {
     activeTab: string;
@@ -57,6 +64,8 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                       Icon = isActive ? HomeIconSolid : Home;
                     } else if (item.key === 'favorites') {
                       Icon = isActive ? HeartIconSolid : Heart;
+                    } else if (item.key === 'progress') {
+                      Icon = isActive ? TargetIconSolid : Target;
                     } else {
                       Icon = item.icon;
                     }
@@ -75,7 +84,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                                     "h-6 w-6 transition-colors duration-150", 
                                     isActive ? 'text-primary-dark' : 'text-primary-dark/70 group-hover:text-primary-dark/85',
                                 )} 
-                                strokeWidth={isActive ? (item.key === 'home' || item.key === 'favorites' ? 0 : 2) : 2}
+                                strokeWidth={isActive ? (item.key === 'home' || item.key === 'favorites' || item.key === 'progress' ? 0 : 2) : 2}
                             />
                             <span className={cn(
                                 "text-xs font-medium transition-colors duration-150", 

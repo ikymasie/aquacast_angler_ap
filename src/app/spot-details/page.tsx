@@ -27,7 +27,6 @@ import { CastingConditionsCard } from '@/components/casting-conditions-card';
 import type { LureAdviceOutput } from '@/ai/flows/lure-advice-flow';
 import { RecommendedSpotCard } from '@/components/recommended-spot-card';
 import { PhotoGallery } from '@/components/photo-gallery';
-import { PracticeTab } from '@/components/practice-tab';
 import { useUser } from '@/hooks/use-user';
 
 
@@ -272,10 +271,9 @@ export default function SpotDetailsPage() {
                 <SpotHeaderCard spot={spot} />
                 
                 <Tabs defaultValue="forecast" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4">
+                    <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="forecast">Forecast</TabsTrigger>
                         <TabsTrigger value="casting">Casting</TabsTrigger>
-                        <TabsTrigger value="practice">Practice</TabsTrigger>
                         <TabsTrigger value="gallery">Gallery</TabsTrigger>
                     </TabsList>
                     
@@ -353,10 +351,6 @@ export default function SpotDetailsPage() {
                             isLoading={isAdviceLoading || isForecastLoading}
                             advice={advice}
                         />
-                    </TabsContent>
-
-                    <TabsContent value="practice" className="pt-4 space-y-4">
-                        <PracticeTab />
                     </TabsContent>
                     
                     <TabsContent value="gallery" className="pt-4 space-y-4">
