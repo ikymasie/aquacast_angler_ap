@@ -20,7 +20,7 @@ interface MasteryOverviewProps {
     familyMastery: MasteryItem[];
 }
 
-function MasteryBar({ name, pct, topSkill, image }: MasteryItem) {
+function MasteryBar({ name, pct, topSkill, image }: Omit<MasteryItem, 'key'>) {
     return (
         <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center flex-shrink-0">
@@ -47,14 +47,14 @@ export function MasteryOverview({ speciesMastery, familyMastery }: MasteryOvervi
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="rounded-xl p-4 space-y-4">
             <SectionHeader title="Species Mastery" />
-            {speciesMastery.length > 0 ? speciesMastery.map(species => (
-                <MasteryBar key={species.key} {...species} />
+            {speciesMastery.length > 0 ? speciesMastery.map(({ key, ...rest }) => (
+                <MasteryBar key={key} {...rest} />
             )) : <p className="text-sm text-muted-foreground">Practice to see your species mastery.</p>}
         </Card>
         <Card className="rounded-xl p-4 space-y-4">
             <SectionHeader title="Bait Family Mastery" />
-            {familyMastery.length > 0 ? familyMastery.map(family => (
-                 <MasteryBar key={family.key} {...family} />
+            {familyMastery.length > 0 ? familyMastery.map(({ key, ...rest }) => (
+                 <MasteryBar key={key} {...rest} />
             )) : <p className="text-sm text-muted-foreground">Practice to see your lure mastery.</p>}
         </Card>
     </div>
