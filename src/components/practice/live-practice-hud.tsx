@@ -83,20 +83,10 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
     // This would be driven by drill type state
     const drillType = drill.techniques.includes('cast_sidearm') ? 'accuracy' : 'cadence'; 
 
-    const handleLogAttempt = () => {
+    const handleLogAttempt = (attemptData: any) => {
         if (!user || !drill.sessionId) return;
         
         startSaving(async () => {
-            // This is a placeholder for real attempt data from the AttemptSheet
-            const attemptData = {
-                roundNumber: 1,
-                castNumber: 1,
-                outcome: 'hit',
-                ring: 'inner',
-                points: 85,
-                timestamp: new Date().toISOString()
-            };
-
             const { success, error } = await savePracticeAttemptAction({
                 userId: user.uid,
                 sessionId: drill.sessionId,
@@ -118,8 +108,8 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
              const { success, error } = await completePracticeSessionAction({
                 userId: user.uid,
                 sessionId: drill.sessionId,
-                finalScore: 8500,
-                finalGrade: 'A'
+                finalScore: 8500, // Placeholder
+                finalGrade: 'A' // Placeholder
             });
              if (error) {
                 toast({ variant: 'destructive', title: 'Failed to Complete', description: error });
@@ -127,6 +117,17 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                 toast({ variant: 'default', title: 'Session Complete!' });
                 onExit();
             }
+        });
+    }
+    
+    const handleLogGenericAttempt = () => {
+         handleLogAttempt({
+            roundNumber: 1,
+            castNumber: 1,
+            outcome: 'hit',
+            ring: 'inner',
+            points: 85,
+            timestamp: new Date().toISOString()
         });
     }
 
@@ -142,7 +143,7 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
             </div>
             
             {/* The real AttemptControls would open a sheet to gather data before calling handleLogAttempt */}
-            <AttemptControls onLog={handleLogAttempt} />
+            <AttemptControls onLog={handleLogGenericAttempt} />
         </div>
     );
 }
