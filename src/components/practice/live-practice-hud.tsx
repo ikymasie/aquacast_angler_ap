@@ -5,6 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { AccuracyPack } from './accuracy-pack';
 import { AttemptControls } from './attempt-controls';
 import { CadencePack } from './cadence-pack';
+import { InstructionCard } from './instruction-card'; // Import the new component
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Pause, MoreVertical, Play, X } from 'lucide-react';
@@ -223,6 +224,10 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                      {drillType === 'accuracy' && <AccuracyPack drill={drill} />}
                      {drillType === 'cadence' && <CadencePack drill={drill} />}
                 </div>
+
+                {drill.coachingTemplates && (
+                    <InstructionCard templates={drill.coachingTemplates} />
+                )}
                 
                 <AttemptControls 
                     round={currentRound}
