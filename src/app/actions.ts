@@ -1,14 +1,14 @@
 
 'use server';
 
-import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext } from "@/lib/types";
+import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext, HourPoint, RecentWindow } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
 import { format, parseISO, startOfToday, endOfDay, isWithinInterval, isToday, startOfHour } from "date-fns";
 import type { CastingAdviceInput } from "@/ai/flows/casting-advice-flow";
 import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
-import type { LureAdviceInput } from "@/ai/flows/lure-advice-flow";
 import { getLureAdvice } from "@/ai/flows/lure-advice-flow";
+import type { LureAdviceInput } from "@/ai/flows/lure-advice-flow";
 
 
 interface GetScoreActionPayload {
@@ -160,5 +160,3 @@ export async function getLureAdviceAction(payload: LureAdviceInput) {
         return { data: null, error: errorMessage };
     }
 }
-
-    

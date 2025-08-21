@@ -12,7 +12,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import type { Species, LureFamily, DayContext, HourPoint, RecentWindow } from '@/lib/types';
 
-export const LureAdviceInputSchema = z.object({
+const LureAdviceInputSchema = z.object({
   species: z.custom<Species>(),
   lureFamily: z.custom<LureFamily>(),
   dayContext: z.custom<DayContext>(),
@@ -22,7 +22,7 @@ export const LureAdviceInputSchema = z.object({
 export type LureAdviceInput = z.infer<typeof LureAdviceInputSchema>;
 
 
-export const LureAdviceOutputSchema = z.object({
+const LureAdviceOutputSchema = z.object({
     conditionScore: z.number().min(0).max(10).describe("A single 0-10 score indicating how suitable the current conditions are for the selected lure family. 0 is worst, 10 is best."),
     summary: z.string().describe("A 1-2 sentence summary explaining the score, referencing the most important conditions."),
     wind: z.string().describe("A very short (1-3 word) descriptor for the wind's impact (e.g., 'Calm', 'Ripples', 'Challenging')."),
@@ -80,5 +80,3 @@ const getLureAdviceFlow = ai.defineFlow(
         return output!;
     }
 );
-
-    
