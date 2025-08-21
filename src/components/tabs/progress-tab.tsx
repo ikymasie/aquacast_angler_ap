@@ -21,6 +21,7 @@ import { WeeklyOverviewCard } from '../progress/weekly-overview-card';
 import { SkillWheel } from '../progress/skill-wheel';
 import { DrillOverviewCarousel } from '../progress/drill-overview-carousel';
 import { MasteryOverview } from '../progress/mastery-overview';
+import { TrendsChart } from '../progress/trends-chart';
 
 export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetails?: boolean }) {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
@@ -114,6 +115,7 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
       <SkillWheel />
       <DrillOverviewCarousel />
       <MasteryOverview />
+      <TrendsChart />
       
       <div className={cn(!isInsideSpotDetails && "sticky top-[56px] z-10 bg-background/95 backdrop-blur-sm py-4 -mx-4 px-4 border-b")}>
           <div className="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
