@@ -1,0 +1,262 @@
+{
+  "schemaVersion": "2.0-practice-catalog",
+  "lastUpdatedISO": "2025-08-21T00:00:00Z",
+  "speciesCatalog": {
+    "speciesKey": "carp",
+    "displayName": "Common/Sharptooth Carp",
+    "preferredFamilies": ["live", "soft"],
+    "gradeBands": [
+      { "min": 90, "grade": "S" },
+      { "min": 80, "grade": "A" },
+      { "min": 70, "grade": "B" },
+      { "min": 60, "grade": "C" },
+      { "min": 0,  "grade": "D" }
+    ],
+    "ui": {
+      "icon": "fish_carp",
+      "palette": { "primary": "#27BFA6", "bgSoft": "#E6F7F4" }
+    },
+    "families": [
+      {
+        "familyKey": "live",
+        "label": "Live / Rigs (Float, Feeder, Hair-Rig)",
+        "recommendedBaits": [
+          { "baitKey": "carp_hair_rig_boilie", "name": "Hair-Rig Boilie 15mm" },
+          { "baitKey": "live_worm_float", "name": "Live Worm under Float" }
+        ],
+        "techniques": [
+          { "techniqueKey": "rig_prep", "label": "Rig Prep Accuracy", "skillAxes": ["rig_accuracy", "setup_time"] },
+          { "techniqueKey": "pitch_flip", "label": "Quiet Placement", "skillAxes": ["precision", "quiet_entry"] },
+          { "techniqueKey": "drift_lane", "label": "Drift Lane Control", "skillAxes": ["time_in_lane", "correction_efficiency"] },
+          { "techniqueKey": "hookset_timing", "label": "Strike Delay Discipline", "skillAxes": ["strike_delay_discipline", "correct_timing_rate"] },
+          { "techniqueKey": "distance_clip", "label": "Clip & Cast Distance Control", "skillAxes": ["distance_accuracy_m", "group_radius_m"] }
+        ],
+        "drills": [
+          {
+            "drillKey": "carp_hair_rig_accuracy_v1",
+            "name": "Hair-Rig Pad Accuracy",
+            "difficulty": 3,
+            "unlockAtLevel": 2,
+            "requires": { "family": "live", "baits": ["carp_hair_rig_boilie"] },
+            "techniques": ["rig_prep", "pitch_flip"],
+            "params": {
+              "rounds": 3,
+              "castsPerRound": 8,
+              "pads": [
+                { "distance_m": 15, "radius_cm": 60 },
+                { "distance_m": 20, "radius_cm": 60 }
+              ]
+            },
+            "metrics": ["rig_accuracy", "quiet_entry", "strike_delay_discipline"],
+            "scoring": { "weights": { "rig_accuracy": 0.5, "quiet_entry": 0.3, "strike_delay_discipline": 0.2 } },
+            "recommendedConditions": [
+              { "label": "Rising water level", "waterLevel": "rising" },
+              { "label": "Evening/early morning", "daypart": "evening|morning" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Rising water draws carp shallow; precise, quiet pad drops reduce spook radius.",
+                "Correct hair length and stopper position improve hook turns on pickup.",
+                "Waiting the proper delay prevents early pulls that pop the bait."
+              ],
+              "possibleStrategies": [
+                "Clip at the target distance and use a smooth overhead swing for repeat drops.",
+                "Feather the spool just before splash to flatten the PVA bag/feeder.",
+                "After landing, let the rig settle fully before tightening to the lead."
+              ],
+              "insights": [
+                "Your highest scores followed quiet entries with <30 cm rig drift.",
+                "Strike success increased when delay stayed near the species profile.",
+                "Grouping within 0.8 m boosted repeatable pad hits round over round."
+              ]
+            }
+          },
+          {
+            "drillKey": "carp_drift_lane_control_v1",
+            "name": "Inflow / River Drift Lane",
+            "difficulty": 3,
+            "unlockAtLevel": 3,
+            "requires": { "family": "live", "baits": ["live_worm_float"] },
+            "techniques": ["drift_lane"],
+            "params": { "rounds": 3, "duration_s": 60, "laneWidth_m": 2.0 },
+            "metrics": ["time_in_lane", "correction_efficiency", "over_drag_penalty"],
+            "scoring": { "weights": { "time_in_lane": 0.5, "correction_efficiency": 0.3, "over_drag_penalty": 0.2 } },
+            "recommendedConditions": [
+              { "label": "After light rain (inflows active)", "rainMm24h": ">=0.2 && <=8" },
+              { "label": "Normal flow rivers/channels", "flowState": "normal" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Inflows create scent plumes; holding the float in-lane maximizes natural drifts.",
+                "Minimal corrections keep the bait believable in the conveyor.",
+                "Over-drag pulls the bait off the feed line and kills takes."
+              ],
+              "possibleStrategies": [
+                "Mend upstream just enough to re-center without moving the float.",
+                "Use longer leaders when the lane widens near an eddy seam.",
+                "Lower rod tip to reduce wind bow on the line."
+              ],
+              "insights": [
+                "Lane breaks clustered right after aggressive mends—use smaller lifts.",
+                "Best time-in-lane came with rod low and semi-slack line.",
+                "Crosswind increased over-drag; shorten exposed line by a meter."
+              ]
+            }
+          },
+          {
+            "drillKey": "carp_hookset_timing_sim_v1",
+            "name": "Carp Hookset Timing Sim",
+            "difficulty": 2,
+            "unlockAtLevel": 1,
+            "requires": { "family": "live", "baits": ["carp_hair_rig_boilie", "live_worm_float"] },
+            "techniques": ["hookset_timing"],
+            "params": { "events": 24, "promptTypes": ["float_dip", "line_move"], "delayProfile_ms": 800 },
+            "metrics": ["correct_timing_rate", "premature_late_index"],
+            "scoring": { "weights": { "correct_timing_rate": 0.7, "premature_late_index": 0.3 } },
+            "recommendedConditions": [
+              { "label": "Anytime training", "season": "hot|cool|transition" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Carp often mouth baits before moving; a measured delay prevents pull-outs.",
+                "Reading sideways line moves is as important as float dips.",
+                "Consistent timing increases landed fish on hair-rigs."
+              ],
+              "possibleStrategies": [
+                "Count a beat after steady line movement before sweeping.",
+                "For float dips, wait for the second sustained pull before lifting.",
+                "Keep rod low and reel into pressure to load the hook."
+              ],
+              "insights": [
+                "Early strikes were concentrated under 500 ms—extend your delay window.",
+                "Late strikes spiked when attention drifted after 10 events—use audible cues.",
+                "Correct timing improved when you pre-loaded the rod before the sweep."
+              ]
+            }
+          },
+          {
+            "drillKey": "carp_clip_distance_grouping_v1",
+            "name": "Feeder — Clip & Grouping",
+            "difficulty": 3,
+            "unlockAtLevel": 4,
+            "requires": { "family": "live", "baits": ["carp_hair_rig_boilie"] },
+            "techniques": ["distance_clip", "pitch_flip"],
+            "params": { "rounds": 3, "castsPerRound": 6, "targetDistance_m": 25, "tolerance_m": 0.7 },
+            "metrics": ["distance_accuracy_m", "group_radius_m", "quiet_entry"],
+            "scoring": { "weights": { "distance_accuracy_m": 0.45, "group_radius_m": 0.35, "quiet_entry": 0.20 } },
+            "recommendedConditions": [
+              { "label": "Open water feeding spots", "cloudPct": "30–80" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Tight grouping builds an attractant bed that keeps carp stationed.",
+                "Accurate clip distance puts the feeder right on your pre-baited line.",
+                "Quiet entries reduce wariness in clear, calm water."
+              ],
+              "possibleStrategies": [
+                "Use line clip and count the drop to match depth consistently.",
+                "Match trajectory each cast—same release point, same rod load.",
+                "Feather the spool just before splash to soften entry."
+              ],
+              "insights": [
+                "Grouping under 1 m radius produced the highest round scores.",
+                "Most long casts came from early release—delay by a split second.",
+                "Quiet entries increased when trajectory angle stayed below 35°."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "familyKey": "soft",
+        "label": "Soft (Ned/Creature/Corn Imitation)",
+        "recommendedBaits": [
+          { "baitKey": "soft_ned_2_75in", "name": "Ned Worm 2.75\"" }
+        ],
+        "techniques": [
+          { "techniqueKey": "pitch_flip", "label": "Quiet Placement", "skillAxes": ["precision", "quiet_entry"] },
+          { "techniqueKey": "slack_management", "label": "Line & Slack Control", "skillAxes": ["line_control", "bottom_contact_time", "bite_detection"] },
+          { "techniqueKey": "distance_clip", "label": "Repeatable Distance", "skillAxes": ["distance_accuracy_m", "group_radius_m"] }
+        ],
+        "drills": [
+          {
+            "drillKey": "carp_soft_graze_precision_v1",
+            "name": "Soft Grazing Precision",
+            "difficulty": 2,
+            "unlockAtLevel": 2,
+            "requires": { "family": "soft", "baits": ["soft_ned_2_75in"] },
+            "techniques": ["pitch_flip", "slack_management"],
+            "params": {
+              "rounds": 3,
+              "castsPerRound": 8,
+              "targets": [
+                { "distance_m": 6, "radius_cm": 40 },
+                { "distance_m": 9, "radius_cm": 40 }
+              ],
+              "soakTime_s": 10
+            },
+            "metrics": ["quiet_entry", "precision", "bottom_contact_time"],
+            "scoring": { "weights": { "quiet_entry": 0.4, "precision": 0.35, "bottom_contact_time": 0.25 } },
+            "recommendedConditions": [
+              { "label": "Clear, calm pockets", "windKph": "<=8", "cloudPct": "30–70" },
+              { "label": "Post-rain edges", "rainMm24h": ">=0.2 && <=8" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Carp graze along edges; silent, precise placements keep them feeding.",
+                "Maintaining bottom contact without dragging looks natural.",
+                "Short soak times test high-percentage spots efficiently."
+              ],
+              "possibleStrategies": [
+                "Feather the line to level the bait just before splash.",
+                "Count to bottom and hold slack—only lift on clear signals.",
+                "If silt puffs, pause then re-place slightly up-drift."
+              ],
+              "insights": [
+                "Quiet entries correlated with more confirmed pickups.",
+                "Your best contact times stayed within ±0.4 s of the countdown.",
+                "False taps dropped when rod-tip movement was minimized."
+              ]
+            }
+          },
+          {
+            "drillKey": "carp_soft_distance_grouping_v1",
+            "name": "Soft — Distance & Grouping",
+            "difficulty": 2,
+            "unlockAtLevel": 3,
+            "requires": { "family": "soft", "baits": ["soft_ned_2_75in"] },
+            "techniques": ["distance_clip"],
+            "params": { "rounds": 3, "castsPerRound": 6, "targetDistance_m": 18, "tolerance_m": 0.6 },
+            "metrics": ["distance_accuracy_m", "group_radius_m", "quiet_entry"],
+            "scoring": { "weights": { "distance_accuracy_m": 0.45, "group_radius_m": 0.35, "quiet_entry": 0.20 } },
+            "recommendedConditions": [
+              { "label": "Still bays & flats", "body": "lake", "windKph": "<=10" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Repeatable distance lets you grid promising flats efficiently.",
+                "Tight grouping builds confidence trails where carp cruise.",
+                "Quiet entries prevent spooking shallow fish in clear water."
+              ],
+              "possibleStrategies": [
+                "Use a soft swing with identical release point each cast.",
+                "Check line clip routinely and keep the same line lay on spool.",
+                "Feather to a flat landing to minimize silt disturbance."
+              ],
+              "insights": [
+                "Grouping improved when you kept the rod load identical.",
+                "Most short casts came from late release; advance by a fraction.",
+                "Quiet entries increased soak time without drift."
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "uiRecommendations": {
+      "emptyStateCopy": "Select a species and lure to see relevant drills.",
+      "filterBehavior": "Show drills where `requires.family` equals the selected family; `All` shows every drill for carp.",
+      "badges": { "duration": "casts × rounds or duration", "difficultyDots": 3 }
+    }
+  }
+}
