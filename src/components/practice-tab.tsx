@@ -28,9 +28,14 @@ export function PracticeTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4">
-        <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} />
-        <LureSelector selectedLure={selectedLureFamily} onLureSelect={handleLureSelect as any} showAllOption />
+      <div className="flex items-center justify-center gap-4">
+        <div className="flex-1">
+          <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} />
+        </div>
+        <p className="text-sm font-medium text-muted-foreground">with</p>
+        <div className="flex-1">
+          <LureSelector selectedLure={selectedLureFamily} onLureSelect={handleLureSelect as any} showAllOption />
+        </div>
       </div>
       
       {filteredFamilies.map(family => (
