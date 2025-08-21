@@ -4,10 +4,10 @@
 import { useState, useEffect, useCallback, useReducer } from 'react';
 
 // State and Types
-interface Attempt {
+export interface Attempt {
   outcome: 'hit' | 'miss';
   points: number;
-  ring?: 'inner' | 'outer' | 'miss';
+  ring?: 'bullseye' | 'inner' | 'outer' | 'miss';
 }
 
 interface Round {
@@ -16,7 +16,7 @@ interface Round {
   roundScore: number;
 }
 
-interface PracticeSessionState {
+export interface PracticeSessionState {
   status: 'in-progress' | 'paused' | 'completed';
   startTime: number; // timestamp
   pauseTime?: number; // timestamp
@@ -149,16 +149,20 @@ export function usePracticeSession({ initialDrill }: { initialDrill: any }) {
 
   const getDisplayMetrics = useCallback(() => {
     const currentRoundData = sessionState.history.find(r => r.roundNumber === sessionState.currentRound);
-    const totalAttempts = currentRoundData?.attempts.length || 0;
+    const totalAttemptsInRound = currentRoundData?.attempts.length || 0;
     const successfulHits = currentRoundData?.attempts.filter(a => a.outcome === 'hit').length || 0;
     
-    const accuracy = totalAttempts > 0 ? Math.round((successfulHits / totalAttempts) * 100) : 100;
+    const accuracy = totalAttemptsInRound > 0 ? Math.round((successfulHits / totalAttemptsInRound) * 100) : 100;
     const roundScore = currentRoundData?.roundScore || 0;
     const totalScore = sessionState.history.reduce((sum, r) => sum + r.roundScore, 0);
+    const lastAttempt = totalAttemptsInRound > 0 ? currentRoundData!.attempts[totalAttemptsInRound - 1] : null;
 
     let performanceBand = "Fair";
     if (accuracy >= 90) performanceBand = "Good";
-    if (accuracy < 70) performanceBand = "Poor";
+    if (accuracy >= 70 && accuracy < 90) performanceBand = "Good";
+    if (accuracy >= 50 && accuracy < 70) performanceBand = "Fair";
+    if (accuracy < 50) performanceBand = "Poor";
+
 
     return {
       roundScore,
@@ -169,6 +173,7 @@ export function usePracticeSession({ initialDrill }: { initialDrill: any }) {
       currentAttempt: sessionState.currentAttempt,
       elapsedTime,
       status: sessionState.status,
+      lastAttempt,
     };
   }, [sessionState, elapsedTime]);
 
@@ -180,4 +185,3 @@ export function usePracticeSession({ initialDrill }: { initialDrill: any }) {
     getDisplayMetrics,
   };
 }
-

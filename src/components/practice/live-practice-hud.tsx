@@ -2,10 +2,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { AccuracyPack } from './accuracy-pack';
+import { DrillLivePanel } from './drill-live-panel';
 import { AttemptControls } from './attempt-controls';
-import { CadencePack } from './cadence-pack';
-import { InstructionCard } from './instruction-card'; // Import the new component
+import { InstructionCard } from './instruction-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Pause, MoreVertical, Play, X } from 'lucide-react';
@@ -31,7 +30,7 @@ interface LivePracticeHUDProps {
     onExit: () => void;
 }
 
-const medicalPalette = {
+const medicalPalette: Record<string, string> = {
     "Prime": "#0FB67F",
     "Very Good": "#26C6DA",
     "Good": "#7BD389",
@@ -77,7 +76,7 @@ function PracticeTopBar({ drillName, onExit, onPauseToggle, isPaused, round, cas
 }
 
 function ScoreStrip({ roundScore, accuracy, performanceBand }: { roundScore: number; accuracy: number; performanceBand: string; }) {
-    const color = medicalPalette[performanceBand as keyof typeof medicalPalette] || '#FFD666';
+    const color = medicalPalette[performanceBand] || '#FFD666';
 
     return (
         <div className="h-10 px-3 bg-white rounded-lg flex items-center justify-between text-sm shadow-sm border border-line-200">
@@ -126,14 +125,21 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
     const drillType = drill.techniques.some((tech: string) => accuracyDrillKeywords.includes(tech)) ? 'accuracy' : 'cadence';
 
 
-    const handleLogGenericAttempt = (outcome: 'hit' | 'miss') => {
+    const handleLogGenericAttempt = (outcome: 'hit' | 'miss', ring: 'bullseye' | 'inner' | 'outer' | 'miss') => {
         if (!user || !drill.sessionId || isSaving || sessionState.status !== 'in-progress') return;
         
+        let points = 0;
+        if (outcome === 'hit') {
+            if (ring === 'bullseye') points = 100;
+            else if (ring === 'inner') points = 85;
+            else if (ring === 'outer') points = 70;
+        }
+
         startSaving(async () => {
             const attemptData = {
                 outcome,
-                ring: outcome === 'hit' ? 'inner' : 'miss', // This is simplified. A real impl would have a way to select the ring.
-                points: outcome === 'hit' ? 85 : 0, // Simplified point system
+                ring,
+                points,
             };
 
             const success = logAttempt(attemptData);
@@ -199,6 +205,7 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
         currentAttempt,
         elapsedTime,
         status,
+        lastAttempt
     } = getDisplayMetrics();
 
     return (
@@ -219,10 +226,16 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                     performanceBand={performanceBand}
                 />
                 
-                <div className="relative bg-white rounded-xl p-4 min-h-[320px] shadow-sm border border-line-200">
-                    {status === 'paused' && <PauseOverlay onResume={togglePause} />}
-                     {drillType === 'accuracy' && <AccuracyPack drill={drill} />}
-                     {drillType === 'cadence' && <CadencePack drill={drill} />}
+                <div className="relative bg-white rounded-xl p-4 min-h-[420px] shadow-sm border border-line-200">
+                     {status === 'paused' && <PauseOverlay onResume={togglePause} />}
+                     <DrillLivePanel 
+                         drill={drill}
+                         drillType={drillType}
+                         sessionState={sessionState}
+                         lastAttempt={lastAttempt}
+                         performanceBand={performanceBand}
+                         isPaused={status === 'paused'}
+                     />
                 </div>
 
                 {drill.coachingTemplates && (
@@ -232,8 +245,8 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                 <AttemptControls 
                     round={currentRound}
                     attempt={currentAttempt}
-                    onLog={() => handleLogGenericAttempt('hit')} 
-                    onMiss={() => handleLogGenericAttempt('miss')}
+                    onLog={() => handleLogGenericAttempt('hit', 'inner')} 
+                    onMiss={() => handleLogGenericAttempt('miss', 'miss')}
                     onUndo={undoLastAttempt}
                     canUndo={sessionState.history.length > 0 && sessionState.history[sessionState.history.length - 1].attempts.length > 0}
                 />
