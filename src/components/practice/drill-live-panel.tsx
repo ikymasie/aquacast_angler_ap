@@ -37,7 +37,7 @@ export function DrillLivePanel({ drill, drillType, sessionState, lastAttempt, pe
     const currentRoundAttempts = sessionState.history.find(r => r.roundNumber === sessionState.currentRound)?.attempts || [];
     
     return (
-        <div className="h-full flex flex-col justify-between">
+        <div className="h-full flex flex-col justify-between text-white">
             <HeaderRow distance={target.distance_m} radius={target.radius_cm} windHint={windHint} />
             <TargetCanvas lastAttempt={lastAttempt} key={sessionState.currentAttempt} />
             <GoalArc progress={progress} attempts={currentRoundAttempts} castsPerRound={castsPerRound} band={performanceBand} />
@@ -48,12 +48,12 @@ export function DrillLivePanel({ drill, drillType, sessionState, lastAttempt, pe
 
 function HeaderRow({ distance, radius, windHint }: { distance: number, radius: number, windHint: string }) {
     return (
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center pt-2">
             <div className="text-left">
-                <p className="text-sm text-muted-foreground">Target</p>
-                <p className="font-headline text-xl font-bold text-foreground">{distance}m <span className="font-medium text-muted-foreground">({radius}cm)</span></p>
+                <p className="text-sm text-white/70">Target</p>
+                <p className="font-headline text-xl font-bold text-white">{distance}m <span className="font-medium text-white/70">({radius}cm)</span></p>
             </div>
-            <Badge variant="outline" className="border-line-200">
+            <Badge variant="outline" className="border-white/20 bg-white/10 text-white">
                 <Wind className="w-3 h-3 mr-1.5" />
                 {windHint}
             </Badge>
@@ -72,10 +72,10 @@ function TargetCanvas({ lastAttempt }: { lastAttempt: Attempt | null }) {
     return (
         <div className="relative w-48 h-48 mx-auto my-4 flex items-center justify-center">
             {/* Base Rings */}
-            <div className="absolute inset-0 rounded-full bg-secondary/30"></div>
-            <div className="absolute inset-[25%] rounded-full bg-secondary/40"></div>
-            <div className="absolute inset-[37.5%] rounded-full bg-secondary/50"></div>
-            <div className="absolute inset-[46.5%] rounded-full bg-secondary"></div>
+            <div className="absolute inset-0 rounded-full bg-white/5"></div>
+            <div className="absolute inset-[25%] rounded-full bg-white/5"></div>
+            <div className="absolute inset-[37.5%] rounded-full bg-white/5"></div>
+            <div className="absolute inset-[46.5%] rounded-full bg-white/10"></div>
 
             <AnimatePresence>
             {lastAttempt && (
@@ -103,7 +103,7 @@ function TargetCanvas({ lastAttempt }: { lastAttempt: Attempt | null }) {
                         transition={{ duration: 0.6, ease: 'easeOut' }}
                         className="absolute"
                     >
-                        <Badge variant="default" className="text-sm" style={{ backgroundColor: lastAttempt.ring ? ringColors[lastAttempt.ring] : 'transparent' }}>
+                        <Badge variant="default" className="text-sm border border-black/10" style={{ backgroundColor: lastAttempt.ring ? ringColors[lastAttempt.ring] : 'transparent' }}>
                            {lastAttempt.ring === 'bullseye' ? 'Bullseye' : lastAttempt.ring === 'inner' ? 'Inner' : 'Outer'} +{lastAttempt.points}
                         </Badge>
                     </motion.div>
@@ -117,10 +117,8 @@ function GoalArc({ progress, attempts, castsPerRound, band }: { progress: number
     const size = 200;
     const strokeWidth = 12;
     const radius = (size - strokeWidth) / 2;
-    const circumference = Math.PI * radius;
-    const offset = circumference - (progress * circumference);
 
-    const bandColor = medicalPalette[band] || '#BFD3D2';
+    const bandColor = "#3EE1B0"; // Teal color for success from image
 
     return (
         <div className="relative w-full flex justify-center items-center h-[120px]">
@@ -129,7 +127,7 @@ function GoalArc({ progress, attempts, castsPerRound, band }: { progress: number
                 <path
                     d={`M ${strokeWidth/2} ${size/2} A ${radius} ${radius} 0 0 1 ${size - strokeWidth/2} ${size/2}`}
                     fill="none"
-                    stroke="hsl(var(--secondary))"
+                    stroke="hsla(0, 0%, 100%, 0.15)"
                     strokeWidth={strokeWidth}
                     strokeLinecap="round"
                 />
@@ -157,12 +155,12 @@ function GoalArc({ progress, attempts, castsPerRound, band }: { progress: number
                     initial={{ rotate: -180 }}
                     animate={{ rotate: -180 + progress * 180 }}
                     transition={{ duration: 0.28, ease: "easeOut" }}
-                    style={{ transformOrigin: "center" }}
+                    style={{ transformOrigin: "center center" }}
                  >
                     <circle cx={size / 2 + radius} cy={size / 2} r="8" fill="#FFD348" stroke="white" strokeWidth="2" />
                  </motion.g>
             </svg>
-            <div className="absolute bottom-0 w-full flex justify-between px-4 text-xs text-muted-foreground">
+            <div className="absolute bottom-0 w-full flex justify-between px-4 text-xs text-white/60">
                 <span>Cast 1</span>
                 <span>Cast {castsPerRound}</span>
             </div>
@@ -177,7 +175,7 @@ function StatusRow({ lastAttempt, sessionState }: { lastAttempt: Attempt | null,
     return (
         <div className="text-center h-10">
         <AnimatePresence mode="wait">
-            {lastAttempt && (
+            {lastAttempt ? (
                 <motion.div
                     key={sessionState.currentAttempt}
                     initial={{ y: 10, opacity: 0 }}
@@ -185,14 +183,18 @@ function StatusRow({ lastAttempt, sessionState }: { lastAttempt: Attempt | null,
                     exit={{ y: -10, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                 >
-                    <p className="font-bold text-lg">
+                    <p className="font-bold text-lg text-white">
                         {lastAttempt.ring === 'bullseye' ? 'Bullseye!' : lastAttempt.ring === 'inner' ? 'Inner Ring' : lastAttempt.ring === 'outer' ? 'Outer Ring' : 'Miss'}
-                        <span className="font-medium text-muted-foreground"> +{lastAttempt.points}pts</span>
+                        <span className="font-medium text-white/70"> +{lastAttempt.points}pts</span>
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-white/60">
                         Cast {sessionState.currentAttempt - 1}/{sessionState.history.find(r=>r.roundNumber === sessionState.currentRound)?.attempts.length || 0} • Streak {streak} • Round {sessionState.currentRound}
                     </p>
                 </motion.div>
+            ) : (
+                 <div className="text-center text-white/70">
+                    <p>Ready to start.</p>
+                 </div>
             )}
         </AnimatePresence>
         </div>

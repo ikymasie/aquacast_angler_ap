@@ -51,24 +51,24 @@ function PracticeTopBar({ drillName, onExit, onPauseToggle, isPaused, round, cas
     }
 
     return (
-        <div className="h-14 p-2 bg-white/80 backdrop-blur-md rounded-t-xl border-b border-line-200 shadow-sm flex flex-col justify-center">
+        <div className="h-14 p-2 bg-white/10 backdrop-blur-md rounded-t-xl border-b border-white/20 flex flex-col justify-center text-white">
            <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="w-8 h-8" onClick={onExit}>
-                        <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+                    <Button variant="ghost" size="icon" className="w-8 h-8 text-white hover:text-white hover:bg-white/10" onClick={onExit}>
+                        <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <span className="text-sm font-medium">{drillName}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="w-8 h-8" onClick={onPauseToggle}>
-                        {isPaused ? <Play className="w-5 h-5 text-muted-foreground" /> : <Pause className="w-5 h-5 text-muted-foreground" />}
+                    <Button variant="ghost" size="icon" className="w-8 h-8 text-white hover:text-white hover:bg-white/10" onClick={onPauseToggle}>
+                        {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
                     </Button>
-                     <Button variant="ghost" size="icon" className="w-8 h-8">
-                        <MoreVertical className="w-5 h-5 text-muted-foreground" />
+                     <Button variant="ghost" size="icon" className="w-8 h-8 text-white hover:text-white hover:bg-white/10">
+                        <MoreVertical className="w-5 h-5" />
                     </Button>
                 </div>
            </div>
-           <div className="text-center text-xs text-muted-foreground -mt-1">
+           <div className="text-center text-xs text-white/70 -mt-1">
                 R{round}/{totalRounds} • Cast {cast}/{totalCasts} • {formatTime(time)}
            </div>
         </div>
@@ -79,9 +79,9 @@ function ScoreStrip({ roundScore, accuracy, performanceBand }: { roundScore: num
     const color = medicalPalette[performanceBand] || '#FFD666';
 
     return (
-        <div className="h-10 px-3 bg-white rounded-lg flex items-center justify-between text-sm shadow-sm border border-line-200">
+        <div className="h-10 px-3 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-between text-sm shadow-sm border border-line-200">
             <div className="flex items-center gap-3">
-                <span className="font-bold">x1.15</span>
+                <span className="font-bold text-foreground">x1.15</span>
                 <span className="text-muted-foreground">Round: <span className="font-bold text-foreground">{roundScore}</span></span>
             </div>
             <div className="flex items-center gap-2">
@@ -158,12 +158,6 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                 if (error) {
                     toast({ variant: 'destructive', title: 'Save Failed', description: error });
                     undoLastAttempt(); // Rollback local state
-                } else {
-                     toast({ 
-                        variant: 'success', 
-                        title: `Cast ${outcome === 'hit' ? 'Logged' : 'Missed'}!`,
-                        description: `Points: ${attemptData.points}`
-                    });
                 }
             } else {
                  toast({ 
@@ -211,33 +205,35 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
     return (
         <>
             <div className="space-y-3">
-                <PracticeTopBar 
-                    drillName={drill.name} 
-                    onExit={() => setIsExitDialogOpen(true)} 
-                    onPauseToggle={togglePause}
-                    isPaused={status === 'paused'}
-                    round={currentRound}
-                    cast={currentAttempt}
-                    time={elapsedTime}
-                />
+                <div className="relative gradient-fishing-panel rounded-xl p-4 min-h-[420px] shadow-sm border border-white/20">
+                     <PracticeTopBar 
+                        drillName={drill.name} 
+                        onExit={() => setIsExitDialogOpen(true)} 
+                        onPauseToggle={togglePause}
+                        isPaused={status === 'paused'}
+                        round={currentRound}
+                        cast={currentAttempt}
+                        time={elapsedTime}
+                    />
+                    
+                     {status === 'paused' ? <PauseOverlay onResume={togglePause} /> : (
+                         <DrillLivePanel 
+                             drill={drill}
+                             drillType={drillType}
+                             sessionState={sessionState}
+                             lastAttempt={lastAttempt}
+                             performanceBand={performanceBand}
+                             isPaused={status === 'paused'}
+                         />
+                     )}
+                </div>
+
                 <ScoreStrip 
                     roundScore={roundScore}
                     accuracy={accuracy}
                     performanceBand={performanceBand}
                 />
                 
-                <div className="relative bg-white rounded-xl p-4 min-h-[420px] shadow-sm border border-line-200">
-                     {status === 'paused' && <PauseOverlay onResume={togglePause} />}
-                     <DrillLivePanel 
-                         drill={drill}
-                         drillType={drillType}
-                         sessionState={sessionState}
-                         lastAttempt={lastAttempt}
-                         performanceBand={performanceBand}
-                         isPaused={status === 'paused'}
-                     />
-                </div>
-
                 {drill.coachingTemplates && (
                     <InstructionCard templates={drill.coachingTemplates} />
                 )}
