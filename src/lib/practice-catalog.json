@@ -1,3 +1,4 @@
+
 {
   "schemaVersion": "2.0-practice-bait-tech",
   "taxonomies": {
@@ -167,6 +168,26 @@
       }
     },
     {
+      "drillKey": "windward_edge_sweep_v1",
+      "name": "Windward Edge Sweep",
+      "speciesKeys": ["bass", "bream"],
+      "requiredFamilies": ["spinner"],
+      "techniques": ["cast_sidearm", "retrieve_control"],
+      "params": { "rounds": 2, "castsPerRound": 12, "distance_m": [20], "crosswind_kph": [10, 16] },
+      "metrics": ["entry_offset_upwind", "edge_time_on_path", "tick_events"],
+      "scoring": { "weights": { "edge_time_on_path": 0.5, "entry_offset_upwind": 0.3, "tick_events": 0.2 } }
+    },
+    {
+      "drillKey": "flash_thump_modulation_v1",
+      "name": "Flash/Thump Modulation",
+      "speciesKeys": ["bass", "bream"],
+      "requiredFamilies": ["spinner"],
+      "techniques": ["retrieve_control"],
+      "params": { "rounds": 3, "duration_s": 60, "cadence_targets_spm": [48, 60, 80] },
+      "metrics": ["depth_control", "cadence_consistency"],
+      "scoring": { "weights": { "cadence_consistency": 0.6, "depth_control": 0.4 } }
+    },
+    {
       "drillKey": "squarebill_contact_course_v1",
       "name": "Squarebill Contact Course",
       "speciesKeys": ["bass"],
@@ -180,8 +201,28 @@
       }
     },
     {
+        "drillKey": "depth_ladder_hold_v1",
+        "name": "Depth Ladder Hold",
+        "speciesKeys": ["bass"],
+        "requiredFamilies": ["crank_swim"],
+        "techniques": ["retrieve_control"],
+        "params": { "rounds": 3, "duration_s": 30, "depth_targets_m": [1.2, 1.5, 1.8] },
+        "metrics": ["time_in_band"],
+        "scoring": { "weights": { "time_in_band": 1.0 } }
+    },
+    {
+        "drillKey": "stop_go_trigger_sets_v1",
+        "name": "Stop–Go Trigger Sets",
+        "speciesKeys": ["bass"],
+        "requiredFamilies": ["crank_swim"],
+        "techniques": ["retrieve_control"],
+        "params": { "rounds": 1, "castsPerRound": 5, "run_duration_s": 4, "stop_duration_s": 1 },
+        "metrics": ["rhythm_variance", "restart_cleanliness", "depth_recovery_time"],
+        "scoring": { "weights": { "rhythm_variance": 0.5, "restart_cleanliness": 0.3, "depth_recovery_time": 0.2 } }
+    },
+    {
       "drillKey": "soft_skip_precision_v1",
-      "name": "Soft Bait Skip Precision",
+      "name": "Soft Skip Precision",
       "speciesKeys": ["bass", "bream"],
       "requiredBaits": ["soft_stickbait_5in"],
       "techniques": ["cast_sidearm", "pitch_flip"],
@@ -191,6 +232,26 @@
         "weights": { "skip_distance": 0.4, "quiet_entry": 0.3, "ring_hits": 0.3 },
         "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
       }
+    },
+    {
+        "drillKey": "quiet_entry_pitch_v1",
+        "name": "Quiet Entry Pitch",
+        "speciesKeys": ["bream", "carp", "bass"],
+        "requiredFamilies": ["soft", "live"],
+        "techniques": ["pitch_flip"],
+        "params": { "rounds": 1, "castsPerRound": 10, "targets": [{ "distance_m": 3, "radius_cm": 25 }, { "distance_m": 5, "radius_cm": 30 }] },
+        "metrics": ["quiet_entry", "precision"],
+        "scoring": { "weights": { "quiet_entry": 0.6, "precision": 0.4 } }
+    },
+    {
+        "drillKey": "bottom_clock_slack_read_v1",
+        "name": "Bottom Clock & Slack Read",
+        "speciesKeys": ["bass", "bream"],
+        "requiredFamilies": ["soft"],
+        "techniques": ["pitch_flip", "retrieve_control"],
+        "params": { "rounds": 3, "duration_s": 90 },
+        "metrics": ["countdown_error", "line_control", "bite_detection"],
+        "scoring": { "weights": { "countdown_error": 0.4, "bite_detection": 0.4, "line_control": 0.2 } }
     },
     {
       "drillKey": "live_pitch_quiet_entry_v1",
@@ -204,6 +265,26 @@
         "weights": { "quiet_entry": 0.45, "precision": 0.35, "hookset_timing": 0.2 },
         "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
       }
+    },
+    {
+        "drillKey": "drift_lane_control_v1",
+        "name": "Drift Lane Control",
+        "speciesKeys": ["bream", "carp"],
+        "requiredFamilies": ["live"],
+        "techniques": ["pitch_flip", "retrieve_control"],
+        "params": { "rounds": 3, "duration_s": 60, "lane_width_m": 2 },
+        "metrics": ["time_in_lane", "correction_efficiency"],
+        "scoring": { "weights": { "time_in_lane": 0.7, "correction_efficiency": 0.3 } }
+    },
+    {
+        "drillKey": "hookset_timing_simulator_v1",
+        "name": "Hookset Timing Simulator",
+        "speciesKeys": ["bream", "carp", "bass"],
+        "requiredFamilies": ["live", "soft"],
+        "techniques": ["retrieve_control"],
+        "params": { "rounds": 1, "castsPerRound": 20 },
+        "metrics": ["correct_timing_rate", "premature_late_index"],
+        "scoring": { "weights": { "correct_timing_rate": 0.8, "premature_late_index": 0.2 } }
     },
     {
       "drillKey": "carp_hair_rig_accuracy_v1",
@@ -408,5 +489,4 @@
     ]
   }
 }
-
-    
+```
