@@ -1,18 +1,15 @@
 
 'use client'
 
-import { useState } from 'react';
-import { usePathname } from 'next/navigation';
 import { Heart, Map, Search, Home } from "lucide-react";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { SVGProps } from "react";
 
 const navItems = [
-    { key: 'home', href: '/', icon: Home, label: 'Home' },
-    { key: 'favorites', href: '/favorites', icon: Heart, label: 'Favorites' },
-    { key: 'search', href: '/search', icon: Search, label: 'Search' },
-    { key: 'maps', href: '/maps', icon: Map, label: 'Maps' },
+    { key: 'home', icon: Home, label: 'Home' },
+    { key: 'favorites', icon: Heart, label: 'Favorites' },
+    { key: 'search', icon: Search, label: 'Search' },
+    { key: 'maps', icon: Map, label: 'Maps' },
 ]
 
 const HomeIconSolid = (props: SVGProps<SVGSVGElement>) => (
@@ -27,13 +24,13 @@ const HeartIconSolid = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+interface BottomNavProps {
+    activeTab: string;
+    onTabChange: (tabKey: string) => void;
+}
 
-export function BottomNav() {
-    const pathname = usePathname();
-    // A more robust check for active state, handling nested routes if necessary
-    const activeKey = navItems.find(item => item.href === '/' ? pathname === '/' : pathname.startsWith(item.href))?.key || 'home';
-    
-    const activeIndex = navItems.findIndex(item => item.key === activeKey);
+export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
+    const activeIndex = navItems.findIndex(item => item.key === activeTab);
 
     return (
         <footer className="sticky bottom-0 z-50 w-full p-3 bg-transparent">
@@ -53,7 +50,7 @@ export function BottomNav() {
                 )}
                 
                 {navItems.map((item) => {
-                    const isActive = item.key === activeKey;
+                    const isActive = item.key === activeTab;
                     
                     let Icon;
                     if (item.key === 'home') {
@@ -65,9 +62,9 @@ export function BottomNav() {
                     }
                     
                     return (
-                        <Link 
+                        <button 
                             key={item.key} 
-                            href={item.href} 
+                            onClick={() => onTabChange(item.key)}
                             className="z-10 flex min-w-[72px] flex-col items-center justify-center gap-1 text-center h-full group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card rounded-lg" 
                             aria-label={`${item.label} tab`}
                             aria-selected={isActive}
@@ -86,7 +83,7 @@ export function BottomNav() {
                             )}>
                                 {item.label}
                             </span>
-                        </Link>
+                        </button>
                     )
                 })}
             </div>
