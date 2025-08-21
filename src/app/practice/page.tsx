@@ -15,21 +15,22 @@ function PracticePageContent() {
     useEffect(() => {
         // This effect runs on the client-side after the component mounts.
         // The drill data is expected to be in the navigation state.
-        if (window.history.state && window.history.state.drill) {
+        if (typeof window !== 'undefined' && window.history.state && window.history.state.drill) {
             setDrill(window.history.state.drill);
             setIsLoading(false);
         } else {
             // It might take a moment for the state to be available.
-            // A more robust solution might involve a retry or a timeout.
-            // For now, we'll wait for a bit before considering it a failure.
-            const timeout = setTimeout(() => {
-                if (!window.history.state || !window.history.state.drill) {
-                    console.warn("No drill data found in history state after delay. Redirecting.");
-                    router.replace('/');
+            // We'll now wait indefinitely for the drill data to appear.
+            const checkState = () => {
+                if (window.history.state && window.history.state.drill) {
+                    setDrill(window.history.state.drill);
+                    setIsLoading(false);
+                } else {
+                    // If not found, check again on the next animation frame.
+                    requestAnimationFrame(checkState);
                 }
-            }, 500); // Wait 500ms before giving up
-
-            return () => clearTimeout(timeout);
+            };
+            requestAnimationFrame(checkState);
         }
     }, [router]);
 
