@@ -60,11 +60,12 @@ export function PracticeTab() {
       const speciesKey = selectedSpecies.toLowerCase();
       const drillData = { ...drillForSetup, speciesKey };
       
-      console.log("Preparing to navigate to practice page with drill data:", drillData);
-      // Use history.pushState to pass complex data without cluttering the URL
-      // Then, trigger the navigation. This is a more robust way to pass state.
-      window.history.pushState({ drill: drillData }, '', '/practice');
-      router.push('/practice', { scroll: false });
+      try {
+        sessionStorage.setItem('currentDrill', JSON.stringify(drillData));
+        router.push('/practice');
+      } catch (error) {
+        console.error("Could not save drill to sessionStorage:", error);
+      }
       
       setDrillForSetup(null);
     }

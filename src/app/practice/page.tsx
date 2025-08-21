@@ -12,16 +12,22 @@ function PracticePageContent() {
     const [drill, setDrill] = useState<any | null>(null);
 
     useEffect(() => {
-        // On component mount, try to read the drill state.
-        console.log("Practice page mounted. Current history state:", window.history.state);
-
-        if (typeof window !== 'undefined' && window.history.state?.drill) {
-            console.log("Drill data found in history state:", window.history.state.drill);
-            setDrill(window.history.state.drill);
+        // On component mount, try to read the drill state from sessionStorage.
+        const drillDataString = sessionStorage.getItem('currentDrill');
+        if (drillDataString) {
+            try {
+                const drillData = JSON.parse(drillDataString);
+                setDrill(drillData);
+                // Clean up the session storage after use
+                sessionStorage.removeItem('currentDrill');
+            } catch (error) {
+                console.error("Failed to parse drill data from sessionStorage", error);
+                router.replace('/');
+            }
         } else {
              // If state isn't available, it suggests a direct navigation or a bug.
              // For now, redirecting home is a safe fallback.
-             console.warn("No drill data found in state, redirecting home.");
+             console.warn("No drill data found in sessionStorage, redirecting home.");
              router.replace('/');
         }
     }, [router]);
