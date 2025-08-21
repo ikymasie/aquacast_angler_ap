@@ -5,12 +5,14 @@ import { Card } from "./ui/card";
 import { cn } from "@/lib/utils";
 import type { LureFamily } from "@/lib/types";
 import Image from "next/image";
+import { Globe } from "lucide-react";
 
 
 interface LureSelectorProps {
-  selectedLure: LureFamily;
-  onLureSelect: (lure: LureFamily) => void;
+  selectedLure: LureFamily | 'All';
+  onLureSelect: (lure: LureFamily | 'All') => void;
   disabled?: boolean;
+  showAllOption?: boolean;
 }
 
 const lureOptions: { name: LureFamily; image: string }[] = [
@@ -20,10 +22,14 @@ const lureOptions: { name: LureFamily; image: string }[] = [
     { name: 'Soft', image: '/images/baits/soft.png' },
 ];
 
-export function LureSelector({ selectedLure, onLureSelect, disabled }: LureSelectorProps) {
+export function LureSelector({ selectedLure, onLureSelect, disabled, showAllOption = false }: LureSelectorProps) {
+  const options = showAllOption 
+    ? [{ name: 'All' as const, image: '' }, ...lureOptions]
+    : lureOptions;
+
   return (
-    <div className="grid grid-cols-4 gap-2">
-      {lureOptions.map(({ name, image }) => (
+    <div className={cn("grid gap-2", showAllOption ? "grid-cols-5" : "grid-cols-4")}>
+      {options.map(({ name, image }) => (
         <Card
           key={name}
           onClick={() => !disabled && onLureSelect(name)}
@@ -38,8 +44,12 @@ export function LureSelector({ selectedLure, onLureSelect, disabled }: LureSelec
           aria-pressed={selectedLure === name}
           tabIndex={disabled ? -1 : 0}
         >
-          <div className="relative h-8 w-8 mx-auto">
-             <Image src={image} alt={name} layout="fill" objectFit="contain" />
+          <div className="relative h-8 w-8 mx-auto flex items-center justify-center">
+            {name === 'All' ? (
+                <Globe className="w-6 h-6 text-muted-foreground" />
+            ) : (
+                <Image src={image} alt={name} layout="fill" objectFit="contain" />
+            )}
           </div>
           <p className="mt-2 text-[11px] font-semibold text-foreground">{name}</p>
         </Card>
