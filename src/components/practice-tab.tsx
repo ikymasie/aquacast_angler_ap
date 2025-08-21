@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import { startPracticeSessionAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import { usePracticeState } from '@/hooks/use-practice-state';
 
 export function PracticeTab() {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
@@ -26,6 +27,7 @@ export function PracticeTab() {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
+  const { setActiveDrill } = usePracticeState();
 
 
   useEffect(() => {
@@ -83,8 +85,11 @@ export function PracticeTab() {
 
         const fullDrillData = { ...drillData, sessionId: sessionData.sessionId };
 
-        // Navigate to the dynamic route, passing drill data in state
-        router.push(`/practice/${drillData.drillKey}`, { state: { drill: fullDrillData } } as any);
+        // Set the active drill in our shared state
+        setActiveDrill(fullDrillData);
+        
+        // Navigate to the dynamic route
+        router.push(`/practice/${drillData.drillKey}`);
         setDrillForSetup(null);
     });
   };
