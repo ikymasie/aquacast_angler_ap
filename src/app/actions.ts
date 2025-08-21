@@ -138,7 +138,7 @@ export async function addSpotAction(payload: AddSpotPayload) {
             coordinates: { lat, lon: lng },
             representative_species: ["bass", "bream/tilapia", "catfish"],
             notes: `Added on ${new Date().toLocaleDateString()}`,
-            image_url: `https://placehold.co/400x300.png`,
+            image_url: `/images/locations/default.jpg`,
             isFavorite: false,
             isRecent: true,
         };

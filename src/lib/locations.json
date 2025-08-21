@@ -8,7 +8,7 @@
     "coordinates": {"lat": -24.718299, "lon": 25.907478},
     "representative_species": ["bass", "bream/tilapia", "catfish"],
     "notes": "Popular bank & boat fishing; local rules/permits apply.",
-    "image_url": "https://tse1.mm.bing.net/th/id/OIP.w4XvXY3rK3GPBv_FHLVRRwHaEr?pid=Api",
+    "image_url": "/images/locations/gaborone.jpeg",
     "isFavorite": true
   },
   {
@@ -19,7 +19,7 @@
     "coordinates": {"lat": -24.452154, "lon": 25.997764},
     "representative_species": ["bream/tilapia", "catfish"],
     "notes": "Accessible day spot; check seasonal water levels and access rules.",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/39/Bokaa_Dam_Botswana.jpg",
+    "image_url": "/images/locations/bokaa.jpg",
     "isFavorite": false
   },
   {
@@ -30,7 +30,7 @@
     "coordinates": {"lat": -25.114670, "lon": 25.682370},
     "representative_species": ["bream/tilapia", "catfish"],
     "notes": "Smaller dam; confirm access and permits.",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Nnywane_Dam_Botswana.jpg",
+    "image_url": "/images/locations/nnywane.jpeg",
     "isFavorite": false
   },
   {
@@ -41,7 +41,7 @@
     "coordinates": {"lat": -21.828357, "lon": 27.713013},
     "representative_species": ["largemouth bass", "bream/tilapia", "catfish"],
     "notes": "Known bass venue; tourism promoted incl. fishing—respect local rules.",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Letsibogo_Dam_Botswana.jpg",
+    "image_url": "/images/locations/letsibogo.jpg",
     "isFavorite": true
   },
   {
@@ -52,7 +52,7 @@
     "coordinates": {"lat": -22.591976, "lon": 27.614430},
     "representative_species": ["bream/tilapia", "catfish"],
     "notes": "Irrigation/storage dam; verify access with local authorities.",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/96/Lotsane_Dam_Botswana.jpg",
+    "image_url": "/images/locations/lotsane.jpeg",
     "isFavorite": false
   },
   {
@@ -63,7 +63,7 @@
     "coordinates": {"lat": -18.365400, "lon": 21.842200},
     "representative_species": ["tigerfish", "nembwe", "bream/tilapia", "catfish"],
     "notes": "Prime sport fishery; peak action during the barbel run (late winter–spring); permits/guides recommended.",
-    "image_url": "https://tse1.mm.bing.net/th/id/OIP.CuLC19deBnHaR1Mnuq7vuAHaFc?r=0&pid=Api",
+    "image_url": "/images/locations/okavango_panhandle.jpg",
     "isFavorite": true
   },
   {
@@ -74,7 +74,7 @@
     "coordinates": {"lat": -17.816700, "lon": 25.150000},
     "representative_species": ["tigerfish", "bream/tilapia", "catfish"],
     "notes": "Popular guided tigerfishing area; observe park boundaries & local permits.",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/17/Chobe_River_Botswana.jpg",
+    "image_url": "/images/locations/chobe_river.jpg",
     "isFavorite": false
   },
   {
@@ -85,7 +85,7 @@
     "coordinates": {"lat": -20.133300, "lon": 23.383300},
     "representative_species": ["bream/tilapia", "catfish", "tigerfish (seasonal)"],
     "notes": "Urban-accessible stretches; water level dependent.",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/83/Thamalakane_River_Maun.jpg",
+    "image_url": "/images/locations/thamalakane.jpg",
     "isFavorite": false
   },
   {
@@ -96,7 +96,7 @@
     "coordinates": {"lat": -20.471050, "lon": 24.510460},
     "representative_species": ["bream/tilapia", "catfish"],
     "notes": "Scenic banks; respect Makgadikgadi NP rules and seasonal flows.",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Boteti_River_Botswana.jpg",
+    "image_url": "/images/locations/boteti.jpg",
     "isFavorite": false
   },
   {
@@ -107,7 +107,7 @@
     "coordinates": {"lat": -20.500000, "lon": 22.666700},
     "representative_species": ["catfish (sharp-tooth)", "bream/tilapia"],
     "notes": "Water levels vary by year; notable for big catfish in flood years.",
-    "image_url": "https://tse1.mm.bing.net/th/id/OIP._w_XC6rBHTtsdZ9xbXgFngHaE8?pid=Api",
+    "image_url": "/images/locations/lake_ngami.webp",
     "isFavorite": false
   }
 ]
