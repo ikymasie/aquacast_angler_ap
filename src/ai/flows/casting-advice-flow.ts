@@ -34,7 +34,11 @@ const CastingAdviceOutputSchema = z.object({
         })).describe("A ranked list of up to 6 specific structure types to target."),
     }),
     how_to_fish: z.object({
-        recommendation: z.string().describe("A 2-3 sentence recommendation for lure presentation and retrieval style."),
+        summary: z.string().describe("A 1-2 sentence summary of the overall presentation strategy."),
+        techniques: z.array(z.object({
+            name: z.string().describe("Name of the technique (e.g., 'Slow Roll', 'Bottom Bouncing')."),
+            description: z.string().describe("A brief (1 sentence) description of how to perform this technique."),
+        })).describe("A list of up to 3 specific techniques to try."),
     }),
     when_to_fish: z.object({
         timing_recommendation: z.string().describe("A concise summary of the best time to fish (e.g., 'Focus on the evening bite')."),
@@ -75,7 +79,7 @@ const prompt = ai.definePrompt({
         Generate advice based *only* on the data provided. Be concise and direct.
 
         1.  **Where to Cast:** Analyze the conditions and species. Suggest up to 6 specific types of structures or areas to target. For each, provide a brief reasoning, a numeric score (0-100), and a status (e.g., Prime, Good, Fair).
-        2.  **How to Fish:** Based on the selected lure family ({{{lureFamily}}}), provide a specific recommendation for presentation or retrieval.
+        2.  **How to Fish:** Based on the selected lure family ({{{lureFamily}}}), provide a brief summary and then recommend exactly 3 distinct techniques. For each technique, provide a name and a one-sentence description.
         3.  **When to Fish:** Look at the forecast scores and identify the most promising time block. Summarize this with a brief reason.
     `,
 });

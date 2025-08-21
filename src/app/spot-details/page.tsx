@@ -121,6 +121,23 @@ export default function SpotDetailsPage() {
     const loadCastingAdvice = useCallback(async (lure: LureFamily, currentDayContext: DayContext, currentThreeHourScores: ThreeHourIntervalScore[]) => {
         if (!currentDayContext || !currentThreeHourScores.length) return;
 
+        // Caching logic
+        const cacheKey = `casting-advice-${spot.name}-${selectedSpecies}-${lure}-${format(selectedDate, 'yyyy-MM-dd')}`;
+        const cachedData = localStorage.getItem(cacheKey);
+
+        if (cachedData) {
+            try {
+                const parsedData = JSON.parse(cachedData);
+                // Optional: add a timestamp to invalidate after a few hours
+                setAdvice(parsedData);
+                return; // Use cached data
+            } catch (e) {
+                console.error("Failed to parse cached advice", e);
+                localStorage.removeItem(cacheKey); // Clear bad data
+            }
+        }
+
+
         setIsAdviceLoading(true);
         const payload: CastingAdviceInput = {
             species: selectedSpecies,
@@ -132,12 +149,17 @@ export default function SpotDetailsPage() {
         const result = await getCastingAdviceAction(payload);
         if (result.data) {
             setAdvice(result.data);
+            try {
+                localStorage.setItem(cacheKey, JSON.stringify(result.data));
+            } catch(e) {
+                console.error("Failed to cache advice", e);
+            }
         } else {
             console.error("Advice Error:", result.error);
             setAdvice(null);
         }
         setIsAdviceLoading(false);
-    }, [selectedSpecies, location]);
+    }, [selectedSpecies, location, spot.name, selectedDate]);
 
     const loadLureAdvice = useCallback(async (lure: LureFamily, currentDayContext: DayContext) => {
         if (!currentDayContext || !weatherData) return;
@@ -172,19 +194,13 @@ export default function SpotDetailsPage() {
     }, [selectedSpecies, weatherData]);
 
 
-    // Effect 1: Fetch initial weather data for the location, then chain forecast loading
+    // Effect 1: Fetch initial weather data for the location
     useEffect(() => {
         async function loadInitialData() {
             setIsWeatherLoading(true);
             try {
                 const weather = await getCachedWeatherData(location);
                 setWeatherData(weather);
-                
-                // Now that weather is confirmed, set a valid date and load forecast
-                const initialDate = startOfToday();
-                setSelectedDate(initialDate); // Ensure we start with today
-                await loadForecast(selectedSpecies, initialDate, location);
-
             } catch (error) {
                 console.error("Failed to load initial data:", error);
                 setForecastError("Could not load weather data for this location.");
@@ -194,25 +210,25 @@ export default function SpotDetailsPage() {
         }
         loadInitialData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location]); // Only runs when location changes
+    }, [location]);
 
 
-    // Effect 2: Reload forecast when species or date change, if weather data is present
+    // Effect 2: Load forecast when weather data is available or dependencies change
     useEffect(() => {
         if (weatherData && !isWeatherLoading) {
             loadForecast(selectedSpecies, selectedDate, location);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedSpecies, selectedDate]);
+    }, [weatherData, selectedSpecies, selectedDate]); // `loadForecast` is stable via useCallback
     
-    // Effect 3: Load casting advice when its dependencies are ready
+    // Effect 3: Load casting and lure advice when dependencies are ready
     useEffect(() => {
         if (!isForecastLoading && dayContext && threeHourScores.length > 0) {
             loadCastingAdvice(selectedLure, dayContext, threeHourScores);
             loadLureAdvice(selectedLure, dayContext);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isForecastLoading, selectedLure, dayContext]); // Simplified dependencies
+    }, [isForecastLoading, selectedLure, dayContext, threeHourScores]);
 
 
      const mapThumbnails = [
@@ -316,5 +332,3 @@ export default function SpotDetailsPage() {
     </div>
   );
 }
-
-    

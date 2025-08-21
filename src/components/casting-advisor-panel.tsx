@@ -13,6 +13,7 @@ import { SpotDropOffIcon } from './icons/spot-drop-off';
 import { SpotFlatIcon } from './icons/spot-flat';
 import { SpotInflowIcon } from './icons/spot-inflow';
 import { SpotPointIcon } from './icons/spot-point';
+import { Fish } from 'lucide-react';
 
 const SPOT_ICONS: Record<string, React.FC<any>> = {
     "Drop-offs": SpotDropOffIcon,
@@ -105,7 +106,20 @@ export function CastingAdvisorPanel({ isLoading, advice }: CastingAdvisorPanelPr
 
             <div className="border-t border-white/20 pt-4">
                 <h3 className="font-headline text-lg">How to Fish</h3>
-                <p className="text-white/80 text-sm mt-1">{how_to_fish.recommendation}</p>
+                <p className="text-white/80 text-sm mt-1 mb-3">{how_to_fish.summary}</p>
+                <div className="space-y-2">
+                    {how_to_fish.techniques.map(tech => (
+                        <div key={tech.name} className="flex gap-3 items-start">
+                            <div className="w-5 h-5 flex-shrink-0 bg-white/20 rounded-full flex items-center justify-center mt-0.5">
+                               <Fish className="w-3 h-3 text-white/80" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-sm leading-tight">{tech.name}</h4>
+                                <p className="text-xs text-white/70 leading-snug">{tech.description}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </Card>
     );
@@ -131,6 +145,22 @@ function CastingAdvisorSkeleton() {
               <div className="space-y-2 pt-4 border-t">
                  <Skeleton className="h-6 w-1/2" />
                  <Skeleton className="h-4 w-full" />
+                 <div className="space-y-3 mt-2">
+                    <div className="flex gap-3">
+                        <Skeleton className="w-5 h-5 rounded-full" />
+                        <div className="flex-1 space-y-1">
+                            <Skeleton className="h-4 w-1/3" />
+                            <Skeleton className="h-3 w-full" />
+                        </div>
+                    </div>
+                     <div className="flex gap-3">
+                        <Skeleton className="w-5 h-5 rounded-full" />
+                        <div className="flex-1 space-y-1">
+                            <Skeleton className="h-4 w-1/3" />
+                            <Skeleton className="h-3 w-full" />
+                        </div>
+                    </div>
+                 </div>
              </div>
         </Card>
     );
