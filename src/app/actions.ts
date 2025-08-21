@@ -39,7 +39,8 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
         
         hoursForDay = weatherData.hourly.filter(h => {
             const hourTime = parseISO(h.t);
-            return isFuture(hourTime) && isWithinInterval(hourTime, { start: now, end: next24HoursEnd });
+            // We need a full 24 hour block, even if some hours are slightly in the past, for trends.
+            return isWithinInterval(hourTime, { start: now, end: next24HoursEnd });
         });
         
         // Fallback: If for some reason that yields nothing, just grab all available future hours.
