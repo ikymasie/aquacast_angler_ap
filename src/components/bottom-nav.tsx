@@ -33,7 +33,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     const activeIndex = navItems.findIndex(item => item.key === activeTab);
 
     return (
-        <footer className="sticky bottom-0 z-50 w-full p-3 bg-transparent">
+        <footer className="fixed bottom-0 z-50 w-full p-3 bg-transparent">
             <div 
                 className="safe-area-pb pointer-events-auto relative mx-auto max-w-[720px] bg-card shadow-floating rounded-full h-[64px] flex items-center justify-around"
             >
