@@ -77,15 +77,48 @@ const prompt = ai.definePrompt({
         - **{{label}}**: Score {{score}}/100 ({{status}}), Conditions: {{condition}}
         {{/each}}
 
+        {{#if (eq species "Bream")}}
+        **Expert Bream Fishing Knowledge (Zambezi & Okavango):**
+        This is critical local knowledge. You MUST use this to inform your recommendations for Bream.
+
+        *   **Top 5 Killer Lure Combinations:**
+            1.  **3" Orange Paddletail + 3/4 oz Jighead:** For pitching into reeds and drop-offs.
+            2.  **Mepps No. 4 Black Fury (Bronze/Black/Red):** Ideal for eddies and clay banks.
+            3.  **Football Jig + Craw Trailer (Black/Red):** Effective in laydowns and timber.
+            4.  **Salmo Rattlin Hornet 5 cm (Green Tiger):** Perfect for trolling drop-offs and channels.
+            5.  **Salmo Executor 7 cm (For Pike):** Use in white water and shadowy backwaters.
+
+        *   **Techniques for Success:**
+            *   **Burn-Pause-Burn:** Fast retrieve followed by a pause to trigger strikes.
+            *   **Lift-Drop:** Let lure hit bottom, lift sharply, then drop to mimic prey.
+            *   **Bottom Bouncing Cranks:** Tick the bottom with cranks for reaction strikes.
+            *   Anchor upstream of structure for natural lure presentation.
+            *   Early morning and late afternoon are peak bite times.
+
+        *   **Target Species Insights (Sub-types of Bream):**
+            *   **Three-Spot Tilapia:** Hunts in eddies, clay hollows. Aggressive ambush predator.
+            *   **Nembwe:** A largemouth predator, targets timber, reeds, and drop-offs.
+            *   **Thinface:** Prefers overhanging trees, grassy areas, shadowed waters.
+            *   **Humpback:** Stays near laydowns, thrives in fast-slow current transitions.
+            *   **Pike:** Found in rapids and calm backwaters; jumps frequently during the fight.
+
+        *   **Tackle & Retrieval Tips:**
+            *   Use 20-30 lb braid with 20 lb fluoro leader; lighter setups for finesse.
+            *   Inline spinners perform best fished low and slow near the bottom.
+            *   For pressured fish, downsize lures and use the thinnest braid possible.
+            *   Keep rod tip down when fighting Pike to prevent lure throw.
+            *   Use rattling crankbaits and attractant gels for better results in murky water.
+        {{/if}}
+
         **Your Task:**
-        Generate advice based *only* on the data provided. Be concise and direct.
+        Generate advice based *only* on the data provided. Be concise and direct. If the species is Bream, heavily reference the expert knowledge provided.
 
         1.  **Where to Cast:** Analyze the conditions and species. Suggest exactly 6 specific types of structures or areas to target. For each spot, provide:
-            - A brief, insightful 'reasoning' (the "why").
+            - A brief, insightful 'reasoning' (the "why"). For Bream, connect this to the sub-species insights.
             - The 2-3 most 'deciding_factors' (e.g., "Wind pushing baitfish", "Low light for ambush").
             - 1-2 'watch_outs' (e.g., "Requires precise casting", "Potential for snags").
             - A numeric score (0-100), and a status (e.g., Prime, Good, Fair).
-        2.  **How to Fish:** Based on the selected lure family ({{{lureFamily}}}), provide a brief summary and then recommend exactly 3 distinct techniques. For each technique, provide a name and a one-sentence description.
+        2.  **How to Fish:** Based on the selected lure family ({{{lureFamily}}}), provide a brief summary and then recommend exactly 3 distinct techniques. For Bream, these techniques should be inspired by the "Techniques for Success" and "Tackle & Retrieval Tips" from the expert knowledge.
         3.  **When to Fish:** Look at the forecast scores and identify the most promising time block. Summarize this with a brief reason.
     `,
 });

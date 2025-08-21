@@ -57,9 +57,17 @@ const prompt = ai.definePrompt({
         - **Sunrise:** {{{dayContext.sunrise}}}
         - **Sunset:** {{{dayContext.sunset}}}
         - **Est. Water Temp:** {{{recentWindow.waterTempC}}}°C
+        
+        {{#if (eq species "Bream")}}
+        **Expert Bream Knowledge:**
+        *   **Lures:** Orange Paddletails for reeds, Mepps Black Fury for eddies, Football Jigs for timber, Rattlin' Hornets for drop-offs.
+        *   **Behavior:** Three-Spots are aggressive in eddies. Nembwe are in timber/reeds. Thinface prefer shade. Humpbacks like current transitions. Pike are in rapids and calm backwaters.
+        *   **Tackle:** Use rattling lures in murky water. Downsize for pressured fish.
+        {{/if}}
+
 
         **Your Task:**
-        1.  **Analyze Conditions:** Evaluate how the wind, light (inferred from cloud cover and time of day), and water clarity (inferred from recent wind/rain) will affect the chosen lure family for the target species.
+        1.  **Analyze Conditions:** Evaluate how the wind, light (inferred from cloud cover and time of day), and water clarity (inferred from recent wind/rain) will affect the chosen lure family for the target species. If the species is Bream, use the expert knowledge to inform your analysis.
         2.  **Generate a Condition Score (0-10):** Based on your analysis, provide a single score from 0 to 10 indicating how favorable the current conditions are for this lure. A 10 means perfect conditions. A 0 means it's nearly impossible to use this lure effectively.
         3.  **Write a Concise Summary:** In 1-2 sentences, explain the reasoning behind your score.
         4.  **Provide Short Descriptors:** For Wind, Light, and Water Clarity, provide very brief (1-3 word) descriptors.
