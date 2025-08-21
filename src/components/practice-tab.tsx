@@ -61,8 +61,9 @@ export function PracticeTab() {
       const drillData = { ...drillForSetup, speciesKey };
       
       // Use history.pushState to pass complex data without cluttering the URL
+      // Then, trigger the navigation. This is a more robust way to pass state.
       window.history.pushState({ drill: drillData }, '', '/practice');
-      router.push('/practice');
+      router.push('/practice', { scroll: false });
       
       setDrillForSetup(null);
     }
