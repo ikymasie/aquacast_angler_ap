@@ -71,7 +71,7 @@
       "air_temp_comfort": 0.10,
       "water_temp_comfort": 0.16,
       "precip": 0.04,
-      "moon": 0.08,
+      "moon": 0.1,
       "stability": 0.10,
       "level_flow": 0.04
     },
@@ -139,9 +139,10 @@
         "params": {
           "schema": "openmeteo_0_new_05_full",
           "bonuses": [
-            { "phase": "new", "score": 85 },
-            { "phase": "quarter", "score": 75 },
-            { "phase": "full", "score": 80 }
+            { "phase": "new", "score": 90 },
+            { "phase": "full", "score": 90 },
+            { "phase": "waxing", "score": 78 },
+            { "phase": "waning", "score": 72 }
           ]
         },
         "uses": ["moon_phase_0_new_05_full"]
@@ -356,9 +357,10 @@
         "params": {
           "schema": "openmeteo_0_new_05_full",
           "bonuses": [
-            { "phase": "new", "score": 78 },
-            { "phase": "quarter", "score": 74 },
-            { "phase": "full", "score": 76 }
+            { "phase": "new", "score": 85 },
+            { "phase": "full", "score": 85 },
+            { "phase": "waxing", "score": 80 },
+            { "phase": "waning", "score": 72 }
           ]
         },
         "uses": ["moon_phase_0_new_05_full"]
@@ -557,7 +559,7 @@
       "air_temp_comfort": 0.06,
       "water_temp_comfort": 0.22,
       "precip": 0.05,
-      "moon": 0.08,
+      "moon": 0.12,
       "stability": 0.09,
       "level_flow": 0.05
     },
@@ -699,18 +701,10 @@
         "params": {
           "schema": "openmeteo_0_new_05_full",
           "bonuses": [
-            {
-              "phase": "new",
-              "score": 82
-            },
-            {
-              "phase": "quarter",
-              "score": 75
-            },
-            {
-              "phase": "full",
-              "score": 80
-            }
+            { "phase": "new", "score": 88 },
+            { "phase": "full", "score": 88 },
+            { "phase": "waxing", "score": 75 },
+            { "phase": "waning", "score": 70 }
           ]
         },
         "uses": [

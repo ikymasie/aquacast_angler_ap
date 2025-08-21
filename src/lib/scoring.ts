@@ -66,11 +66,17 @@ function twilightBoost(t: string, ctx: DayContext, params: any): number {
 
 function phaseBonus(value: number, bonuses: {phase: string, score: number}[]): number {
     // A simple mapping for now. A more complex implementation could be added.
-    if (value > 0.95 || value < 0.05) { // full or new
-        const bonus = bonuses.find(b => b.phase === 'new' || b.phase === 'full');
+    if (value > 0.94 || value < 0.06) { // New Moon
+        const bonus = bonuses.find(b => b.phase === 'new');
         return bonus ? bonus.score : 75;
-    } else if (value > 0.45 && value < 0.55) { // quarter
-        const bonus = bonuses.find(b => b.phase === 'quarter');
+    } else if (value > 0.44 && value < 0.56) { // Full Moon
+        const bonus = bonuses.find(b => b.phase === 'full');
+        return bonus ? bonus.score : 75;
+    } else if (value >= 0.06 && value <= 0.44) { // Waxing
+        const bonus = bonuses.find(b => b.phase === 'waxing');
+        return bonus ? bonus.score : 75;
+    } else if (value >= 0.56 && value <= 0.94) { // Waning
+        const bonus = bonuses.find(b => b.phase === 'waning');
         return bonus ? bonus.score : 75;
     }
     return 75;
