@@ -247,9 +247,9 @@ export default function SpotDetailsPage() {
                 <Tabs defaultValue="forecast" className="w-full">
                     <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="forecast">Forecast</TabsTrigger>
-                        <TabsTrigger value="advisor">Casting Advisor</TabsTrigger>
-                        <TabsTrigger value="map">Map & Photos</TabsTrigger>
+                        <TabsTrigger value="casting">Casting</TabsTrigger>
                         <TabsTrigger value="practice">Practice</TabsTrigger>
+                        <TabsTrigger value="gallery">Gallery</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="forecast" className="space-y-4 pt-4">
@@ -306,7 +306,7 @@ export default function SpotDetailsPage() {
                         ) : null}
                     </TabsContent>
 
-                     <TabsContent value="advisor" className="space-y-4 pt-4">
+                     <TabsContent value="casting" className="space-y-4 pt-4">
                         <CastingConditionsCard 
                             isLoading={isLureAdviceLoading || isForecastLoading}
                             advice={lureAdvice}
@@ -328,21 +328,21 @@ export default function SpotDetailsPage() {
                         />
                     </TabsContent>
 
-                    <TabsContent value="map" className="pt-4 space-y-4">
+                    <TabsContent value="practice" className="pt-4 space-y-4">
+                        <PracticeTab />
+                    </TabsContent>
+                    
+                    <TabsContent value="gallery" className="pt-4 space-y-4">
                         <MapCard
                            center={{ lat: spot.coordinates.lat, lng: spot.coordinates.lon }}
                        />
                        <PhotoGallery spotName={spot.name} />
                     </TabsContent>
 
-                    <TabsContent value="practice" className="pt-4 space-y-4">
-                        <PracticeTab />
-                    </TabsContent>
                 </Tabs>
             </Suspense>
         </main>
     </div>
   );
-}
 
     
