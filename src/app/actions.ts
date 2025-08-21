@@ -41,6 +41,7 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
              hoursForDay = weatherData.hourly.slice(nowIndex, nowIndex + 24);
         } else {
             // Fallback: if we can't find the current hour, just use the first 24 hours available.
+            // This can happen if all available forecast hours are in the past.
             hoursForDay = weatherData.hourly.slice(0, 24);
         }
 
@@ -54,7 +55,7 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     }
     
     // Ensure we have a reasonable number of hours to create a forecast.
-    if (hoursForDay.length < 12) { 
+    if (!hoursForDay || hoursForDay.length < 12) { 
       return { data: null, error: "Not enough forecast data is available to create a forecast for the selected date."};
     }
 
