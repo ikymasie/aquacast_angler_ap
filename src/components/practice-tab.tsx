@@ -60,13 +60,9 @@ export function PracticeTab() {
       const speciesKey = selectedSpecies.toLowerCase();
       const drillData = { ...drillForSetup, speciesKey };
       
-      try {
-        sessionStorage.setItem('currentDrill', JSON.stringify(drillData));
-        router.push('/practice');
-      } catch (error) {
-        console.error("Could not save drill to sessionStorage:", error);
-      }
-      
+      // Navigate to the dynamic route, passing drill data in state
+      router.push(`/practice/${drillData.drillKey}`, { state: { drill: drillData } } as any);
+
       setDrillForSetup(null);
     }
   };
