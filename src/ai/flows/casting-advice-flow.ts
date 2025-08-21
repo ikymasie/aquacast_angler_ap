@@ -29,8 +29,10 @@ const CastingAdviceOutputSchema = z.object({
         ranked_spots: z.array(z.object({
             name: z.string().describe("Name of the structure or spot type (e.g., 'Submerged Vegetation', 'Rocky Outcrops')."),
             score: z.number().min(0).max(100).describe("A 0-100 score for how good this spot is right now."),
-            reasoning: z.string().describe("Brief (1 sentence) reasoning for why this spot is good now."),
+            reasoning: z.string().describe("The 'Why': A concise (1-2 sentence) explanation for why this spot is good or bad right now."),
             status: z.custom<ScoreStatus>().describe("The current fishing status for this spot type."),
+            deciding_factors: z.array(z.string()).describe("A list of 2-3 key factors (e.g., 'Wind direction', 'Cloud cover') influencing the score."),
+            watch_outs: z.array(z.string()).describe("A list of 1-2 potential challenges or things to be aware of for this spot (e.g., 'Risk of snags', 'May be crowded')."),
         })).min(6).max(6).describe("A ranked list of exactly 6 specific structure types to target."),
     }),
     how_to_fish: z.object({
@@ -78,7 +80,11 @@ const prompt = ai.definePrompt({
         **Your Task:**
         Generate advice based *only* on the data provided. Be concise and direct.
 
-        1.  **Where to Cast:** Analyze the conditions and species. Suggest exactly 6 specific types of structures or areas to target. For each, provide a brief reasoning, a numeric score (0-100), and a status (e.g., Prime, Good, Fair).
+        1.  **Where to Cast:** Analyze the conditions and species. Suggest exactly 6 specific types of structures or areas to target. For each spot, provide:
+            - A brief, insightful 'reasoning' (the "why").
+            - The 2-3 most 'deciding_factors' (e.g., "Wind pushing baitfish", "Low light for ambush").
+            - 1-2 'watch_outs' (e.g., "Requires precise casting", "Potential for snags").
+            - A numeric score (0-100), and a status (e.g., Prime, Good, Fair).
         2.  **How to Fish:** Based on the selected lure family ({{{lureFamily}}}), provide a brief summary and then recommend exactly 3 distinct techniques. For each technique, provide a name and a one-sentence description.
         3.  **When to Fish:** Look at the forecast scores and identify the most promising time block. Summarize this with a brief reason.
     `,
