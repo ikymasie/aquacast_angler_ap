@@ -10,6 +10,7 @@ import { FishBreamIcon } from "./icons/fish-bream";
 import { FishBassIcon } from "./icons/fish-bass";
 import { FishCarpIcon } from "./icons/fish-carp";
 import { WeatherIcon } from "./weather-icon";
+import { format, isToday, isTomorrow } from "date-fns";
 
 const statusColors: Record<ScoreStatus, string> = {
     "Prime": "var(--score-prime)",
@@ -34,6 +35,7 @@ interface DaypartScorePanelProps {
     dayAvgScore: number;
     dayStatus: ScoreStatus;
     intervals: ThreeHourIntervalScore[];
+    selectedDate: Date;
 }
 
 function useElementWidth() {
@@ -53,7 +55,8 @@ export function DaypartScorePanel({
     spotName,
     dayAvgScore,
     dayStatus,
-    intervals
+    intervals,
+    selectedDate
 }: DaypartScorePanelProps) {
     const { ref: stripRef, width: stripWidth } = useElementWidth();
     const SpeciesIcon = speciesIcons[speciesKey];
@@ -67,13 +70,19 @@ export function DaypartScorePanel({
     const cellStyle = getCellStyle();
 
     const getStatusColor = (status: ScoreStatus) => statusColors[status] || "var(--score-fair)";
+
+    const getDateLabel = (date: Date): string => {
+        if (isToday(date)) return "Today";
+        if (isTomorrow(date)) return "Tomorrow";
+        return format(date, "EEE");
+    };
     
     return (
         <Card className="w-full rounded-xl shadow-floating border-0 gradient-fishing-panel text-white h-[180px] p-4" aria-live="polite">
             <div className="flex h-full items-center gap-3">
                 {/* Left Column */}
                 <div className="flex flex-col w-[110px] flex-shrink-0">
-                    <span className="font-body text-sm text-white/90">Today</span>
+                    <span className="font-body text-sm text-white/90">{getDateLabel(selectedDate)}</span>
                     <span className="font-headline font-semibold text-[44px] leading-none text-white">{dayAvgScore}</span>
                     <Badge
                         className="mt-1.5 h-[22px] rounded-full self-start"

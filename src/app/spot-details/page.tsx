@@ -276,6 +276,7 @@ export default function SpotDetailsPage() {
                                dayAvgScore={overallDayScore.dayAvgScore}
                                dayStatus={overallDayScore.dayStatus}
                                intervals={threeHourScores}
+                               selectedDate={selectedDate}
                            />
                         ) : (
                            <Card className="h-[180px] w-full rounded-xl bg-secondary/50 flex items-center justify-center p-4">
