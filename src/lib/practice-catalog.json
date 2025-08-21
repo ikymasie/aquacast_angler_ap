@@ -1,492 +1,303 @@
 
 {
-  "schemaVersion": "2.0-practice-bait-tech",
-  "taxonomies": {
-    "speciesEnum": ["bream", "bass", "carp"],
-    "baitFamiliesEnum": ["live", "crank_swim", "spinner", "soft"],
-    "techniqueCategoriesEnum": ["casting", "short_range", "presentation", "rigging"],
-    "techniqueCatalog": [
-      {
-        "techniqueKey": "cast_overhead",
-        "name": "Overhead Cast",
-        "category": "casting",
-        "skillAxes": ["accuracy", "distance", "trajectory_control"],
-        "compatibleFamilies": ["spinner", "crank_swim", "soft", "live"]
-      },
-      {
-        "techniqueKey": "cast_sidearm",
-        "name": "Sidearm Cast",
-        "category": "casting",
-        "skillAxes": ["accuracy", "low_clearance", "skip_setup"],
-        "compatibleFamilies": ["spinner", "crank_swim", "soft"]
-      },
-      {
-        "techniqueKey": "pitch_flip",
-        "name": "Pitching & Flipping",
-        "category": "short_range",
-        "skillAxes": ["quiet_entry", "precision", "line_control"],
-        "compatibleFamilies": ["soft", "live"]
-      },
-      {
-        "techniqueKey": "retrieve_control",
-        "name": "Retrieve Control",
-        "category": "presentation",
-        "skillAxes": ["cadence_consistency", "depth_control", "contact_cover"],
-        "compatibleFamilies": ["crank_swim", "spinner", "soft"]
-      },
-      {
-        "techniqueKey": "rig_prep",
-        "name": "Rigging Prep",
-        "category": "rigging",
-        "skillAxes": ["knot_quality", "rig_accuracy", "bait_presentation"],
-        "compatibleFamilies": ["live", "soft"]
-      }
+  "schemaVersion": "1.0-bait-techniques",
+  "updatedAtISO": "2025-08-21T00:00:00Z",
+  "defaults": {
+    "gradeBands": [
+      { "min": 90, "grade": "S" },
+      { "min": 80, "grade": "A" },
+      { "min": 70, "grade": "B" },
+      { "min": 60, "grade": "C" },
+      { "min": 0,  "grade": "D" }
     ],
-    "baitCatalog": [
-      {
-        "baitKey": "spinner_inline_size3",
-        "family": "spinner",
-        "subtype": "inline",
-        "name": "Inline Spinner #3",
-        "weight_g": 10,
-        "size": "3",
-        "speciesAffinity": { "bass": 0.8, "bream": 0.6, "carp": 0.2 },
-        "recommendedTechniques": ["cast_overhead", "cast_sidearm", "retrieve_control"],
-        "presentationAxes": ["cadence_consistency", "flash_control", "depth_control"]
-      },
-      {
-        "baitKey": "spinner_willow_1_2oz",
-        "family": "spinner",
-        "subtype": "willow",
-        "name": "Willow Spinnerbait 1/2oz",
-        "weight_g": 14,
-        "size": "1/2oz",
-        "speciesAffinity": { "bass": 0.9, "bream": 0.4, "carp": 0.1 },
-        "recommendedTechniques": ["cast_sidearm", "retrieve_control"],
-        "presentationAxes": ["cadence_consistency", "contact_cover", "angle_through_wind"]
-      },
-      {
-        "baitKey": "crank_squarebill_1_5",
-        "family": "crank_swim",
-        "subtype": "squarebill",
-        "name": "Squarebill 1.5",
-        "weight_g": 12,
-        "size": "1.5",
-        "speciesAffinity": { "bass": 0.9, "bream": 0.5, "carp": 0.1 },
-        "recommendedTechniques": ["cast_overhead", "retrieve_control"],
-        "presentationAxes": ["cover_deflection", "depth_track_error", "cadence_consistency"]
-      },
-      {
-        "baitKey": "swimbait_paddle_4in",
-        "family": "crank_swim",
-        "subtype": "paddle_swimbait",
-        "name": "Paddle-Tail Swimbait 4\"",
-        "weight_g": 10,
-        "size": "4in",
-        "speciesAffinity": { "bass": 0.85, "bream": 0.55, "carp": 0.15 },
-        "recommendedTechniques": ["cast_sidearm", "retrieve_control"],
-        "presentationAxes": ["cadence_consistency", "depth_control", "line_angle"]
-      },
-      {
-        "baitKey": "soft_stickbait_5in",
-        "family": "soft",
-        "subtype": "stickbait",
-        "name": "Stickbait 5\"",
-        "weight_g": 12,
-        "size": "5in",
-        "speciesAffinity": { "bass": 0.85, "bream": 0.6, "carp": 0.25 },
-        "recommendedTechniques": ["cast_sidearm", "pitch_flip", "retrieve_control"],
-        "presentationAxes": ["skip_distance", "quiet_entry", "sink_countdown"]
-      },
-      {
-        "baitKey": "soft_ned_2_75in",
-        "family": "soft",
-        "subtype": "ned",
-        "name": "Ned Worm 2.75\"",
-        "weight_g": 5,
-        "size": "2.75in",
-        "speciesAffinity": { "bass": 0.8, "bream": 0.7, "carp": 0.2 },
-        "recommendedTechniques": ["pitch_flip", "retrieve_control"],
-        "presentationAxes": ["bottom_contact_time", "line_control", "bite_detection"]
-      },
-      {
-        "baitKey": "live_worm_float",
-        "family": "live",
-        "subtype": "worm_float",
-        "name": "Live Worm under Float",
-        "weight_g": 4,
-        "size": "std",
-        "speciesAffinity": { "bass": 0.4, "bream": 0.9, "carp": 0.7 },
-        "recommendedTechniques": ["pitch_flip", "rig_prep", "retrieve_control"],
-        "presentationAxes": ["quiet_entry", "drift_lane_control", "hookset_timing"]
-      },
-      {
-        "baitKey": "carp_hair_rig_boilie",
-        "family": "live",
-        "subtype": "hair_rig",
-        "name": "Carp Hair-Rig (Boilie)",
-        "weight_g": 18,
-        "size": "15mm",
-        "speciesAffinity": { "bass": 0.05, "bream": 0.2, "carp": 0.95 },
-        "recommendedTechniques": ["rig_prep", "pitch_flip"],
-        "presentationAxes": ["rig_accuracy", "quiet_entry", "strike_delay_discipline"]
-      }
-    ],
-    "speciesProfiles": [
-      {
-        "speciesKey": "bass",
-        "preferredFamilies": ["crank_swim", "spinner", "soft"],
-        "recommendedBaits": ["spinner_willow_1_2oz", "crank_squarebill_1_5", "swimbait_paddle_4in", "soft_stickbait_5in"],
-        "techniqueBias": { "cast_sidearm": 0.2, "retrieve_control": 0.2, "pitch_flip": 0.1 }
-      },
-      {
-        "speciesKey": "bream",
-        "preferredFamilies": ["soft", "live"],
-        "recommendedBaits": ["soft_ned_2_75in", "live_worm_float"],
-        "techniqueBias": { "pitch_flip": 0.2, "retrieve_control": 0.1 }
-      },
-      {
-        "speciesKey": "carp",
-        "preferredFamilies": ["live", "soft"],
-        "recommendedBaits": ["carp_hair_rig_boilie", "live_worm_float", "soft_ned_2_75in"],
-        "techniqueBias": { "rig_prep": 0.25, "pitch_flip": 0.15 }
-      }
-    ]
+    "rounds": 3,
+    "castsPerRound": 10
   },
-  "drillCatalog": [
-    {
-      "drillKey": "spinner_lane_cadence_v1",
-      "name": "Spinner Lane Cadence",
-      "speciesKeys": ["bass", "bream"],
-      "requiredFamilies": ["spinner"],
-      "techniques": ["cast_sidearm", "retrieve_control"],
-      "params": { "rounds": 3, "castsPerRound": 10, "laneWidth_m": 4, "distance_m": [12, 18], "targetCadence_spm": 60, "tolerance_spm": 6 },
-      "metrics": ["cadence_consistency", "lane_hits", "contact_cover"],
-      "scoring": {
-        "weights": { "cadence_consistency": 0.5, "lane_hits": 0.3, "contact_cover": 0.2 },
-        "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
-      }
-    },
-    {
-      "drillKey": "windward_edge_sweep_v1",
-      "name": "Windward Edge Sweep",
-      "speciesKeys": ["bass", "bream"],
-      "requiredFamilies": ["spinner"],
-      "techniques": ["cast_sidearm", "retrieve_control"],
-      "params": { "rounds": 2, "castsPerRound": 12, "distance_m": [20], "crosswind_kph": [10, 16] },
-      "metrics": ["entry_offset_upwind", "edge_time_on_path", "tick_events"],
-      "scoring": { "weights": { "edge_time_on_path": 0.5, "entry_offset_upwind": 0.3, "tick_events": 0.2 } }
-    },
-    {
-      "drillKey": "flash_thump_modulation_v1",
-      "name": "Flash/Thump Modulation",
-      "speciesKeys": ["bass", "bream"],
-      "requiredFamilies": ["spinner"],
-      "techniques": ["retrieve_control"],
-      "params": { "rounds": 3, "duration_s": 60, "cadence_targets_spm": [48, 60, 80] },
-      "metrics": ["depth_control", "cadence_consistency"],
-      "scoring": { "weights": { "cadence_consistency": 0.6, "depth_control": 0.4 } }
-    },
-    {
-      "drillKey": "squarebill_contact_course_v1",
-      "name": "Squarebill Contact Course",
-      "speciesKeys": ["bass"],
-      "requiredBaits": ["crank_squarebill_1_5"],
-      "techniques": ["cast_overhead", "retrieve_control"],
-      "params": { "rounds": 3, "castsPerRound": 8, "targets": [{ "distance_m": 12 }, { "distance_m": 15 }], "obstacles": 6 },
-      "metrics": ["cover_deflection", "depth_track_error", "accuracy"],
-      "scoring": {
-        "weights": { "cover_deflection": 0.45, "depth_track_error": 0.35, "accuracy": 0.2 },
-        "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
-      }
-    },
-    {
-        "drillKey": "depth_ladder_hold_v1",
-        "name": "Depth Ladder Hold",
-        "speciesKeys": ["bass"],
-        "requiredFamilies": ["crank_swim"],
-        "techniques": ["retrieve_control"],
-        "params": { "rounds": 3, "duration_s": 30, "depth_targets_m": [1.2, 1.5, 1.8] },
-        "metrics": ["time_in_band"],
-        "scoring": { "weights": { "time_in_band": 1.0 } }
-    },
-    {
-        "drillKey": "stop_go_trigger_sets_v1",
-        "name": "Stop–Go Trigger Sets",
-        "speciesKeys": ["bass"],
-        "requiredFamilies": ["crank_swim"],
-        "techniques": ["retrieve_control"],
-        "params": { "rounds": 1, "castsPerRound": 5, "run_duration_s": 4, "stop_duration_s": 1 },
-        "metrics": ["rhythm_variance", "restart_cleanliness", "depth_recovery_time"],
-        "scoring": { "weights": { "rhythm_variance": 0.5, "restart_cleanliness": 0.3, "depth_recovery_time": 0.2 } }
-    },
-    {
-      "drillKey": "soft_skip_precision_v1",
-      "name": "Soft Skip Precision",
-      "speciesKeys": ["bass", "bream"],
-      "requiredBaits": ["soft_stickbait_5in"],
-      "techniques": ["cast_sidearm", "pitch_flip"],
-      "params": { "rounds": 4, "castsPerRound": 6, "targets": [{ "distance_m": 8, "radius_cm": 45 }, { "distance_m": 10, "radius_cm": 45 }], "minSkips": 2 },
-      "metrics": ["skip_distance", "quiet_entry", "ring_hits"],
-      "scoring": {
-        "weights": { "skip_distance": 0.4, "quiet_entry": 0.3, "ring_hits": 0.3 },
-        "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
-      }
-    },
-    {
-        "drillKey": "quiet_entry_pitch_v1",
-        "name": "Quiet Entry Pitch",
-        "speciesKeys": ["bream", "carp", "bass"],
-        "requiredFamilies": ["soft", "live"],
-        "techniques": ["pitch_flip"],
-        "params": { "rounds": 1, "castsPerRound": 10, "targets": [{ "distance_m": 3, "radius_cm": 25 }, { "distance_m": 5, "radius_cm": 30 }] },
-        "metrics": ["quiet_entry", "precision"],
-        "scoring": { "weights": { "quiet_entry": 0.6, "precision": 0.4 } }
-    },
-    {
-        "drillKey": "bottom_clock_slack_read_v1",
-        "name": "Bottom Clock & Slack Read",
-        "speciesKeys": ["bass", "bream"],
-        "requiredFamilies": ["soft"],
-        "techniques": ["pitch_flip", "retrieve_control"],
-        "params": { "rounds": 3, "duration_s": 90 },
-        "metrics": ["countdown_error", "line_control", "bite_detection"],
-        "scoring": { "weights": { "countdown_error": 0.4, "bite_detection": 0.4, "line_control": 0.2 } }
-    },
-    {
-      "drillKey": "live_pitch_quiet_entry_v1",
-      "name": "Live Pitch — Quiet Entry",
-      "speciesKeys": ["bream", "carp", "bass"],
-      "requiredFamilies": ["live"],
-      "techniques": ["pitch_flip", "rig_prep"],
-      "params": { "rounds": 3, "castsPerRound": 10, "targets": [{ "distance_m": 3, "radius_cm": 25 }, { "distance_m": 5, "radius_cm": 30 }] },
-      "metrics": ["quiet_entry", "precision", "hookset_timing"],
-      "scoring": {
-        "weights": { "quiet_entry": 0.45, "precision": 0.35, "hookset_timing": 0.2 },
-        "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
-      }
-    },
-    {
-        "drillKey": "drift_lane_control_v1",
-        "name": "Drift Lane Control",
-        "speciesKeys": ["bream", "carp"],
-        "requiredFamilies": ["live"],
-        "techniques": ["pitch_flip", "retrieve_control"],
-        "params": { "rounds": 3, "duration_s": 60, "lane_width_m": 2 },
-        "metrics": ["time_in_lane", "correction_efficiency"],
-        "scoring": { "weights": { "time_in_lane": 0.7, "correction_efficiency": 0.3 } }
-    },
-    {
-        "drillKey": "hookset_timing_simulator_v1",
-        "name": "Hookset Timing Simulator",
-        "speciesKeys": ["bream", "carp", "bass"],
-        "requiredFamilies": ["live", "soft"],
-        "techniques": ["retrieve_control"],
-        "params": { "rounds": 1, "castsPerRound": 20 },
-        "metrics": ["correct_timing_rate", "premature_late_index"],
-        "scoring": { "weights": { "correct_timing_rate": 0.8, "premature_late_index": 0.2 } }
-    },
-    {
-      "drillKey": "carp_hair_rig_accuracy_v1",
-      "name": "Carp Hair-Rig Accuracy",
-      "speciesKeys": ["carp"],
-      "requiredBaits": ["carp_hair_rig_boilie"],
-      "techniques": ["rig_prep", "pitch_flip"],
-      "params": { "rounds": 3, "castsPerRound": 8, "targets": [{ "distance_m": 15, "radius_cm": 60 }, { "distance_m": 20, "radius_cm": 60 }] },
-      "metrics": ["rig_accuracy", "quiet_entry", "strike_delay_discipline"],
-      "scoring": {
-        "weights": { "rig_accuracy": 0.5, "quiet_entry": 0.3, "strike_delay_discipline": 0.2 },
-        "gradeBands": [{ "min": 90, "grade": "S" }, { "min": 80, "grade": "A" }, { "min": 70, "grade": "B" }, { "min": 60, "grade": "C" }, { "min": 0, "grade": "D" }]
-      }
-    }
-  ],
-  "evaluationRubrics": {
-    "byBaitFamily": {
-      "spinner": {
-        "axes": ["cadence_consistency", "lane_hits", "depth_control", "contact_cover"],
-        "weights": { "cadence_consistency": 0.35, "lane_hits": 0.25, "depth_control": 0.2, "contact_cover": 0.2 }
-      },
-      "crank_swim": {
-        "axes": ["cover_deflection", "depth_track_error", "cadence_consistency"],
-        "weights": { "cover_deflection": 0.4, "depth_track_error": 0.4, "cadence_consistency": 0.2 }
-      },
-      "soft": {
-        "axes": ["skip_distance", "quiet_entry", "line_control", "bottom_contact_time"],
-        "weights": { "skip_distance": 0.35, "quiet_entry": 0.3, "line_control": 0.2, "bottom_contact_time": 0.15 }
-      },
-      "live": {
-        "axes": ["quiet_entry", "drift_lane_control", "hookset_timing", "rig_accuracy"],
-        "weights": { "quiet_entry": 0.35, "drift_lane_control": 0.25, "hookset_timing": 0.2, "rig_accuracy": 0.2 }
-      }
-    }
+  "metricDefinitions": {
+    "cadence_consistency": "How closely retrieve cadence matches target over time.",
+    "lane_hits": "Count of casts that stay within a defined lateral lane.",
+    "contact_cover": "Controlled ticks/deflections off cover without fouling.",
+    "depth_control": "Percent of time lure runs within depth band.",
+    "cover_deflection": "Quality and timing of squarebill/swim deflections.",
+    "depth_track_error": "Average deviation from target depth (lower is better).",
+    "rhythm_variance": "Variance from programmed stop–go rhythm.",
+    "entry_offset_upwind": "Aim compensation upwind at entry (m).",
+    "edge_time_on_path": "Time lure stays on the marked edge/path.",
+    "tick_events": "Valid brief contact events along an edge.",
+    "skip_distance": "Distance traveled across the surface during skips.",
+    "quiet_entry": "Landing noise proxy and splash control.",
+    "ring_hits": "Accuracy rings hits (center/inner/outer).",
+    "precision": "Hit proximity to target center for short pitches.",
+    "sound_proxy": "Estimated entry sound vs threshold.",
+    "first_move_latency": "Delay before moving bait after splashdown.",
+    "countdown_error": "Error between called and actual bottom contact time.",
+    "line_control": "Slack management quality during sink/pause.",
+    "bite_detection": "Correctly identified simulated taps.",
+    "time_in_lane": "Percent time float/lure stays in drift lane.",
+    "correction_efficiency": "Minimal, timely corrections to hold lane.",
+    "over_drag_penalty": "Penalty for dragging float out of natural drift.",
+    "correct_timing_rate": "Rate of correct hookset timing on prompts.",
+    "premature_late_index": "Composite penalty for early/late sets.",
+    "rig_accuracy": "Placement accuracy for rigs (e.g., hair-rig pad hits).",
+    "strike_delay_discipline": "Adherence to species/rig-specific set delay."
   },
-  "practiceTab": {
-    "uiDefaults": {
-      "gutter_px": 16,
-      "cardRadius_px": 16,
-      "tileRadius_px": 14
-    },
-    "filters": {
-      "species": ["bass", "bream", "carp"],
-      "baitFamily": ["spinner", "crank_swim", "soft", "live"],
-      "techniqueCategory": ["casting", "short_range", "presentation", "rigging"]
-    }
-  },
-  "session": {
-    "sessionId": "string",
-    "userId": "string",
-    "startedAtISO": "string",
-    "endedAtISO": "string|null",
-    "mode": "drill|free",
-    "speciesFocus": "bream|bass|carp|null",
-    "drillKey": "string|null",
-    "techniqueKey": "string|null",
-    "bait": {
-      "baitKey": "string|null",
-      "family": "live|crank_swim|spinner|soft|null",
-      "subtype": "string|null",
-      "weight_g": "number|null",
-      "color": "string|null",
-      "size": "string|null",
-      "rig": {
-        "style": "texas|carolina|jighead|dropshot|hair_rig|float|free_rig|null",
-        "leader_lb": "number|null",
-        "hook_size": "string|null"
-      }
-    },
-    "equipment": {
-      "rod_len_ft": "number|null",
-      "line_type": "mono|fluoro|braid|null",
-      "line_lb": "number|null"
-    },
-    "conditions": {
-      "body": "lake|river|null",
-      "season": "hot|cool|transition|null",
-      "windKph": "number|null",
-      "windDirDeg": "number|null",
-      "cloudPct": "number|null",
-      "pressureTrendHpaPer3h": "number|null",
-      "rainMm24h": "number|null",
-      "waterLevel": "rising|falling|stable|null",
-      "tempAirC": "number|null",
-      "tempWaterC": "number|null"
-    },
-    "attempts": [
-      {
-        "attemptId": "string",
-        "timestampISO": "string",
-        "target": { "distance_m": "number", "bearing_deg": "number|null", "radius_cm": "number|null" },
-        "baitUsed": { "baitKey": "string", "family": "live|crank_swim|spinner|soft" },
-        "cast": {
-          "techniqueKey": "string",
-          "releaseAngle_deg": "number|null",
-          "trajectory": "low|medium|high|null",
-          "skipCount": "number|null",
-          "retrieveStyle": "steady|yo-yo|burn|slow-roll|twitch|null",
-          "retrieveCadence_spm": "number|null",
-          "depthTrack_m": "number|null",
-          "contactCover": "boolean|null",
-          "duration_s": "number|null"
+  "families": [
+    {
+      "familyKey": "spinner",
+      "label": "Spinner (Inline & Spinnerbait)",
+      "supportedSpecies": ["bass", "bream"],
+      "coreTechniques": [
+        {
+          "techniqueKey": "cast_sidearm",
+          "label": "Sidearm, Low Profile",
+          "skillAxes": ["accuracy", "low_clearance", "trajectory_control"]
         },
-        "outcome": {
-          "ring": "center|inner|outer|miss|null",
-          "distanceError_cm": "number|null",
-          "angleError_deg": "number|null",
-          "quietEntry": "boolean|null",
-          "bottomContactTime_s": "number|null",
-          "biteSimulated": "boolean|null",
-          "hookset": "n/a|miss|landed",
-          "landedFish": "boolean|null"
+        {
+          "techniqueKey": "retrieve_control",
+          "label": "Retrieve Cadence Control",
+          "skillAxes": ["cadence_consistency", "depth_control", "contact_cover"]
         },
-        "score": { "points": "number", "comboMultiplier": "number" },
-        "notes": "string|null",
-        "mediaRef": "string|null"
-      }
-    ],
-    "totals": {
-      "casts": "number",
-      "hits": "number",
-      "accuracy_pct": "number",
-      "avgDistanceError_cm": "number|null",
-      "avgCadence_spm": "number|null",
-      "contactCoverRate_pct": "number|null",
-      "quietEntryRate_pct": "number|null",
-      "sessionPoints": "number",
-      "grade": "S|A|B|C|D",
-      "xpEarned": "number",
-      "coinsEarned": "number"
+        {
+          "techniqueKey": "lane_discipline",
+          "label": "Lane Discipline",
+          "skillAxes": ["lane_hits", "edge_time_on_path", "tick_events"]
+        }
+      ],
+      "drills": [
+        {
+          "drillKey": "spinner_lane_cadence_v1",
+          "name": "Spinner Lane Cadence",
+          "difficulty": 2,
+          "techniques": ["cast_sidearm", "retrieve_control"],
+          "params": {
+            "rounds": 3,
+            "castsPerRound": 10,
+            "laneWidth_m": 4,
+            "distance_m": [12, 18],
+            "targetCadence_spm": 60,
+            "tolerance_spm": 6,
+            "windHint_kph": [8, 16]
+          },
+          "metrics": ["cadence_consistency", "lane_hits", "contact_cover"],
+          "scoring": { "weights": { "cadence_consistency": 0.5, "lane_hits": 0.3, "contact_cover": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Hold blade pulse and stay in the lane.", "proTip": "Aim slightly upwind so the lure sweeps the edge cleanly." },
+          "progression": { "laneWidth_m": 3, "targetCadence_spm": [48, 80] }
+        },
+        {
+          "drillKey": "windward_edge_sweep_v1",
+          "name": "Windward Edge Sweep",
+          "difficulty": 3,
+          "techniques": ["cast_sidearm", "lane_discipline"],
+          "params": { "rounds": 2, "castsPerRound": 12, "edgeLength_m": 20, "allowedOffsetUpwind_m": 1.0 },
+          "metrics": ["entry_offset_upwind", "edge_time_on_path", "tick_events"],
+          "scoring": { "weights": { "edge_time_on_path": 0.45, "entry_offset_upwind": 0.3, "tick_events": 0.25 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Use wind to arc the spinner along the weed edge.", "proTip": "Keep rod tip low to prevent surfacing on gusts." },
+          "progression": { "allowedOffsetUpwind_m": 0.6, "edgeLength_m": 30 }
+        },
+        {
+          "drillKey": "flash_thump_modulation_v1",
+          "name": "Flash & Thump Modulation",
+          "difficulty": 3,
+          "techniques": ["retrieve_control"],
+          "params": { "runs": 3, "runDuration_s": 60, "cadenceProfiles_spm": [48, 60, 80], "depthBand_m": [0.6, 1.2] },
+          "metrics": ["depth_control", "cadence_consistency"],
+          "scoring": { "weights": { "depth_control": 0.55, "cadence_consistency": 0.45 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Match speed to hold depth across wind and turns.", "proTip": "Rod height fine-tunes depth without changing speed." },
+          "progression": { "depthBand_m": [0.4, 1.0] }
+        }
+      ]
     },
-    "aiCoaching": {
-      "biteConsiderations": ["string", "string", "string"],
-      "possibleStrategies": ["string", "string", "string"],
-      "insights": ["string", "string", "string"]
-    }
-  },
-  "progress": {
-    "level": "number",
-    "xp": "number",
-    "nextLevelXp": "number",
-    "streakDays": "number",
-    "techniqueMastery": [
-      { "speciesKey": "bass", "techniqueKey": "cast_sidearm", "rating_0_100": 72, "trend": "up|flat|down" }
-    ],
-    "baitMastery": [
-      { "speciesKey": "bass", "baitKey": "spinner_willow_1_2oz", "rating_0_100": 78, "trend": "up|flat|down" },
-      { "speciesKey": "carp", "baitKey": "carp_hair_rig_boilie", "rating_0_100": 84, "trend": "up|flat|down" }
-    ],
-    "speciesMastery": [
-      { "speciesKey": "bass", "rating_0_100": 76, "trend": "up|flat|down" }
-    ],
-    "achievements": [
-      { "badgeKey": "spinner_cadence_pro", "tier": "bronze|silver|gold|elite", "unlockedAtISO": "string" },
-      { "badgeKey": "carp_rigsmith", "tier": "bronze|silver|gold|elite", "unlockedAtISO": "string" }
-    ]
-  },
-  "quests": {
-    "daily": [
-      {
-        "questId": "q_spin_5_lane_hits",
-        "title": "Spinner: 5 perfect lane hits",
-        "expiresAtISO": "string",
-        "requirements": { "baitFamily": "spinner", "lane_hits": 5 },
-        "rewards": { "xp": 120, "coins": 30, "badgeKey": null },
-        "progress": { "lane_hits": 0, "completed": false }
-      }
-    ],
-    "weekly": [
-      {
-        "questId": "q_carp_rig_accuracy",
-        "title": "Carp: 10 hair-rig accuracy hits",
-        "expiresAtISO": "string",
-        "requirements": { "speciesKey": "carp", "baitKey": "carp_hair_rig_boilie", "rig_accuracy_hits": 10 },
-        "rewards": { "xp": 500, "coins": 120, "badgeKey": "carp_rigsmith" },
-        "progress": { "rig_accuracy_hits": 0, "completed": false }
-      }
-    ]
-  },
-  "leaderboards": [
     {
-      "scope": "global|spot|friends",
-      "metricKey": "sessionPoints|accuracy_pct|maxHitStreak|grade|baitMastery",
-      "dimension": { "speciesKey": "bass", "baitFamily": "spinner" },
-      "period": "daily|weekly|alltime",
-      "entries": [
-        { "rank": 1, "userId": "string", "displayName": "string", "value": "number|string", "userCountry": "string|null" }
+      "familyKey": "crank_swim",
+      "label": "Crank & Swimbaits",
+      "supportedSpecies": ["bass"],
+      "coreTechniques": [
+        {
+          "techniqueKey": "cast_overhead",
+          "label": "Overhead Distance + Accuracy",
+          "skillAxes": ["accuracy", "distance", "trajectory_control"]
+        },
+        {
+          "techniqueKey": "depth_track",
+          "label": "Depth Track",
+          "skillAxes": ["depth_control", "depth_track_error"]
+        },
+        {
+          "techniqueKey": "cover_deflect",
+          "label": "Cover Deflection",
+          "skillAxes": ["cover_deflection", "contact_cover"]
+        },
+        {
+          "techniqueKey": "stop_go",
+          "label": "Stop–Go Rhythm",
+          "skillAxes": ["rhythm_variance", "depth_recovery_time"]
+        }
+      ],
+      "drills": [
+        {
+          "drillKey": "squarebill_contact_course_v1",
+          "name": "Squarebill Contact Course",
+          "difficulty": 3,
+          "techniques": ["cast_overhead", "cover_deflect"],
+          "params": { "rounds": 3, "castsPerRound": 8, "obstacles": 6, "distance_m": [12, 15] },
+          "metrics": ["cover_deflection", "depth_track_error", "accuracy"],
+          "scoring": { "weights": { "cover_deflection": 0.45, "depth_track_error": 0.35, "accuracy": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Tap cover and recover depth without fouling.", "proTip": "Loosen grip at impact to let the bait glance off." },
+          "progression": { "obstacles": 8, "distance_m": [15, 18] }
+        },
+        {
+          "drillKey": "depth_ladder_hold_v1",
+          "name": "Depth Ladder Hold",
+          "difficulty": 2,
+          "techniques": ["depth_track"],
+          "params": { "ladders": 3, "stepDurations_s": [30, 30, 30], "bands_m": [[1.2, 1.3], [1.5, 1.6], [1.8, 1.9]] },
+          "metrics": ["depth_control", "depth_track_error"],
+          "scoring": { "weights": { "depth_control": 0.6, "depth_track_error": 0.4 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Hold a running depth with rod angle and speed.", "proTip": "Point the rod down to dig, level to ride higher." },
+          "progression": { "stepDurations_s": [40, 40, 40], "bands_m": [[1.1, 1.2], [1.4, 1.5], [1.7, 1.8]] }
+        },
+        {
+          "drillKey": "stop_go_trigger_sets_v1",
+          "name": "Stop–Go Trigger Sets",
+          "difficulty": 3,
+          "techniques": ["stop_go", "depth_track"],
+          "params": { "rounds": 3, "runsPerRound": 5, "pattern_s": { "run": 4, "stop": 1 } },
+          "metrics": ["rhythm_variance", "depth_control"],
+          "scoring": { "weights": { "rhythm_variance": 0.55, "depth_control": 0.45 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Program triggers without blowing out depth.", "proTip": "On the stop, lower rod to keep the lure in zone." },
+          "progression": { "pattern_s": { "run": 3, "stop": 2 } }
+        }
+      ]
+    },
+    {
+      "familyKey": "soft",
+      "label": "Soft Plastics (Stickbait, Ned, Fluke, Jig)",
+      "supportedSpecies": ["bass", "bream", "carp"],
+      "coreTechniques": [
+        {
+          "techniqueKey": "skip_sidearm",
+          "label": "Skipping (Sidearm)",
+          "skillAxes": ["skip_distance", "quiet_entry", "trajectory_control"]
+        },
+        {
+          "techniqueKey": "pitch_flip",
+          "label": "Pitch/Flip Precision",
+          "skillAxes": ["precision", "quiet_entry", "line_control"]
+        },
+        {
+          "techniqueKey": "slack_management",
+          "label": "Line/Slack Management",
+          "skillAxes": ["line_control", "bite_detection", "bottom_contact_time"]
+        }
+      ],
+      "drills": [
+        {
+          "drillKey": "soft_skip_precision_v1",
+          "name": "Soft Bait Skip Precision",
+          "difficulty": 3,
+          "techniques": ["skip_sidearm"],
+          "params": { "rounds": 4, "castsPerRound": 6, "targets": [{ "distance_m": 8, "radius_cm": 45 }, { "distance_m": 10, "radius_cm": 45 }], "minSkips": 2 },
+          "metrics": ["skip_distance", "quiet_entry", "ring_hits"],
+          "scoring": { "weights": { "skip_distance": 0.4, "quiet_entry": 0.3, "ring_hits": 0.3 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Skip under cover without blow-ups.", "proTip": "Aim two rod-tip heights short; let momentum carry it in." },
+          "progression": { "radius_cm": 35, "minSkips": 3 }
+        },
+        {
+          "drillKey": "quiet_entry_pitch_v1",
+          "name": "Quiet Entry Pitch",
+          "difficulty": 2,
+          "techniques": ["pitch_flip"],
+          "params": { "rounds": 3, "castsPerRound": 10, "targets": [{ "distance_m": 3, "radius_cm": 25 }, { "distance_m": 5, "radius_cm": 30 }] },
+          "metrics": ["quiet_entry", "precision", "first_move_latency"],
+          "scoring": { "weights": { "quiet_entry": 0.45, "precision": 0.35, "first_move_latency": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Land silently and let it soak correctly.", "proTip": "Feather the spool at splash to kill momentum." },
+          "progression": { "targets": [{ "distance_m": 5, "radius_cm": 25 }, { "distance_m": 7, "radius_cm": 25 }] }
+        },
+        {
+          "drillKey": "bottom_clock_slack_read_v1",
+          "name": "Bottom Clock & Slack Read",
+          "difficulty": 3,
+          "techniques": ["slack_management"],
+          "params": { "rounds": 3, "runsPerRound": 3, "depths_m": [1.5, 2.0, 2.5], "weights_g": [7, 10, 14] },
+          "metrics": ["countdown_error", "line_control", "bite_detection"],
+          "scoring": { "weights": { "countdown_error": 0.45, "line_control": 0.3, "bite_detection": 0.25 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Own your sink count and slack tick reads.", "proTip": "Pinch line lightly to feel taps without moving bait." },
+          "progression": { "depths_m": [2.0, 3.0, 4.0] }
+        }
+      ]
+    },
+    {
+      "familyKey": "live",
+      "label": "Live Bait (Float, Drift, Hair-Rig)",
+      "supportedSpecies": ["bream", "carp", "bass"],
+      "coreTechniques": [
+        {
+          "techniqueKey": "float_entry",
+          "label": "Quiet Entry Under Float",
+          "skillAxes": ["quiet_entry", "precision", "setup_time"]
+        },
+        {
+          "techniqueKey": "drift_lane",
+          "label": "Drift Lane Control",
+          "skillAxes": ["time_in_lane", "correction_efficiency", "over_drag_penalty"]
+        },
+        {
+          "techniqueKey": "hookset_timing",
+          "label": "Hookset Timing Discipline",
+          "skillAxes": ["correct_timing_rate", "premature_late_index"]
+        },
+        {
+          "techniqueKey": "rig_prep",
+          "label": "Rig Prep Accuracy",
+          "skillAxes": ["rig_accuracy", "quiet_entry", "strike_delay_discipline"]
+        }
+      ],
+      "drills": [
+        {
+          "drillKey": "live_pitch_quiet_entry_v1",
+          "name": "Live Pitch — Quiet Entry",
+          "difficulty": 2,
+          "techniques": ["float_entry"],
+          "params": { "rounds": 3, "castsPerRound": 10, "targets": [{ "distance_m": 3, "radius_cm": 25 }, { "distance_m": 5, "radius_cm": 30 }] },
+          "metrics": ["quiet_entry", "precision", "setup_time"],
+          "scoring": { "weights": { "quiet_entry": 0.45, "precision": 0.35, "setup_time": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Land a float silently in tight spots.", "proTip": "Stop the float mid-air to level it before splash." },
+          "progression": { "radius_cm": 20, "distance_m": [6, 8] }
+        },
+        {
+          "drillKey": "drift_lane_control_v1",
+          "name": "Drift Lane Control",
+          "difficulty": 3,
+          "techniques": ["drift_lane"],
+          "params": { "rounds": 3, "duration_s": 60, "laneWidth_m": 2.0 },
+          "metrics": ["time_in_lane", "correction_efficiency", "over_drag_penalty"],
+          "scoring": { "weights": { "time_in_lane": 0.5, "correction_efficiency": 0.3, "over_drag_penalty": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Ride natural lanes without over-dragging.", "proTip": "Mend line just enough to correct the drift, not steer it." },
+          "progression": { "laneWidth_m": 1.5, "duration_s": 90 }
+        },
+        {
+          "drillKey": "hookset_timing_sim_v1",
+          "name": "Hookset Timing Simulator",
+          "difficulty": 2,
+          "techniques": ["hookset_timing"],
+          "params": { "events": 20, "promptTypes": ["float_dip", "line_move"], "delayProfiles_ms": { "bream": 400, "carp": 800, "bass": 300 } },
+          "metrics": ["correct_timing_rate", "premature_late_index"],
+          "scoring": { "weights": { "correct_timing_rate": 0.7, "premature_late_index": 0.3 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Wait the right beat, then set cleanly.", "proTip": "Watch for sideways line moves—they often mean a moving take." },
+          "progression": { "events": 30, "promptMix": "more subtle dips" }
+        },
+        {
+          "drillKey": "carp_hair_rig_accuracy_v1",
+          "name": "Carp Hair-Rig Accuracy",
+          "difficulty": 3,
+          "techniques": ["rig_prep", "pitch_flip"],
+          "params": { "rounds": 3, "castsPerRound": 8, "pads": [{ "distance_m": 15, "radius_cm": 60 }, { "distance_m": 20, "radius_cm": 60 }] },
+          "metrics": ["rig_accuracy", "quiet_entry", "strike_delay_discipline"],
+          "scoring": { "weights": { "rig_accuracy": 0.5, "quiet_entry": 0.3, "strike_delay_discipline": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
+          "ui": { "whatYouLearn": "Place rigs precisely and wait for the right moment.", "proTip": "Let the feeder settle fully before tightening to the lead." },
+          "progression": { "pads": [{ "distance_m": 22, "radius_cm": 50 }] }
+        }
       ]
     }
-  ],
-  "rewardStore": {
-    "coins": "number",
-    "inventory": [
-      { "itemKey": "pro_tip_pack_spinner", "type": "consumable", "owned": 0, "costCoins": 200 },
-      { "itemKey": "rod_skin_teal_medical", "type": "cosmetic", "owned": 1, "costCoins": 300 }
-    ]
-  },
-  "safety": {
-    "disclaimers": [
-      "Practice casting only in safe, clear areas and use eye protection.",
-      "Avoid lightning, strong wind, and crowded spaces while practicing."
-    ]
-  }
+  ]
 }
-```

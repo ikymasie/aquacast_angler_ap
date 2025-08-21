@@ -12,19 +12,10 @@ import { LureSpinnerIcon } from './icons/lure-spinner';
 
 interface TechniqueCardProps {
   technique: {
-    name: string;
-    category: string;
-    compatibleFamilies: LureFamily[];
+    label: string;
     skillAxes: string[];
   };
 }
-
-const lureIcons: Record<string, React.FC<any>> = {
-  'Crank/Swim': LureCrankSwimIcon,
-  'Live': LureLiveIcon,
-  'Soft': LureSoftIcon,
-  'Spinner': LureSpinnerIcon,
-};
 
 const skillIcons: Record<string, React.ElementType> = {
     accuracy: Target,
@@ -38,10 +29,6 @@ const skillIcons: Record<string, React.ElementType> = {
 
 export function TechniqueCard({ technique }: TechniqueCardProps) {
 
-  const getLureIcon = (lureFamily: string) => {
-    return lureIcons[lureFamily] || LureSoftIcon;
-  };
-
   const getSkillIcon = (skill: string) => {
       const lowerSkill = skill.toLowerCase();
       for (const key in skillIcons) {
@@ -53,18 +40,11 @@ export function TechniqueCard({ technique }: TechniqueCardProps) {
   }
 
   return (
-    <Card className="p-3 rounded-xl shadow-sm border-line-200 flex flex-col justify-between">
+    <Card className="p-3 rounded-xl shadow-sm border-line-200 flex flex-col justify-between h-full">
       <div>
         <div className="flex justify-between items-start">
-            <h3 className="font-headline text-base text-foreground">{technique.name}</h3>
-            <div className="flex gap-1.5 flex-shrink-0 ml-2">
-                {technique.compatibleFamilies.slice(0,3).map(lure => {
-                    const Icon = getLureIcon(lure);
-                    return <Icon key={lure} className="h-4 w-4 text-muted-foreground" />
-                })}
-            </div>
+            <h3 className="font-headline text-base text-foreground">{technique.label}</h3>
         </div>
-        <Badge variant="secondary" className="mt-1 capitalize text-xs">{technique.category}</Badge>
       </div>
 
       <div className="mt-3">
