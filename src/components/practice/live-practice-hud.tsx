@@ -13,6 +13,7 @@ import { useUser } from '@/hooks/use-user';
 import { useToast } from '@/hooks/use-toast';
 import { useTransition } from 'react';
 import { usePracticeSession, type Ring } from '@/hooks/use-practice-session';
+import { useRouter } from 'next/navigation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -117,6 +118,7 @@ function PauseOverlay({ onResume }: { onResume: () => void }) {
 
 export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
     const { user } = useUser();
+    const router = useRouter();
     const { toast } = useToast();
     const [isSaving, startSaving] = useTransition();
     const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
@@ -169,35 +171,36 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                     undoLastAttempt(); // Rollback local state
                 }
             } else {
-                 toast({ 
-                    variant: 'destructive', 
-                    title: 'Round Complete', 
-                    description: 'Please start the next round.'
-                });
+                 handleCompleteRound();
             }
         });
     };
-
-    const handleCompleteSession = () => {
+    
+    const handleCompleteRound = async () => {
         if (!user || !drill.sessionId) return;
-        setIsExitDialogOpen(false);
-
-        startSaving(async () => {
-            const finalMetrics = getDisplayMetrics();
-            const { success, error } = await completePracticeSessionAction({
-                userId: user.uid,
-                sessionId: drill.sessionId,
-                finalScore: finalMetrics.totalScore,
-                finalGrade: 'A' // Placeholder for final grade calculation
-            });
-            if (error) {
-                toast({ variant: 'destructive', title: 'Failed to Complete', description: error });
-            } else {
-                toast({ variant: 'default', title: 'Session Complete!', description: 'Your progress has been saved.' });
-                onExit();
-            }
+        
+        const finalMetrics = getDisplayMetrics();
+        const { success, error } = await completePracticeSessionAction({
+            userId: user.uid,
+            sessionId: drill.sessionId,
+            finalScore: finalMetrics.totalScore,
+            finalGrade: 'A' // Placeholder
         });
-    }
+
+        if (error) {
+            toast({ variant: 'destructive', title: 'Failed to Complete', description: error });
+        } else {
+            toast({ variant: 'default', title: 'Session Complete!', description: 'Redirecting to review...' });
+            router.push(`/practice/review/${drill.sessionId}`);
+        }
+    };
+
+
+    const handleExitSession = () => {
+        setIsExitDialogOpen(false);
+        handleCompleteRound();
+    };
+
 
     const {
         roundScore,
@@ -263,14 +266,14 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>End Practice Session?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to complete this drill? Your progress will be saved.
+                            Are you sure you want to complete this drill? Your progress will be saved, and you'll be taken to the review screen.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleCompleteSession} className="bg-destructive hover:bg-destructive/90">
+                        <AlertDialogAction onClick={handleExitSession} className="bg-destructive hover:bg-destructive/90">
                             <X className="w-4 h-4 mr-2" />
-                            End Session
+                            End & Review
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -278,3 +281,4 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
         </>
     );
 }
+

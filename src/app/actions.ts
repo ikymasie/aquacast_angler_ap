@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { analyzePhoto, type PhotoAnalysisInput } from "@/ai/flows/photo-analysis-flow";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { getDrillAnalysis } from '@/ai/flows/drill-analysis-flow';
 
 
 const LureAdviceInputSchema = z.object({
@@ -334,11 +335,25 @@ export async function completePracticeSessionAction(payload: CompletePracticeSes
         if (!userId || !sessionId) throw new Error("User or session ID missing.");
 
         const sessionRef = doc(db, 'users', userId, 'practiceSessions', sessionId);
+        const sessionSnap = await getDoc(sessionRef);
+        if (!sessionSnap.exists()) throw new Error("Session not found");
+
+        const sessionData = sessionSnap.data();
+        
+        // Generate AI analysis
+        const analysis = await getDrillAnalysis({
+            session: sessionData, // Pass the whole session data
+            kpis: { /* Pass calculated KPIs */ accuracyPct: 75, misses: 3, centerHits: 2 },
+            normalizedScore: finalScore,
+            band: finalGrade,
+        });
+
         await updateDoc(sessionRef, {
             status: 'completed',
             endTime: serverTimestamp(),
             finalScore,
             finalGrade,
+            insights: analysis // Save the insights
         });
 
         return { success: true, error: null };
@@ -348,4 +363,66 @@ export async function completePracticeSessionAction(payload: CompletePracticeSes
         return { success: false, error: errorMessage };
     }
 }
-    
+
+
+interface GetSessionReviewPayload {
+    userId: string;
+    sessionId: string;
+}
+
+export async function getSessionReviewDataAction(payload: GetSessionReviewPayload): Promise<{ data: any | null, error: string | null }> {
+    try {
+        const { userId, sessionId } = payload;
+        if (!userId || !sessionId) {
+            throw new Error("User or session ID missing.");
+        }
+
+        const sessionRef = doc(db, 'users', userId, 'practiceSessions', sessionId);
+        const sessionSnap = await getDoc(sessionRef);
+
+        if (!sessionSnap.exists() || sessionSnap.data().status !== 'completed') {
+            throw new Error("Session review not available or session not completed.");
+        }
+
+        const session = sessionSnap.data();
+        
+        // This is where you would calculate KPIs based on the rounds data
+        const timeline = session.rounds?.flatMap((r: any) => r.attempts.map((a: any, i: number) => ({
+            idx: i + 1,
+            result: a.ring || 'miss',
+        }))) || [];
+
+        const kpis = {
+            accuracyPct: 72,
+            centerHits: 5,
+            misses: 3,
+            maxStreak: 5,
+        };
+
+        const rewards = {
+            xp: 381,
+            coins: 108,
+            streakDelta: 1,
+        };
+        
+        const reviewData = {
+            session: {
+                drillName: session.drillName,
+                finalScore: session.finalScore,
+                finalGrade: session.finalGrade,
+            },
+            timeline,
+            kpis,
+            rewards,
+            insights: session.insights,
+        };
+
+        return { data: reviewData, error: null };
+
+    } catch (err) {
+        console.error("Failed to get session review data:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+        return { data: null, error: errorMessage };
+    }
+}
+
