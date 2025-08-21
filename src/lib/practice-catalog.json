@@ -1,8 +1,11 @@
 
 {
-  "schemaVersion": "1.0-bait-techniques",
-  "updatedAtISO": "2025-08-21T00:00:00Z",
-  "defaults": {
+  "schemaVersion": "2.0-practice-catalog",
+  "lastUpdatedISO": "2025-08-21T00:00:00Z",
+  "speciesCatalog": {
+    "speciesKey": "bream",
+    "displayName": "Bream/Tilapia",
+    "preferredFamilies": ["soft", "live", "spinner", "crank_swim"],
     "gradeBands": [
       { "min": 90, "grade": "S" },
       { "min": 80, "grade": "A" },
@@ -10,294 +13,281 @@
       { "min": 60, "grade": "C" },
       { "min": 0,  "grade": "D" }
     ],
-    "rounds": 3,
-    "castsPerRound": 10
-  },
-  "metricDefinitions": {
-    "cadence_consistency": "How closely retrieve cadence matches target over time.",
-    "lane_hits": "Count of casts that stay within a defined lateral lane.",
-    "contact_cover": "Controlled ticks/deflections off cover without fouling.",
-    "depth_control": "Percent of time lure runs within depth band.",
-    "cover_deflection": "Quality and timing of squarebill/swim deflections.",
-    "depth_track_error": "Average deviation from target depth (lower is better).",
-    "rhythm_variance": "Variance from programmed stop–go rhythm.",
-    "entry_offset_upwind": "Aim compensation upwind at entry (m).",
-    "edge_time_on_path": "Time lure stays on the marked edge/path.",
-    "tick_events": "Valid brief contact events along an edge.",
-    "skip_distance": "Distance traveled across the surface during skips.",
-    "quiet_entry": "Landing noise proxy and splash control.",
-    "ring_hits": "Accuracy rings hits (center/inner/outer).",
-    "precision": "Hit proximity to target center for short pitches.",
-    "sound_proxy": "Estimated entry sound vs threshold.",
-    "first_move_latency": "Delay before moving bait after splashdown.",
-    "countdown_error": "Error between called and actual bottom contact time.",
-    "line_control": "Slack management quality during sink/pause.",
-    "bite_detection": "Correctly identified simulated taps.",
-    "time_in_lane": "Percent time float/lure stays in drift lane.",
-    "correction_efficiency": "Minimal, timely corrections to hold lane.",
-    "over_drag_penalty": "Penalty for dragging float out of natural drift.",
-    "correct_timing_rate": "Rate of correct hookset timing on prompts.",
-    "premature_late_index": "Composite penalty for early/late sets.",
-    "rig_accuracy": "Placement accuracy for rigs (e.g., hair-rig pad hits).",
-    "strike_delay_discipline": "Adherence to species/rig-specific set delay."
-  },
-  "families": [
-    {
-      "familyKey": "spinner",
-      "label": "Spinner (Inline & Spinnerbait)",
-      "supportedSpecies": ["bass", "bream"],
-      "coreTechniques": [
-        {
-          "techniqueKey": "cast_sidearm",
-          "label": "Sidearm, Low Profile",
-          "skillAxes": ["accuracy", "low_clearance", "trajectory_control"]
-        },
-        {
-          "techniqueKey": "retrieve_control",
-          "label": "Retrieve Cadence Control",
-          "skillAxes": ["cadence_consistency", "depth_control", "contact_cover"]
-        },
-        {
-          "techniqueKey": "lane_discipline",
-          "label": "Lane Discipline",
-          "skillAxes": ["lane_hits", "edge_time_on_path", "tick_events"]
-        }
-      ],
-      "drills": [
-        {
-          "drillKey": "spinner_lane_cadence_v1",
-          "name": "Spinner Lane Cadence",
-          "difficulty": 2,
-          "techniques": ["cast_sidearm", "retrieve_control"],
-          "params": {
-            "rounds": 3,
-            "castsPerRound": 10,
-            "laneWidth_m": 4,
-            "distance_m": [12, 18],
-            "targetCadence_spm": 60,
-            "tolerance_spm": 6,
-            "windHint_kph": [8, 16]
+    "ui": {
+      "icon": "fish_bream",
+      "palette": { "primary": "#27BFA6", "bgSoft": "#E6F7F4" }
+    },
+    "families": [
+      {
+        "familyKey": "live",
+        "label": "Live",
+        "recommendedBaits": [
+          { "baitKey": "live_worm_float", "name": "Live Worm under Float" }
+        ],
+        "techniques": [
+          { "techniqueKey": "float_entry", "label": "Quiet Entry under Float" },
+          { "techniqueKey": "drift_lane", "label": "Drift Lane Control" },
+          { "techniqueKey": "hookset_timing", "label": "Hookset Timing" }
+        ],
+        "drills": [
+          {
+            "drillKey": "bream_live_quiet_entry_v1",
+            "name": "Float Pitch — Quiet Entry",
+            "difficulty": 2,
+            "unlockAtLevel": 1,
+            "requires": { "family": "live", "baits": ["live_worm_float"] },
+            "techniques": ["float_entry"],
+            "params": {
+              "rounds": 3,
+              "castsPerRound": 10,
+              "targets": [
+                { "distance_m": 3, "radius_cm": 25 },
+                { "distance_m": 5, "radius_cm": 30 }
+              ],
+              "maxSetupTime_s": 20
+            },
+            "metrics": ["quiet_entry", "precision", "setup_time"],
+            "scoring": { "weights": { "quiet_entry": 0.45, "precision": 0.35, "setup_time": 0.20 } },
+            "recommendedConditions": [
+              { "label": "Sunny/high pressure", "cloudPct": "<=30", "pressureTrendHpaPer3h": ">=0.8" },
+              { "label": "Hot midday shade", "season": "hot", "daypart": "midday" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Bright, calm conditions push bream tight to cover, so a quiet float entry prevents spooking fish.",
+                "High pressure reduces roaming and rewards precise placements into shade pockets.",
+                "Short soak times keep the bait in high-percentage targets instead of dead water."
+              ],
+              "possibleStrategies": [
+                "Feather the line to level the float and land flat for a silent splash.",
+                "Aim for the darkest edge of reeds and hold the float stationary for 10–15 seconds.",
+                "If wind drifts the float, mend just enough line to hold the lane without dragging."
+              ],
+              "insights": [
+                "Your quiet-entry rate directly correlates with inner-ring hits in this drill.",
+                "Reducing setup time increases total quality presentations per round.",
+                "Misses cluster when entry angle is steep—flatten the trajectory to lower splash."
+              ]
+            }
           },
-          "metrics": ["cadence_consistency", "lane_hits", "contact_cover"],
-          "scoring": { "weights": { "cadence_consistency": 0.5, "lane_hits": 0.3, "contact_cover": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Hold blade pulse and stay in the lane.", "proTip": "Aim slightly upwind so the lure sweeps the edge cleanly." },
-          "progression": { "laneWidth_m": 3, "targetCadence_spm": [48, 80] }
-        },
-        {
-          "drillKey": "windward_edge_sweep_v1",
-          "name": "Windward Edge Sweep",
-          "difficulty": 3,
-          "techniques": ["cast_sidearm", "lane_discipline"],
-          "params": { "rounds": 2, "castsPerRound": 12, "edgeLength_m": 20, "allowedOffsetUpwind_m": 1.0 },
-          "metrics": ["entry_offset_upwind", "edge_time_on_path", "tick_events"],
-          "scoring": { "weights": { "edge_time_on_path": 0.45, "entry_offset_upwind": 0.3, "tick_events": 0.25 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Use wind to arc the spinner along the weed edge.", "proTip": "Keep rod tip low to prevent surfacing on gusts." },
-          "progression": { "allowedOffsetUpwind_m": 0.6, "edgeLength_m": 30 }
-        },
-        {
-          "drillKey": "flash_thump_modulation_v1",
-          "name": "Flash & Thump Modulation",
-          "difficulty": 3,
-          "techniques": ["retrieve_control"],
-          "params": { "runs": 3, "runDuration_s": 60, "cadenceProfiles_spm": [48, 60, 80], "depthBand_m": [0.6, 1.2] },
-          "metrics": ["depth_control", "cadence_consistency"],
-          "scoring": { "weights": { "depth_control": 0.55, "cadence_consistency": 0.45 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Match speed to hold depth across wind and turns.", "proTip": "Rod height fine-tunes depth without changing speed." },
-          "progression": { "depthBand_m": [0.4, 1.0] }
-        }
-      ]
-    },
-    {
-      "familyKey": "crank_swim",
-      "label": "Crank & Swimbaits",
-      "supportedSpecies": ["bass"],
-      "coreTechniques": [
-        {
-          "techniqueKey": "cast_overhead",
-          "label": "Overhead Distance + Accuracy",
-          "skillAxes": ["accuracy", "distance", "trajectory_control"]
-        },
-        {
-          "techniqueKey": "depth_track",
-          "label": "Depth Track",
-          "skillAxes": ["depth_control", "depth_track_error"]
-        },
-        {
-          "techniqueKey": "cover_deflect",
-          "label": "Cover Deflection",
-          "skillAxes": ["cover_deflection", "contact_cover"]
-        },
-        {
-          "techniqueKey": "stop_go",
-          "label": "Stop–Go Rhythm",
-          "skillAxes": ["rhythm_variance", "depth_recovery_time"]
-        }
-      ],
-      "drills": [
-        {
-          "drillKey": "squarebill_contact_course_v1",
-          "name": "Squarebill Contact Course",
-          "difficulty": 3,
-          "techniques": ["cast_overhead", "cover_deflect"],
-          "params": { "rounds": 3, "castsPerRound": 8, "obstacles": 6, "distance_m": [12, 15] },
-          "metrics": ["cover_deflection", "depth_track_error", "accuracy"],
-          "scoring": { "weights": { "cover_deflection": 0.45, "depth_track_error": 0.35, "accuracy": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Tap cover and recover depth without fouling.", "proTip": "Loosen grip at impact to let the bait glance off." },
-          "progression": { "obstacles": 8, "distance_m": [15, 18] }
-        },
-        {
-          "drillKey": "depth_ladder_hold_v1",
-          "name": "Depth Ladder Hold",
-          "difficulty": 2,
-          "techniques": ["depth_track"],
-          "params": { "ladders": 3, "stepDurations_s": [30, 30, 30], "bands_m": [[1.2, 1.3], [1.5, 1.6], [1.8, 1.9]] },
-          "metrics": ["depth_control", "depth_track_error"],
-          "scoring": { "weights": { "depth_control": 0.6, "depth_track_error": 0.4 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Hold a running depth with rod angle and speed.", "proTip": "Point the rod down to dig, level to ride higher." },
-          "progression": { "stepDurations_s": [40, 40, 40], "bands_m": [[1.1, 1.2], [1.4, 1.5], [1.7, 1.8]] }
-        },
-        {
-          "drillKey": "stop_go_trigger_sets_v1",
-          "name": "Stop–Go Trigger Sets",
-          "difficulty": 3,
-          "techniques": ["stop_go", "depth_track"],
-          "params": { "rounds": 3, "runsPerRound": 5, "pattern_s": { "run": 4, "stop": 1 } },
-          "metrics": ["rhythm_variance", "depth_control"],
-          "scoring": { "weights": { "rhythm_variance": 0.55, "depth_control": 0.45 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Program triggers without blowing out depth.", "proTip": "On the stop, lower rod to keep the lure in zone." },
-          "progression": { "pattern_s": { "run": 3, "stop": 2 } }
-        }
-      ]
-    },
-    {
-      "familyKey": "soft",
-      "label": "Soft Plastics (Stickbait, Ned, Fluke, Jig)",
-      "supportedSpecies": ["bass", "bream", "carp"],
-      "coreTechniques": [
-        {
-          "techniqueKey": "skip_sidearm",
-          "label": "Skipping (Sidearm)",
-          "skillAxes": ["skip_distance", "quiet_entry", "trajectory_control"]
-        },
-        {
-          "techniqueKey": "pitch_flip",
-          "label": "Pitch/Flip Precision",
-          "skillAxes": ["precision", "quiet_entry", "line_control"]
-        },
-        {
-          "techniqueKey": "slack_management",
-          "label": "Line/Slack Management",
-          "skillAxes": ["line_control", "bite_detection", "bottom_contact_time"]
-        }
-      ],
-      "drills": [
-        {
-          "drillKey": "soft_skip_precision_v1",
-          "name": "Soft Bait Skip Precision",
-          "difficulty": 3,
-          "techniques": ["skip_sidearm"],
-          "params": { "rounds": 4, "castsPerRound": 6, "targets": [{ "distance_m": 8, "radius_cm": 45 }, { "distance_m": 10, "radius_cm": 45 }], "minSkips": 2 },
-          "metrics": ["skip_distance", "quiet_entry", "ring_hits"],
-          "scoring": { "weights": { "skip_distance": 0.4, "quiet_entry": 0.3, "ring_hits": 0.3 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Skip under cover without blow-ups.", "proTip": "Aim two rod-tip heights short; let momentum carry it in." },
-          "progression": { "radius_cm": 35, "minSkips": 3 }
-        },
-        {
-          "drillKey": "quiet_entry_pitch_v1",
-          "name": "Quiet Entry Pitch",
-          "difficulty": 2,
-          "techniques": ["pitch_flip"],
-          "params": { "rounds": 3, "castsPerRound": 10, "targets": [{ "distance_m": 3, "radius_cm": 25 }, { "distance_m": 5, "radius_cm": 30 }] },
-          "metrics": ["quiet_entry", "precision", "first_move_latency"],
-          "scoring": { "weights": { "quiet_entry": 0.45, "precision": 0.35, "first_move_latency": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Land silently and let it soak correctly.", "proTip": "Feather the spool at splash to kill momentum." },
-          "progression": { "targets": [{ "distance_m": 5, "radius_cm": 25 }, { "distance_m": 7, "radius_cm": 25 }] }
-        },
-        {
-          "drillKey": "bottom_clock_slack_read_v1",
-          "name": "Bottom Clock & Slack Read",
-          "difficulty": 3,
-          "techniques": ["slack_management"],
-          "params": { "rounds": 3, "runsPerRound": 3, "depths_m": [1.5, 2.0, 2.5], "weights_g": [7, 10, 14] },
-          "metrics": ["countdown_error", "line_control", "bite_detection"],
-          "scoring": { "weights": { "countdown_error": 0.45, "line_control": 0.3, "bite_detection": 0.25 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Own your sink count and slack tick reads.", "proTip": "Pinch line lightly to feel taps without moving bait." },
-          "progression": { "depths_m": [2.0, 3.0, 4.0] }
-        }
-      ]
-    },
-    {
-      "familyKey": "live",
-      "label": "Live Bait (Float, Drift, Hair-Rig)",
-      "supportedSpecies": ["bream", "carp", "bass"],
-      "coreTechniques": [
-        {
-          "techniqueKey": "float_entry",
-          "label": "Quiet Entry Under Float",
-          "skillAxes": ["quiet_entry", "precision", "setup_time"]
-        },
-        {
-          "techniqueKey": "drift_lane",
-          "label": "Drift Lane Control",
-          "skillAxes": ["time_in_lane", "correction_efficiency", "over_drag_penalty"]
-        },
-        {
-          "techniqueKey": "hookset_timing",
-          "label": "Hookset Timing Discipline",
-          "skillAxes": ["correct_timing_rate", "premature_late_index"]
-        },
-        {
-          "techniqueKey": "rig_prep",
-          "label": "Rig Prep Accuracy",
-          "skillAxes": ["rig_accuracy", "quiet_entry", "strike_delay_discipline"]
-        }
-      ],
-      "drills": [
-        {
-          "drillKey": "live_pitch_quiet_entry_v1",
-          "name": "Live Pitch — Quiet Entry",
-          "difficulty": 2,
-          "techniques": ["float_entry"],
-          "params": { "rounds": 3, "castsPerRound": 10, "targets": [{ "distance_m": 3, "radius_cm": 25 }, { "distance_m": 5, "radius_cm": 30 }] },
-          "metrics": ["quiet_entry", "precision", "setup_time"],
-          "scoring": { "weights": { "quiet_entry": 0.45, "precision": 0.35, "setup_time": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Land a float silently in tight spots.", "proTip": "Stop the float mid-air to level it before splash." },
-          "progression": { "radius_cm": 20, "distance_m": [6, 8] }
-        },
-        {
-          "drillKey": "drift_lane_control_v1",
-          "name": "Drift Lane Control",
-          "difficulty": 3,
-          "techniques": ["drift_lane"],
-          "params": { "rounds": 3, "duration_s": 60, "laneWidth_m": 2.0 },
-          "metrics": ["time_in_lane", "correction_efficiency", "over_drag_penalty"],
-          "scoring": { "weights": { "time_in_lane": 0.5, "correction_efficiency": 0.3, "over_drag_penalty": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Ride natural lanes without over-dragging.", "proTip": "Mend line just enough to correct the drift, not steer it." },
-          "progression": { "laneWidth_m": 1.5, "duration_s": 90 }
-        },
-        {
-          "drillKey": "hookset_timing_sim_v1",
-          "name": "Hookset Timing Simulator",
-          "difficulty": 2,
-          "techniques": ["hookset_timing"],
-          "params": { "events": 20, "promptTypes": ["float_dip", "line_move"], "delayProfiles_ms": { "bream": 400, "carp": 800, "bass": 300 } },
-          "metrics": ["correct_timing_rate", "premature_late_index"],
-          "scoring": { "weights": { "correct_timing_rate": 0.7, "premature_late_index": 0.3 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Wait the right beat, then set cleanly.", "proTip": "Watch for sideways line moves—they often mean a moving take." },
-          "progression": { "events": 30, "promptMix": "more subtle dips" }
-        },
-        {
-          "drillKey": "carp_hair_rig_accuracy_v1",
-          "name": "Carp Hair-Rig Accuracy",
-          "difficulty": 3,
-          "techniques": ["rig_prep", "pitch_flip"],
-          "params": { "rounds": 3, "castsPerRound": 8, "pads": [{ "distance_m": 15, "radius_cm": 60 }, { "distance_m": 20, "radius_cm": 60 }] },
-          "metrics": ["rig_accuracy", "quiet_entry", "strike_delay_discipline"],
-          "scoring": { "weights": { "rig_accuracy": 0.5, "quiet_entry": 0.3, "strike_delay_discipline": 0.2 }, "gradeBandsRef": "defaults.gradeBands" },
-          "ui": { "whatYouLearn": "Place rigs precisely and wait for the right moment.", "proTip": "Let the feeder settle fully before tightening to the lead." },
-          "progression": { "pads": [{ "distance_m": 22, "radius_cm": 50 }] }
-        }
-      ]
+          {
+            "drillKey": "bream_live_drift_lane_v1",
+            "name": "Inlet Drift Lane Control",
+            "difficulty": 3,
+            "unlockAtLevel": 3,
+            "requires": { "family": "live", "baits": ["live_worm_float"] },
+            "techniques": ["drift_lane"],
+            "params": { "rounds": 3, "duration_s": 60, "laneWidth_m": 2.0 },
+            "metrics": ["time_in_lane", "correction_efficiency", "over_drag_penalty"],
+            "scoring": { "weights": { "time_in_lane": 0.5, "correction_efficiency": 0.3, "over_drag_penalty": 0.2 } },
+            "recommendedConditions": [
+              { "label": "After light rain", "rainMm24h": ">=0.1 && <=8" },
+              { "label": "Wind lanes present", "windKph": ">=8 && <=18" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Light rain and breeze create conveyor lanes that carry food to bream.",
+                "Holding the float in a narrow lane maximizes time in the feeding path.",
+                "Over-mending drags the bait unnaturally and reduces takes."
+              ],
+              "possibleStrategies": [
+                "Set the float depth to just graze tops of weeds and let it ride naturally.",
+                "Use small upstream mends to steer back into the lane without pulling the float.",
+                "Pause corrections when the float is centered to avoid oscillation."
+              ],
+              "insights": [
+                "Most lane breaks happen within 10 seconds after a correction—be gentle.",
+                "Your best time-in-lane occurred with rod tip low and line barely taut.",
+                "Wind from behind increases over-drag risk; shorten exposed line."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "familyKey": "soft",
+        "label": "Soft",
+        "recommendedBaits": [
+          { "baitKey": "soft_ned_2_75in", "name": "Ned Worm 2.75\"" },
+          { "baitKey": "soft_stickbait_5in", "name": "Stickbait 5\"" }
+        ],
+        "techniques": [
+          { "techniqueKey": "skip_sidearm", "label": "Skip (Sidearm)" },
+          { "techniqueKey": "pitch_flip", "label": "Pitch/Flip Precision" },
+          { "techniqueKey": "slack_management", "label": "Line/Slack Management" }
+        ],
+        "drills": [
+          {
+            "drillKey": "bream_soft_skip_precision_v1",
+            "name": "Soft Skip Precision",
+            "difficulty": 3,
+            "unlockAtLevel": 2,
+            "requires": { "family": "soft", "baits": ["soft_stickbait_5in"] },
+            "techniques": ["skip_sidearm"],
+            "params": {
+              "rounds": 4,
+              "castsPerRound": 6,
+              "targets": [
+                { "distance_m": 8, "radius_cm": 45 },
+                { "distance_m": 10, "radius_cm": 45 }
+              ],
+              "minSkips": 2
+            },
+            "metrics": ["skip_distance", "quiet_entry", "ring_hits"],
+            "scoring": { "weights": { "skip_distance": 0.4, "quiet_entry": 0.3, "ring_hits": 0.3 } },
+            "recommendedConditions": [
+              { "label": "Bluebird shade program", "cloudPct": "<=30", "pressureTrendHpaPer3h": ">=0.8" },
+              { "label": "Calm to light breeze", "windKph": "<=10" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Bright skies push bream under docks and reeds where skipping excels.",
+                "Quiet entries reduce spook radius and increase soak time.",
+                "Two or more skips help the bait travel deeper under cover."
+              ],
+              "possibleStrategies": [
+                "Aim short and flat—let momentum carry the bait under.",
+                "Feather the spool at splash to kill forward noise without lifting the rod.",
+                "Hold slack briefly to let the bait settle where fish stage."
+              ],
+              "insights": [
+                "Your inner-ring hits improved when release angle dropped below 20°.",
+                "Most blow-ups happened on high spooned wrist—keep palm neutral.",
+                "Quiet-entry percentage predicted total ring hits this session."
+              ]
+            }
+          },
+          {
+            "drillKey": "bream_soft_bottom_clock_v1",
+            "name": "Bottom Clock & Slack Read",
+            "difficulty": 3,
+            "unlockAtLevel": 4,
+            "requires": { "family": "soft", "baits": ["soft_ned_2_75in"] },
+            "techniques": ["slack_management"],
+            "params": { "rounds": 3, "runsPerRound": 3, "depths_m": [1.5, 2.0, 2.5], "weights_g": [5, 7, 10] },
+            "metrics": ["countdown_error", "line_control", "bite_detection"],
+            "scoring": { "weights": { "countdown_error": 0.45, "line_control": 0.3, "bite_detection": 0.25 } },
+            "recommendedConditions": [
+              { "label": "Cool morning edges", "season": "cool", "daypart": "morning" },
+              { "label": "Light wind over flats", "windKph": "<=12", "cloudPct": ">=40" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Bream often pick up on the fall; accurate countdowns catch those windows.",
+                "Slack control improves bite detection without moving the bait.",
+                "Stable, cooler conditions favor patient bottom presentations."
+              ],
+              "possibleStrategies": [
+                "Count down to contact and log the time for each weight/depth.",
+                "Pinch the line lightly to feel ticks while keeping the bait still.",
+                "If line jumps early, pause before lifting to confirm weight."
+              ],
+              "insights": [
+                "Your best detection rate aligned with countdown variance under 0.4 s.",
+                "Excess rod movement increased false positives—reduce tip travel.",
+                "Heavier heads needed shorter pauses to maintain bottom contact."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "familyKey": "spinner",
+        "label": "Spinner",
+        "recommendedBaits": [
+          { "baitKey": "spinner_inline_size3", "name": "Inline Spinner #3" }
+        ],
+        "techniques": [
+          { "techniqueKey": "cast_sidearm", "label": "Sidearm, Low Profile" },
+          { "techniqueKey": "retrieve_control", "label": "Retrieve Cadence" },
+          { "techniqueKey": "lane_discipline", "label": "Lane Discipline" }
+        ],
+        "drills": [
+          {
+            "drillKey": "bream_spinner_edge_glide_v1",
+            "name": "Inline Spinner Edge Glide",
+            "difficulty": 2,
+            "unlockAtLevel": 2,
+            "requires": { "family": "spinner", "baits": ["spinner_inline_size3"] },
+            "techniques": ["cast_sidearm", "retrieve_control"],
+            "params": { "rounds": 3, "castsPerRound": 10, "laneWidth_m": 3, "distance_m": [10, 14], "targetCadence_spm": 60, "tolerance_spm": 8 },
+            "metrics": ["lane_hits", "cadence_consistency", "depth_control"],
+            "scoring": { "weights": { "lane_hits": 0.4, "cadence_consistency": 0.35, "depth_control": 0.25 } },
+            "recommendedConditions": [
+              { "label": "Overcast with breeze", "cloudPct": ">=60", "windKph": ">=6 && <=16" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Overcast lets bream roam edges where an inline spinner shines.",
+                "Consistent cadence keeps the blade pulsing and depth stable.",
+                "Staying in the edge lane maximizes time in the strike zone."
+              ],
+              "possibleStrategies": [
+                "Aim 0.5–1 m upwind and sweep along the weed edge.",
+                "Hold rod low to prevent the spinner from surfacing in gusts.",
+                "If fouling, pause briefly then resume cadence to clear the blade."
+              ],
+              "insights": [
+                "Your lane-hit streaks increased when cadence stayed within ±8 spm.",
+                "Most misses occurred when entry was downwind—add slight upwind aim.",
+                "Depth drifted shallower above 70 spm; trim speed to maintain track."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "familyKey": "crank_swim",
+        "label": "Crank/Swim (Micro)",
+        "recommendedBaits": [
+          { "baitKey": "micro_squarebill_1_0", "name": "Micro Squarebill 1.0" }
+        ],
+        "techniques": [
+          { "techniqueKey": "cast_overhead", "label": "Overhead Distance + Accuracy" },
+          { "techniqueKey": "depth_track", "label": "Depth Track" }
+        ],
+        "drills": [
+          {
+            "drillKey": "bream_micro_crank_edge_track_v1",
+            "name": "Micro Crank Edge Track",
+            "difficulty": 2,
+            "unlockAtLevel": 5,
+            "requires": { "family": "crank_swim", "baits": ["micro_squarebill_1_0"] },
+            "techniques": ["cast_overhead", "depth_track"],
+            "params": { "rounds": 3, "castsPerRound": 8, "edgeLength_m": 15, "depthBand_m": [0.8, 1.2] },
+            "metrics": ["depth_control", "accuracy", "edge_time_on_path"],
+            "scoring": { "weights": { "depth_control": 0.45, "edge_time_on_path": 0.35, "accuracy": 0.20 } },
+            "recommendedConditions": [
+              { "label": "Cloudy flats", "cloudPct": ">=50", "windKph": "6-14" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Micro cranks excel when bream cruise shallow edges under cloud.",
+                "Holding a tight depth band keeps the lure above grass but in view.",
+                "Accurate parallel casts extend time in the productive lane."
+              ],
+              "possibleStrategies": [
+                "Angle parallel to the edge and maintain steady retrieve.",
+                "Lower the rod tip to dig slightly when grass rises.",
+                "If you tick cover, relax grip to let the bait glance off."
+              ],
+              "insights": [
+                "Depth control improved when speed stabilized within a narrow band.",
+                "Edge time peaked on casts launched parallel rather than at 30°.",
+                "Tick-and-release events correlated with longer follow durations."
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "uiRecommendations": {
+      "emptyStateCopy": "Select a species and lure to see relevant drills.",
+      "filterBehavior": "Show drills where `requires.family` matches the selected family; `All` shows every drill for the species.",
+      "badges": {
+        "duration": "duration or casts x rounds",
+        "difficultyDots": 3
+      }
     }
-  ]
+  }
 }
