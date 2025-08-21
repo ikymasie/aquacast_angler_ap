@@ -18,7 +18,7 @@ import { UserAuthDialog } from '@/components/user-auth-dialog';
 import { useRouter } from 'next/navigation';
 
 function AppContent() {
-  const { user, isLoading: isUserLoading } = useUser();
+  const { user, isInitialized } = useUser();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("recents");
   const [location, setLocation] = useState<Location | null>(null);
@@ -26,10 +26,10 @@ function AppContent() {
   const [isWeatherLoading, setIsWeatherLoading] = useState(true);
 
   useEffect(() => {
-    if (!isUserLoading && !user) {
+    if (isInitialized && !user) {
       router.push('/login');
     }
-  }, [isUserLoading, user, router]);
+  }, [isInitialized, user, router]);
 
 
   useEffect(() => {
@@ -83,7 +83,7 @@ function AppContent() {
     }
   }, [location]);
 
-  if (isUserLoading || !user) {
+  if (!isInitialized || !user) {
     return (
       <div className="flex flex-col min-h-screen bg-background items-center justify-center">
         <Skeleton className="h-screen w-screen" />

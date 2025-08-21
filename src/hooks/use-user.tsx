@@ -23,6 +23,7 @@ interface AppUser {
 interface UserContextType {
   user: AppUser | null;
   isLoading: boolean;
+  isInitialized: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateUserProfile: (profileData: { displayName: string }) => Promise<void>;
@@ -33,10 +34,12 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const auth = getAuth();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      setIsLoading(true);
       if (firebaseUser) {
         const userRef = doc(db, 'users', firebaseUser.uid);
         const userSnap = await getDoc(userRef);
@@ -57,6 +60,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
       }
       setIsLoading(false);
+      setIsInitialized(true);
     });
 
     return () => unsubscribe();
@@ -103,7 +107,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
 
-  const value = { user, isLoading, signIn, signOut, updateUserProfile };
+  const value = { user, isLoading, isInitialized, signIn, signOut, updateUserProfile };
 
   return (
     <UserContext.Provider value={value}>
