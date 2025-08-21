@@ -11,12 +11,14 @@ import { SessionHeader } from './practice/session-header';
 import { cn } from '@/lib/utils';
 import { Skeleton } from './ui/skeleton';
 import { LivePracticeHUD } from './practice/live-practice-hud';
+import { SessionSetupSheet } from './practice/session-setup-sheet';
 
 export function PracticeTab() {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
   const [selectedLureFamily, setSelectedLureFamily] = useState<LureFamily | 'All'>('All');
   const [catalog, setCatalog] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [drillForSetup, setDrillForSetup] = useState<any | null>(null);
   const [activeDrill, setActiveDrill] = useState<any | null>(null);
 
   useEffect(() => {
@@ -49,10 +51,15 @@ export function PracticeTab() {
   const handleLureSelect = (lure: LureFamily | 'All') => {
     setSelectedLureFamily(lure);
   };
-
+  
   const handleStartDrill = (drill: any) => {
-    setActiveDrill(drill);
+    setDrillForSetup(drill);
   };
+
+  const handleBeginFromSheet = () => {
+    setActiveDrill(drillForSetup);
+    setDrillForSetup(null);
+  }
   
   if (activeDrill) {
     return <LivePracticeHUD drill={activeDrill} onExit={() => setActiveDrill(null)} />;
@@ -75,7 +82,7 @@ export function PracticeTab() {
           <div className="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
               <p className="text-sm font-medium text-muted-foreground">Fishing for</p>
               <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} />
-              <p className="text-sm font-medium text-muted-foreground">with</p>
+              <p className="text-sm font-medium text-muted-foreground mt-2">with</p>
               <LureSelector selectedLure={selectedLureFamily} onLureSelect={handleLureSelect as any} showAllOption />
           </div>
       </div>
@@ -103,7 +110,12 @@ export function PracticeTab() {
             )}
         </div>
       </div>
-
+       <SessionSetupSheet 
+          drill={drillForSetup}
+          isOpen={!!drillForSetup}
+          onOpenChange={(isOpen) => !isOpen && setDrillForSetup(null)}
+          onBegin={handleBeginFromSheet}
+       />
     </div>
   );
 }
