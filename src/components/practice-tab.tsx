@@ -22,24 +22,26 @@ export function PracticeTab() {
   };
 
   const filteredDrills = Array.isArray(drillCatalog) ? drillCatalog.filter(drill => {
+      if (!drill.speciesKeys || !Array.isArray(drill.speciesKeys)) return false;
+      
       const speciesMatch = drill.speciesKeys.includes(selectedSpecies.toLowerCase());
-      const lureFamilyMatch = selectedLureFamily === 'All' || (drill.requiredFamilies && drill.requiredFamilies.includes(selectedLureFamily.toLowerCase().replace('/','_').replace(' ','_')));
+      
+      const lureFamilyMatch = selectedLureFamily === 'All' || 
+          (drill.requiredFamilies && drill.requiredFamilies.includes(selectedLureFamily.toLowerCase().replace(/[\s/]/g, '_')));
+          
       return speciesMatch && lureFamilyMatch;
   }) : [];
+
 
   return (
     <div className="space-y-6">
       <SessionHeader />
       
-      <div className="sticky top-[68px] z-10 bg-background py-4 -mx-4 px-4 border-b">
-          <div className="flex items-center justify-center gap-4 max-w-md mx-auto">
-            <div className="flex-1">
+      <div className="sticky top-[56px] z-10 bg-background py-4 -mx-4 px-4 border-b">
+          <div className="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
               <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} />
-            </div>
-            <p className="text-sm font-medium text-muted-foreground">with</p>
-            <div className="flex-1">
+              <p className="text-sm font-medium text-muted-foreground">with</p>
               <LureSelector selectedLure={selectedLureFamily} onLureSelect={handleLureSelect as any} showAllOption />
-            </div>
           </div>
       </div>
       
