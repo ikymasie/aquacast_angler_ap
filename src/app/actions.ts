@@ -21,10 +21,11 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
 
     // Use the date part of the ISO string directly to avoid timezone issues.
     const selectedDateString = date.substring(0, 10); // e.g., "2025-08-21"
-
+    console.log("Selected Date", selectedDateString)
     // Find the daily data for the selected day from the 7-day forecast data
     const selectedDayData = weatherData.daily.find(d => d.sunrise.startsWith(selectedDateString));
-    
+    console.log("Selected Data", selectedDayData)
+
     if (!selectedDayData) {
         return { data: null, error: `Daily forecast data is not available for ${selectedDateString}.`};
     }

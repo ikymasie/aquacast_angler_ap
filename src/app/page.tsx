@@ -9,27 +9,67 @@ import { SectionHeader } from '@/components/section-header';
 import { FavoritesRecents } from '@/components/favorites-recents';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from 'react';
-
+import type { Location, WeatherApiResponse } from '@/lib/types';
+import { getCachedWeatherData } from '@/services/weather/client';
+import { ConditionsPanel } from '@/components/conditions-panel';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState("recents");
+  const [location, setLocation] = useState<Location | null>(null);
+  const [weather, setWeather] = useState<WeatherApiResponse | null>(null);
+  const [isWeatherLoading, setIsWeatherLoading] = useState(true);
 
   useEffect(() => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log('User location:', position.coords.latitude, position.coords.longitude);
-          // You can now use the coordinates to fetch location-specific data
+          const userLocation: Location = {
+            name: "Current Location",
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+          setLocation(userLocation);
         },
         (error) => {
           console.error('Geolocation error:', error);
-          // Handle errors or user denial gracefully
+          // Fallback to a default location if user denies permission
+          const defaultLocation: Location = {
+            name: "Gaborone Dam",
+            latitude: -24.718299,
+            longitude: 25.907478
+          };
+          setLocation(defaultLocation);
         }
       );
     } else {
       console.log('Geolocation is not supported by this browser.');
+      const defaultLocation: Location = {
+            name: "Gaborone Dam",
+            latitude: -24.718299,
+            longitude: 25.907478
+          };
+      setLocation(defaultLocation);
     }
   }, []);
+
+  useEffect(() => {
+    if (location) {
+      const loadWeather = async () => {
+        setIsWeatherLoading(true);
+        try {
+          const data = await getCachedWeatherData(location);
+          setWeather(data);
+        } catch (error) {
+          console.error("Failed to load weather for homepage", error);
+          setWeather(null);
+        } finally {
+          setIsWeatherLoading(false);
+        }
+      };
+      loadWeather();
+    }
+  }, [location]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -37,6 +77,16 @@ function AppContent() {
       <main className="flex-1 space-y-4 p-4 pb-24">
         <GreetingBlock />
         <SearchBar />
+
+        <div className="pt-2">
+            {isWeatherLoading ? (
+                <Skeleton className="h-[180px] w-full rounded-xl" />
+            ) : location && weather ? (
+                <ConditionsPanel location={location} initialData={weather} />
+            ) : (
+                null // Don't show anything if weather fails to load
+            )}
+        </div>
 
         <div className="space-y-3 pt-4">
             <div>
