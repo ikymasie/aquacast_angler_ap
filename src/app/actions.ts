@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext, HourPoint, RecentWindow } from "@/lib/types";
+import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext, HourPoint, RecentWindow, UserSpot } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
 import { format, parseISO, startOfToday, endOfDay, isWithinInterval, isToday, startOfHour } from "date-fns";
@@ -10,6 +10,9 @@ import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
 import { getLureAdvice } from "@/ai/flows/lure-advice-flow";
 import { z } from 'zod';
 import { analyzePhoto, type PhotoAnalysisInput } from "@/ai/flows/photo-analysis-flow";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, getDocs, doc } from "firebase/firestore";
+
 
 const LureAdviceInputSchema = z.object({
   species: z.custom<Species>(),
@@ -92,6 +95,7 @@ function isSameDay(date1: Date, date2: Date): boolean {
 
 
 interface AddSpotPayload {
+    userId: string;
     lat: number;
     lng: number;
     name: string;
@@ -99,9 +103,12 @@ interface AddSpotPayload {
 
 export async function addSpotAction(payload: AddSpotPayload) {
     try {
-        const { lat, lng, name } = payload;
+        const { userId, lat, lng, name } = payload;
+        
+        if (!userId) {
+            throw new Error("User is not authenticated.");
+        }
 
-        // Construct the URL for our new API route.
         const apiUrl = process.env.NODE_ENV === 'production'
             ? `https://YOUR_PRODUCTION_DOMAIN/api/place-from-latlng?lat=${lat}&lng=${lng}`
             : `http://localhost:9002/api/place-from-latlng?lat=${lat}&lng=${lng}`;
@@ -123,8 +130,7 @@ export async function addSpotAction(payload: AddSpotPayload) {
         const generatedName = data.place?.displayName?.text || data.geocode?.formattedAddress || "Unnamed Spot";
         const nearestTown = generatedName.split(',')[0];
         
-        const newSpot = {
-            id: data.place?.id || `spot_${new Date().getTime()}`,
+        const newSpot: Omit<UserSpot, 'id'> = {
             name: name || generatedName,
             region: "custom",
             waterbody_type: "user-added",
@@ -137,7 +143,10 @@ export async function addSpotAction(payload: AddSpotPayload) {
             isRecent: true,
         };
 
-        return { data: newSpot, error: null };
+        const userSpotsCollectionRef = collection(db, 'users', userId, 'spots');
+        const docRef = await addDoc(userSpotsCollectionRef, newSpot);
+
+        return { data: { id: docRef.id, ...newSpot }, error: null };
 
     } catch (err) {
         console.error("Failed to process new spot:", err);
@@ -145,6 +154,29 @@ export async function addSpotAction(payload: AddSpotPayload) {
         return { data: null, error: errorMessage };
     }
 }
+
+export async function getUserSpotsAction(userId: string): Promise<{ data: UserSpot[] | null, error: string | null }> {
+    try {
+        if (!userId) {
+            throw new Error("User is not authenticated.");
+        }
+        const spotsCollectionRef = collection(db, 'users', userId, 'spots');
+        const querySnapshot = await getDocs(spotsCollectionRef);
+        
+        const spots = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as UserSpot));
+
+        return { data: spots, error: null };
+
+    } catch (err) {
+        console.error("Failed to fetch user spots:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while fetching spots.";
+        return { data: null, error: errorMessage };
+    }
+}
+
 
 export async function getCastingAdviceAction(payload: CastingAdviceInput) {
     try {

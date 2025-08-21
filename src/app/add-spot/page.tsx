@@ -26,8 +26,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useUser } from '@/hooks/use-user';
 
 export default function AddSpotPage() {
+    const { user } = useUser();
     const [selectedLocation, setSelectedLocation] = useState<LatLngLiteral | null>(null);
     const [isPending, startTransition] = useTransition();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -60,10 +62,11 @@ export default function AddSpotPage() {
     }
 
     const handleConfirmSave = () => {
-         if (!selectedLocation) return;
+         if (!selectedLocation || !user) return;
          
          startTransition(async () => {
             const { data: newSpot, error } = await addSpotAction({
+                userId: user.uid,
                 lat: selectedLocation.lat,
                 lng: selectedLocation.lng,
                 name: spotName
@@ -76,27 +79,12 @@ export default function AddSpotPage() {
                     description: error,
                 });
             } else if (newSpot) {
-                // Save to local storage
-                try {
-                    const existingSpots = JSON.parse(localStorage.getItem('user-spots') || '[]');
-                    const updatedSpots = [...existingSpots, newSpot];
-                    localStorage.setItem('user-spots', JSON.stringify(updatedSpots));
-                    
-                    toast({
-                        variant: 'success',
-                        title: 'Spot Added!',
-                        description: `${newSpot.name} has been saved.`,
-                    });
-                    router.push(`/`);
-
-                } catch (storageError) {
-                    console.error("Failed to save to local storage:", storageError);
-                    toast({
-                         variant: 'destructive',
-                         title: 'Failed to Save Spot',
-                         description: 'Could not save the spot to your device.',
-                    });
-                }
+                toast({
+                    variant: 'success',
+                    title: 'Spot Added!',
+                    description: `${newSpot.name} has been saved to your account.`,
+                });
+                router.push(`/`);
             }
             setIsDialogOpen(false);
             setSpotName('');

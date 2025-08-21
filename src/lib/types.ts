@@ -94,6 +94,20 @@ export interface RecommendedWindow {
     avgScore: number;
 }
 
+export interface UserSpot {
+    id: string;
+    name: string;
+    region: string;
+    waterbody_type: string;
+    nearest_town: string;
+    coordinates: { lat: number, lon: number };
+    representative_species: string[];
+    notes: string;
+    image_url: string;
+    isFavorite?: boolean;
+    isRecent?: boolean;
+}
+
 // --- Casting Advisor Types ---
 
 export type SpotKey = 
@@ -185,5 +199,3 @@ export const MOCK_FORECAST_GRAPHS = {
     { day: 'Sun', success: 78, uv: 7 },
   ]
 };
-
-    

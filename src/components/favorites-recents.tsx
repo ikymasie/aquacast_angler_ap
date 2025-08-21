@@ -1,28 +1,44 @@
 
-
 'use client';
 
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Star, Plus } from "lucide-react";
+import { Star, Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
 import allSpotsData from "@/lib/locations.json";
 import { Button } from "./ui/button";
-import { useEffect, useState } from "react";
-
+import { useEffect, useState, useTransition } from "react";
+import { useUser } from "@/hooks/use-user";
+import { getUserSpotsAction } from "@/app/actions";
+import type { UserSpot } from "@/lib/types";
+import { Skeleton } from "./ui/skeleton";
 
 export function FavoritesRecents({ tab = 'all_spots' }: { tab?: 'all_spots' | 'recents' | 'favorites' }) {
-    const [userSpots, setUserSpots] = useState<any[]>([]);
+    const { user } = useUser();
+    const [userSpots, setUserSpots] = useState<UserSpot[]>([]);
+    const [isPending, startTransition] = useTransition();
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const storedSpots = JSON.parse(localStorage.getItem('user-spots') || '[]');
-            setUserSpots(storedSpots);
+        if (user) {
+            startTransition(async () => {
+                const { data, error } = await getUserSpotsAction(user.uid);
+                if (data) {
+                    setUserSpots(data);
+                }
+                if (error) {
+                    console.error("Failed to fetch user spots:", error);
+                }
+            });
         }
-    }, [tab]); // Rerun when tab changes to get latest data
+    }, [user, tab]);
 
-    const all_spots = [...allSpotsData.map(spot => ({ ...spot, isUserSpot: false })), ...userSpots.map(spot => ({ ...spot, isUserSpot: true }))].map(spot => ({
+    const staticSpots = allSpotsData.map(spot => ({ ...spot, isUserSpot: false, id: spot.name }));
+
+    const allSpots = [
+        ...staticSpots, 
+        ...userSpots.map(spot => ({ ...spot, isUserSpot: true }))
+    ].map(spot => ({
         ...spot,
         name: spot.name,
         photo: spot.image_url,
@@ -30,16 +46,24 @@ export function FavoritesRecents({ tab = 'all_spots' }: { tab?: 'all_spots' | 'r
         isFavorite: spot.isFavorite,
     }));
 
-    const favorites = all_spots.filter(spot => spot.isFavorite);
-    const recents = all_spots.filter(spot => spot.isRecent);
+    const favorites = allSpots.filter(spot => spot.isFavorite);
+    const recents = allSpots.filter(spot => spot.isRecent);
 
-    const spots = tab === 'favorites' ? favorites : tab === 'recents' ? recents : all_spots;
+    const spotsToDisplay = tab === 'favorites' ? favorites : tab === 'recents' ? recents : allSpots;
     
-    if (tab !== 'all_spots' && spots.length === 0) {
+    if (isPending) {
+        return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => <Skeleton key={i} className="aspect-[16/10] rounded-lg" />)}
+            </div>
+        )
+    }
+
+    if (tab !== 'all_spots' && spotsToDisplay.length === 0) {
         return <EmptyState tab={tab} />
     }
 
-    return <SpotList spots={spots} />;
+    return <SpotList spots={spotsToDisplay} />;
 }
 
 function EmptyState({ tab }: { tab: 'recents' | 'favorites' }) {
@@ -61,11 +85,11 @@ function EmptyState({ tab }: { tab: 'recents' | 'favorites' }) {
     )
 }
 
-function SpotList({ spots }: { spots: { name: string, photo: string, hint: string, isFavorite: boolean }[] }) {
+function SpotList({ spots }: { spots: { id: string; name: string, photo: string, hint: string, isFavorite?: boolean }[] }) {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {spots.map((spot) => (
-                <Link href="/spot-details" key={spot.name} className="relative rounded-lg overflow-hidden aspect-[16/10] group cursor-pointer">
+                <Link href={`/spot-details?name=${encodeURIComponent(spot.name)}`} key={spot.id} className="relative rounded-lg overflow-hidden aspect-[16/10] group cursor-pointer">
                     <Image src={spot.photo} layout="fill" objectFit="cover" alt={spot.name} data-ai-hint={spot.hint} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute bottom-0 left-0 p-3">
