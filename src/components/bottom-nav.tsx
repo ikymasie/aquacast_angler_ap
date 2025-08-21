@@ -10,9 +10,9 @@ import type { SVGProps } from "react";
 
 const navItems = [
     { key: 'home', href: '/', icon: Home, label: 'Home' },
-    { key: 'favorites', href: '#', icon: Heart, label: 'Favorites' },
-    { key: 'search', href: '#', icon: Search, label: 'Search' },
-    { key: 'maps', href: '#', icon: Map, label: 'Maps' },
+    { key: 'favorites', href: '/favorites', icon: Heart, label: 'Favorites' },
+    { key: 'search', href: '/search', icon: Search, label: 'Search' },
+    { key: 'maps', href: '/maps', icon: Map, label: 'Maps' },
 ]
 
 const HomeIconSolid = (props: SVGProps<SVGSVGElement>) => (
@@ -21,12 +21,17 @@ const HomeIconSolid = (props: SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
+const HeartIconSolid = (props: SVGProps<SVGSVGElement>) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
+  </svg>
+);
+
 
 export function BottomNav() {
-    // For now, we'll determine the active key based on the pathname.
-    // This can be made more robust if routes become more complex.
     const pathname = usePathname();
-    const activeKey = navItems.find(item => item.href === pathname)?.key || 'home';
+    // A more robust check for active state, handling nested routes if necessary
+    const activeKey = navItems.find(item => item.href === '/' ? pathname === '/' : pathname.startsWith(item.href))?.key || 'home';
     
     const activeIndex = navItems.findIndex(item => item.key === activeKey);
 
@@ -49,7 +54,16 @@ export function BottomNav() {
                 
                 {navItems.map((item) => {
                     const isActive = item.key === activeKey;
-                    const Icon = isActive && item.key === 'home' ? HomeIconSolid : item.icon;
+                    
+                    let Icon;
+                    if (item.key === 'home') {
+                      Icon = isActive ? HomeIconSolid : Home;
+                    } else if (item.key === 'favorites') {
+                      Icon = isActive ? HeartIconSolid : Heart;
+                    } else {
+                      Icon = item.icon;
+                    }
+                    
                     return (
                         <Link 
                             key={item.key} 
@@ -63,9 +77,8 @@ export function BottomNav() {
                                 className={cn(
                                     "h-6 w-6 transition-colors duration-150", 
                                     isActive ? 'text-primary-dark' : 'text-primary-dark/70 group-hover:text-primary-dark/85',
-                                    item.key === 'favorites' && 'stroke-current fill-none' // Ensure heart is outlined
                                 )} 
-                                strokeWidth={isActive ? (item.key === 'home' ? 0 : 2) : 2}
+                                strokeWidth={isActive ? (item.key === 'home' || item.key === 'favorites' ? 0 : 2) : 2}
                             />
                             <span className={cn(
                                 "text-xs font-medium transition-colors duration-150", 
