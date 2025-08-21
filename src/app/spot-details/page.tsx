@@ -90,10 +90,12 @@ export default function SpotDetailsPage() {
         });
 
         if (forecastResult.data) {
+             const selectedDateString = date.toISOString().substring(0, 10);
              const allScoredHours: ScoredHour[] = (forecastResult.data.hourlyChartData || []).map((d: any) => {
-                // Find corresponding full hour data point, safer than time string matching
-                 if (!weatherData) return null;
-                const correspondingHour = weatherData.hourly.find(h => h.t.startsWith(format(date, 'yyyy-MM-dd')) && format(parseISO(h.t), 'ha') === d.time);
+                if (!weatherData) return null;
+                const correspondingHour = weatherData.hourly.find(h => 
+                    h.t.startsWith(selectedDateString) && format(parseISO(h.t), 'ha') === d.time
+                );
                 return {
                     time: correspondingHour?.t || new Date().toISOString(),
                     score: d.success ?? 0,
