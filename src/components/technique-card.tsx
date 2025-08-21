@@ -14,13 +14,13 @@ interface TechniqueCardProps {
   technique: {
     name: string;
     category: string;
-    lureFamilies: LureFamily[];
+    compatibleFamilies: LureFamily[];
     skillAxes: string[];
   };
 }
 
 const lureIcons: Record<string, React.FC<any>> = {
-  'crank/swim': LureCrankSwimIcon,
+  'crank_swim': LureCrankSwimIcon,
   live: LureLiveIcon,
   soft: LureSoftIcon,
   spinner: LureSpinnerIcon,
@@ -57,10 +57,10 @@ export function TechniqueCard({ technique }: TechniqueCardProps) {
       <div className="flex justify-between items-start">
         <div>
           <h3 className="font-headline text-lg text-foreground">{technique.name}</h3>
-          <Badge variant="secondary" className="mt-1">{technique.category}</Badge>
+          <Badge variant="secondary" className="mt-1 capitalize">{technique.category}</Badge>
         </div>
         <div className="flex gap-1.5">
-            {technique.lureFamilies.slice(0,3).map(lure => {
+            {technique.compatibleFamilies.slice(0,3).map(lure => {
                 const Icon = getLureIcon(lure);
                 return <Icon key={lure} className="h-5 w-5 text-muted-foreground" />
             })}

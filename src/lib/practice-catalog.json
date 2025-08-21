@@ -1,82 +1,121 @@
-
 {
-  "techniqueCatalog": [
-    {
-      "techniqueKey": "cast_overhead",
-      "name": "Overhead Cast",
-      "category": "Casting",
-      "lureFamilies": ["spinner", "crank_swim", "soft", "live"],
-      "skillAxes": ["accuracy", "distance", "trajectory_control"],
-      "defaultTargets": [
-        { "distance_m": 10, "radius_cm": 60 },
-        { "distance_m": 15, "radius_cm": 50 },
-        { "distance_m": 20, "radius_cm": 60 }
-      ]
-    },
-    {
-      "techniqueKey": "cast_sidearm",
-      "name": "Sidearm Cast",
-      "category": "Casting",
-      "lureFamilies": ["spinner", "crank_swim", "soft"],
-      "skillAxes": ["accuracy", "low_clearance", "skip_setup"],
-      "defaultTargets": [
-        { "distance_m": 8, "radius_cm": 45 },
-        { "distance_m": 12, "radius_cm": 45 }
-      ]
-    },
-    {
-      "techniqueKey": "pitch_flip",
-      "name": "Pitching & Flipping",
-      "category": "Short-Range",
-      "lureFamilies": ["soft", "live"],
-      "skillAxes": ["quiet_entry", "precision", "line_control"],
-      "defaultTargets": [
-        { "distance_m": 3, "radius_cm": 25 },
-        { "distance_m": 5, "radius_cm": 30 }
-      ]
-    },
-    {
-      "techniqueKey": "retrieve_control",
-      "name": "Retrieve Control",
-      "category": "Presentation",
-      "lureFamilies": ["crank_swim", "spinner", "soft"],
-      "skillAxes": ["cadence_consistency", "depth_control", "contact_cover"],
-      "defaultTargets": []
-    }
-  ],
-  "drillCatalog": [
-    {
-      "drillKey": "accuracy_rings_v1",
-      "name": "Accuracy Rings",
-      "description": "A classic drill to hone your casting accuracy at various distances.",
-      "techniques": ["cast_overhead", "cast_sidearm", "pitch_flip"],
-      "params": {
-        "rounds": 3,
-        "castsPerRound": 10,
-        "timeLimit_s": 600,
-        "targets": [
-          { "distance_m": 10, "radius_cm": 60 },
-          { "distance_m": 15, "radius_cm": 50 },
-          { "distance_m": 5, "radius_cm": 30 }
-        ]
+  "schemaVersion": "2.0-practice-bait-tech",
+  "taxonomies": {
+    "speciesEnum": ["bream", "bass", "carp"],
+    "baitFamiliesEnum": ["live", "crank_swim", "spinner", "soft"],
+    "techniqueCategoriesEnum": ["casting", "short_range", "presentation", "rigging"],
+    "techniqueCatalog": [
+      {
+        "techniqueKey": "cast_overhead",
+        "name": "Overhead Cast",
+        "category": "casting",
+        "skillAxes": ["accuracy", "distance", "trajectory_control"],
+        "compatibleFamilies": ["spinner", "crank_swim", "soft", "live"]
       },
-      "scoring": {
-        "hit_center_points": 100,
-        "inner_ring_points": 75,
-        "outer_ring_points": 50,
-        "miss_points": 0,
-        "quiet_entry_bonus": 10,
-        "combo_multiplier_per_consecutive_hit": 0.05,
-        "max_combo_multiplier": 1.5,
-        "gradeBands": [
-          { "min": 90, "grade": "S" },
-          { "min": 80, "grade": "A" },
-          { "min": 70, "grade": "B" },
-          { "min": 60, "grade": "C" }
-        ]
+      {
+        "techniqueKey": "cast_sidearm",
+        "name": "Sidearm Cast",
+        "category": "casting",
+        "skillAxes": ["accuracy", "low_clearance", "skip_setup"],
+        "compatibleFamilies": ["spinner", "crank_swim", "soft"]
+      },
+      {
+        "techniqueKey": "pitch_flip",
+        "name": "Pitching & Flipping",
+        "category": "short_range",
+        "skillAxes": ["quiet_entry", "precision", "line_control"],
+        "compatibleFamilies": ["soft", "live"]
+      },
+      {
+        "techniqueKey": "retrieve_control",
+        "name": "Retrieve Control",
+        "category": "presentation",
+        "skillAxes": ["cadence_consistency", "depth_control", "contact_cover"],
+        "compatibleFamilies": ["crank_swim", "spinner", "soft"]
+      },
+      {
+        "techniqueKey": "rig_prep",
+        "name": "Rigging Prep",
+        "category": "rigging",
+        "skillAxes": ["knot_quality", "rig_accuracy", "bait_presentation"],
+        "compatibleFamilies": ["live", "soft"]
       }
-    }
-  ]
+    ],
+    "baitCatalog": [
+      {
+        "baitKey": "spinner_inline_size3",
+        "family": "spinner",
+        "subtype": "inline",
+        "name": "Inline Spinner #3",
+        "weight_g": 10,
+        "size": "3",
+        "speciesAffinity": { "bass": 0.8, "bream": 0.6, "carp": 0.2 },
+        "recommendedTechniques": ["cast_overhead", "cast_sidearm", "retrieve_control"],
+        "presentationAxes": ["cadence_consistency", "flash_control", "depth_control"]
+      },
+      {
+        "baitKey": "spinner_willow_1_2oz",
+        "family": "spinner",
+        "subtype": "willow",
+        "name": "Willow Spinnerbait 1/2oz",
+        "weight_g": 14,
+        "size": "1/2oz",
+        "speciesAffinity": { "bass": 0.9, "bream": 0.4, "carp": 0.1 },
+        "recommendedTechniques": ["cast_sidearm", "retrieve_control"],
+        "presentationAxes": ["cadence_consistency", "contact_cover", "angle_through_wind"]
+      },
+      {
+        "baitKey": "crank_squarebill_1_5",
+        "family": "crank_swim",
+        "subtype": "squarebill",
+        "name": "Squarebill 1.5",
+        "weight_g": 12,
+        "size": "1.5",
+        "speciesAffinity": { "bass": 0.9, "bream": 0.5, "carp": 0.1 },
+        "recommendedTechniques": ["cast_overhead", "retrieve_control"],
+        "presentationAxes": ["cover_deflection", "depth_track_error", "cadence_consistency"]
+      },
+      {
+        "baitKey": "swimbait_paddle_4in",
+        "family": "crank_swim",
+        "subtype": "paddle_swimbait",
+        "name": "Paddle-Tail Swimbait 4\"",
+        "weight_g": 10,
+        "size": "4in",
+        "speciesAffinity": { "bass": 0.85, "bream": 0.55, "carp": 0.15 },
+        "recommendedTechniques": ["cast_sidearm", "retrieve_control"],
+        "presentationAxes": ["cadence_consistency", "depth_control", "line_angle"]
+      },
+      {
+        "baitKey": "soft_stickbait_5in",
+        "family": "soft",
+        "subtype": "stickbait",
+        "name": "Stickbait 5\"",
+        "weight_g": 12,
+        "size": "5in",
+        "speciesAffinity": { "bass": 0.85, "bream": 0.6, "carp": 0.25 },
+        "recommendedTechniques": ["cast_sidearm", "pitch_flip", "retrieve_control"],
+        "presentationAxes": ["skip_distance", "quiet_entry", "sink_countdown"]
+      },
+      {
+        "baitKey": "soft_ned_2_75in",
+        "family": "soft",
+        "subtype": "ned",
+        "name": "Ned Worm 2.75\"",
+        "weight_g": 5,
+        "size": "2.75in",
+        "speciesAffinity": { "bass": 0.8, "bream": 0.7, "carp": 0.2 },
+        "recommendedTechniques": ["pitch_flip", "retrieve_control"],
+        "presentationAxes": ["bottom_contact_time", "line_control", "bite_detection"]
+      },
+      {
+        "baitKey": "live_worm_float",
+        "family": "live",
+        "subtype": "worm_float",
+        "name": "Live Worm under Float",
+        "weight_g": 4,
+        "size": "std"
+      }
+    ]
+  }
 }
-
-    
