@@ -121,16 +121,18 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
         getDisplayMetrics
     } = usePracticeSession({ initialDrill: drill });
     
-    const drillType = drill.techniques.includes('cast_sidearm') || drill.techniques.includes('pitch_flip') || drill.techniques.includes('skip_sidearm') ? 'accuracy' : 'cadence'; 
+    const accuracyDrillKeywords = ['pitch_flip', 'skip_sidearm', 'cast_sidearm', 'cast_overhead'];
+    const drillType = drill.techniques.some((tech: string) => accuracyDrillKeywords.includes(tech)) ? 'accuracy' : 'cadence';
+
 
     const handleLogGenericAttempt = (outcome: 'hit' | 'miss') => {
-        if (!user || !drill.sessionId) return;
+        if (!user || !drill.sessionId || isSaving || sessionState.status !== 'in-progress') return;
         
         startSaving(async () => {
             const attemptData = {
                 outcome,
-                ring: outcome === 'hit' ? 'inner' : 'miss', // Simplified
-                points: outcome === 'hit' ? 85 : 0, // Simplified
+                ring: outcome === 'hit' ? 'inner' : 'miss', // This is simplified. A real impl would have a way to select the ring.
+                points: outcome === 'hit' ? 85 : 0, // Simplified point system
             };
 
             const success = logAttempt(attemptData);
@@ -150,8 +152,18 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                     toast({ variant: 'destructive', title: 'Save Failed', description: error });
                     undoLastAttempt(); // Rollback local state
                 } else {
-                    toast({ variant: 'success', title: 'Attempt Logged!' });
+                     toast({ 
+                        variant: 'success', 
+                        title: `Cast ${outcome === 'hit' ? 'Logged' : 'Missed'}!`,
+                        description: `Points: ${attemptData.points}`
+                    });
                 }
+            } else {
+                 toast({ 
+                    variant: 'destructive', 
+                    title: 'Round Complete', 
+                    description: 'Please start the next round.'
+                });
             }
         });
     };
@@ -166,12 +178,12 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                 userId: user.uid,
                 sessionId: drill.sessionId,
                 finalScore: finalMetrics.totalScore,
-                finalGrade: 'A' // Placeholder
+                finalGrade: 'A' // Placeholder for final grade calculation
             });
             if (error) {
                 toast({ variant: 'destructive', title: 'Failed to Complete', description: error });
             } else {
-                toast({ variant: 'default', title: 'Session Complete!' });
+                toast({ variant: 'default', title: 'Session Complete!', description: 'Your progress has been saved.' });
                 onExit();
             }
         });
@@ -218,7 +230,7 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                     onLog={() => handleLogGenericAttempt('hit')} 
                     onMiss={() => handleLogGenericAttempt('miss')}
                     onUndo={undoLastAttempt}
-                    canUndo={sessionState.history.length > 0}
+                    canUndo={sessionState.history.length > 0 && sessionState.history[sessionState.history.length - 1].attempts.length > 0}
                 />
             </div>
              <AlertDialog open={isExitDialogOpen} onOpenChange={setIsExitDialogOpen}>
@@ -241,4 +253,3 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
         </>
     );
 }
-
