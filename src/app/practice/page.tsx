@@ -10,17 +10,26 @@ import { Header } from '@/components/header';
 function PracticePageContent() {
     const router = useRouter();
     const [drill, setDrill] = useState<any | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // This effect runs on the client-side after the component mounts.
         // The drill data is expected to be in the navigation state.
         if (window.history.state && window.history.state.drill) {
             setDrill(window.history.state.drill);
+            setIsLoading(false);
         } else {
-            // If state is not found, it's safer to redirect back
-            // This could happen on a page refresh.
-            console.warn("No drill data found in history state. Redirecting.");
-            router.replace('/');
+            // It might take a moment for the state to be available.
+            // A more robust solution might involve a retry or a timeout.
+            // For now, we'll wait for a bit before considering it a failure.
+            const timeout = setTimeout(() => {
+                if (!window.history.state || !window.history.state.drill) {
+                    console.warn("No drill data found in history state after delay. Redirecting.");
+                    router.replace('/');
+                }
+            }, 500); // Wait 500ms before giving up
+
+            return () => clearTimeout(timeout);
         }
     }, [router]);
 
@@ -28,7 +37,7 @@ function PracticePageContent() {
         router.back();
     };
 
-    if (!drill) {
+    if (isLoading || !drill) {
         // Render a loading state while waiting for the drill data from navigation state.
         return (
              <div className="flex flex-col min-h-screen bg-background">
