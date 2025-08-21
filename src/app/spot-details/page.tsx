@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SpeciesSelector } from '@/components/species-selector';
 import { RecommendedTimeCard } from '@/components/recommended-time-card';
 import { DaySelector } from '@/components/day-selector';
-import { startOfToday, isFuture, getHours } from 'date-fns';
+import { startOfToday, isFuture } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DaypartScorePanel } from '@/components/daypart-score-panel';
 import { recommendWindows } from '@/lib/scoring';
@@ -84,13 +84,16 @@ export default function SpotDetailsPage() {
             date: date.toISOString(),
         });
 
-        if (forecastResult.data) {
-             const allScoredHours: ScoredHour[] = (weatherData?.hourly || []).map((h, i) => ({
-                time: h.t,
-                score: forecastResult.data.hourlyChartData[i]?.success || 0,
-                condition: forecastResult.data.hourlyChartData[i]?.condition || 'Clear',
-                temperature: forecastResult.data.hourlyChartData[i]?.temperature || 0
-            }));
+        if (forecastResult.data && weatherData?.hourly) {
+             const allScoredHours: ScoredHour[] = weatherData.hourly.map((h, i) => {
+                const correspondingForecast = forecastResult.data.hourlyChartData.find(d => d.time === h.t);
+                return {
+                    time: h.t,
+                    score: correspondingForecast?.success ?? 0,
+                    condition: correspondingForecast?.condition ?? 'Clear',
+                    temperature: correspondingForecast?.temperature ?? 0
+                };
+             });
 
             const futureScoredHours = allScoredHours.filter(h => isFuture(new Date(h.time)));
 
@@ -190,7 +193,7 @@ export default function SpotDetailsPage() {
                         )}
                         
                         <SpeciesSelector 
-                           selectedSpecies={setSelectedSpecies}
+                           selectedSpecies={selectedSpecies}
                            onSelectSpecies={setSelectedSpecies}
                            disabled={isForecastLoading}
                         />
@@ -253,3 +256,5 @@ export default function SpotDetailsPage() {
     </div>
   );
 }
+
+    
