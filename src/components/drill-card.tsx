@@ -15,6 +15,7 @@ interface DrillCardProps {
   drill: {
     name: string;
     techniques: string[];
+    requiredFamilies?: string[];
     ui: {
         whatYouLearn: string;
         proTip: string;
@@ -23,6 +24,7 @@ interface DrillCardProps {
 }
 
 export function DrillCard({ drill }: DrillCardProps) {
+  const families = drill.requiredFamilies || [];
 
   return (
     <Card className="p-4 rounded-xl shadow-sm border-line-200 flex flex-col justify-between">
@@ -35,7 +37,7 @@ export function DrillCard({ drill }: DrillCardProps) {
                 <Badge key={tech} variant="outline" className="text-xs capitalize">{tech.replace(/_/g, ' ')}</Badge>
             ))}
         </div>
-         <p className="text-sm text-muted-foreground mt-3">{drill.ui.whatYouLearn}</p>
+         <p className="text-sm text-muted-foreground mt-3">{drill.ui?.whatYouLearn || 'A drill to improve your skills.'}</p>
       </div>
       <div className="flex justify-end mt-4">
         <Button size="sm">

@@ -4,7 +4,6 @@
 import { useState } from 'react';
 import { SectionHeader } from './section-header';
 import catalog from '@/lib/practice-catalog.json';
-import { TechniqueCard } from './technique-card';
 import { DrillCard } from './drill-card';
 import { SpeciesSelector } from './species-selector';
 import type { Species, LureFamily } from '@/lib/types';
@@ -16,8 +15,7 @@ export function PracticeTab() {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
   const [selectedLureFamily, setSelectedLureFamily] = useState<LureFamily | 'All'>('All');
 
-  const { taxonomies, drillCatalog } = catalog;
-  const { techniqueCatalog } = taxonomies;
+  const { drillCatalog } = catalog;
 
   const handleLureSelect = (lure: LureFamily | 'All') => {
     setSelectedLureFamily(lure);
@@ -25,7 +23,7 @@ export function PracticeTab() {
 
   const filteredDrills = drillCatalog.filter(drill => {
       const speciesMatch = drill.speciesKeys.includes(selectedSpecies.toLowerCase());
-      const lureFamilyMatch = selectedLureFamily === 'All' || drill.requiredFamilies.includes(selectedLureFamily.toLowerCase().replace('/','_'));
+      const lureFamilyMatch = selectedLureFamily === 'All' || (drill.requiredFamilies && drill.requiredFamilies.includes(selectedLureFamily.toLowerCase().replace('/','_').replace(' ','_')));
       return speciesMatch && lureFamilyMatch;
   });
 
@@ -33,8 +31,8 @@ export function PracticeTab() {
     <div className="space-y-6">
       <SessionHeader />
       
-      <div className="sticky top-0 z-10 bg-background py-4">
-          <div className="flex items-center justify-center gap-4">
+      <div className="sticky top-[68px] z-10 bg-background py-4 -mx-4 px-4 border-b">
+          <div className="flex items-center justify-center gap-4 max-w-md mx-auto">
             <div className="flex-1">
               <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} />
             </div>
@@ -46,9 +44,9 @@ export function PracticeTab() {
       </div>
       
       <div>
-        <SectionHeader title="Drills"/>
+        <SectionHeader title="Recommended Drills"/>
           <p className="text-muted-foreground text-sm mt-1">
-              Select a species and lure family to see relevant drills.
+              Select a species and lure to see relevant drills.
           </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           {filteredDrills.map(drill => (
@@ -58,7 +56,7 @@ export function PracticeTab() {
         {filteredDrills.length === 0 && (
             <div className="text-center py-10 px-4 border-2 border-dashed rounded-lg mt-4">
                 <h3 className="text-lg font-semibold text-foreground">No Drills Found</h3>
-                <p className="text-muted-foreground mt-2 text-sm">No drills match your selected species and lure family. Try a different combination.</p>
+                <p className="text-muted-foreground mt-2 text-sm">Try a different combination of species and lure family.</p>
             </div>
         )}
       </div>
