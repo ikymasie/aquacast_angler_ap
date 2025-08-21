@@ -24,10 +24,10 @@ export function DaySelector({ dailyData, selectedDate, onDateSelect }: DaySelect
   }
 
   return (
-    <div className="w-full">
-        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+    <div className="w-full overflow-x-auto no-scrollbar pb-2">
+        <div className="grid grid-cols-7 gap-2 min-w-[420px]">
             {days.map((day, index) => {
-            const dayData = dailyData[index];
+            const dayData = dailyData.find(d => d.sunrise.startsWith(format(day, 'yyyy-MM-dd')));
             const isSelected = isSameDay(day, selectedDate);
             
             return (
@@ -54,6 +54,10 @@ export function DaySelector({ dailyData, selectedDate, onDateSelect }: DaySelect
             );
             })}
         </div>
+        <style jsx>{`
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        `}</style>
     </div>
   );
 }
