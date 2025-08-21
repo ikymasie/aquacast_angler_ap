@@ -19,8 +19,8 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     const { species, location, date } = payload;
     const weatherData = await fetchWeatherData(location);
 
-    const selectedDate = parseISO(date);
-    const selectedDateString = format(selectedDate, 'yyyy-MM-dd');
+    // Use the date part of the ISO string directly to avoid timezone issues.
+    const selectedDateString = date.substring(0, 10); // e.g., "2025-08-21"
 
     // Find the daily data for the selected day from the 7-day forecast data
     const selectedDayData = weatherData.daily.find(d => d.sunrise.startsWith(selectedDateString));
