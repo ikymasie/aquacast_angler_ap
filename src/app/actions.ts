@@ -32,19 +32,9 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     let hoursForDay: any[];
 
     if (isToday(selectedDate)) {
-        // For today, find the current hour and take the next 24 hours.
-        const now = startOfHour(new Date());
-        const nowIndex = weatherData.hourly.findIndex(h => parseISO(h.t) >= now);
-        
-        if (nowIndex !== -1) {
-             // Take a 24-hour slice from the current hour onwards.
-             hoursForDay = weatherData.hourly.slice(nowIndex, nowIndex + 24);
-        } else {
-            // Fallback: if we can't find the current hour, just use the first 24 hours available.
-            // This can happen if all available forecast hours are in the past.
-            hoursForDay = weatherData.hourly.slice(0, 24);
-        }
-
+        // For today, the hourly data from the API already starts from the current day.
+        // We can simply take the first 24 hours available.
+        hoursForDay = weatherData.hourly.slice(0, 24);
     } else {
         // For future dates, get all hours for that day.
         const dayStart = startOfDay(selectedDate);
