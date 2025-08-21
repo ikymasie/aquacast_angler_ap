@@ -168,12 +168,16 @@ function SpotDetailDialog({ spot, isOpen, onClose }: SpotDetailDialogProps) {
                 </AlertDialogHeader>
                 
                 <div className="py-2 space-y-3">
-                   <DialogSection icon={CheckCircle2} title="Deciding Factors">
-                        {spot.deciding_factors.map(factor => <li key={factor}>{factor}</li>)}
-                   </DialogSection>
-                    <DialogSection icon={ShieldAlert} title="Things to Watch For">
-                        {spot.watch_outs.map(watch_out => <li key={watch_out}>{watch_out}</li>)}
-                    </DialogSection>
+                   {spot.deciding_factors && spot.deciding_factors.length > 0 && (
+                        <DialogSection icon={CheckCircle2} title="Deciding Factors">
+                            {spot.deciding_factors.map(factor => <li key={factor}>{factor}</li>)}
+                        </DialogSection>
+                    )}
+                    {spot.watch_outs && spot.watch_outs.length > 0 && (
+                        <DialogSection icon={ShieldAlert} title="Things to Watch For">
+                            {spot.watch_outs.map(watch_out => <li key={watch_out}>{watch_out}</li>)}
+                        </DialogSection>
+                    )}
                 </div>
 
                 <AlertDialogFooter>
