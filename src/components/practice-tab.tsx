@@ -22,13 +22,19 @@ export function PracticeTab() {
       setIsLoading(true);
       try {
         const speciesKey = selectedSpecies.toLowerCase();
+        // Dynamically import the correct catalog based on the selected species
         const catalogModule = await import(`@/lib/practice-catalog-${speciesKey}.json`);
         setCatalog(catalogModule.default);
       } catch (error) {
         console.error(`Failed to load catalog for ${selectedSpecies}:`, error);
-        // Fallback to bream or a default state if loading fails
-        const fallbackModule = await import(`@/lib/practice-catalog-bream.json`);
-        setCatalog(fallbackModule.default);
+        // Fallback to a default catalog (e.g., bream) if the selected one fails to load
+        try {
+            const fallbackModule = await import(`@/lib/practice-catalog-bream.json`);
+            setCatalog(fallbackModule.default);
+        } catch (fallbackError) {
+            console.error('Failed to load fallback catalog:', fallbackError);
+            setCatalog(null); // Set to null if even fallback fails
+        }
       } finally {
         setIsLoading(false);
       }
@@ -57,6 +63,7 @@ export function PracticeTab() {
       
       <div className="sticky top-[56px] z-10 bg-background py-4 -mx-4 px-4 border-b">
           <div className="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
+              <p className="text-sm font-medium text-muted-foreground">Fishing for</p>
               <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} />
               <p className="text-sm font-medium text-muted-foreground">with</p>
               <LureSelector selectedLure={selectedLureFamily} onLureSelect={handleLureSelect as any} showAllOption />
@@ -90,3 +97,4 @@ export function PracticeTab() {
     </div>
   );
 }
+
