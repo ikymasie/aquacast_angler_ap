@@ -121,7 +121,7 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
         getDisplayMetrics
     } = usePracticeSession({ initialDrill: drill });
     
-    const accuracyDrillKeywords = ['pitch_flip', 'skip_sidearm', 'cast_sidearm', 'cast_overhead'];
+    const accuracyDrillKeywords = ['pitch_flip', 'skip_sidearm', 'cast_sidearm', 'cast_overhead', 'float_entry'];
     const drillType = drill.techniques.some((tech: string) => accuracyDrillKeywords.includes(tech)) ? 'accuracy' : 'cadence';
 
 
