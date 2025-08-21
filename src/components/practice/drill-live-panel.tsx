@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wind } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import type { PracticeSessionState, Attempt } from '@/hooks/use-practice-session';
+import type { PracticeSessionState, Attempt, Ring } from '@/hooks/use-practice-session';
 
 const medicalPalette: Record<string, string> = {
     "Prime": "#0FB67F",
@@ -25,6 +25,14 @@ interface DrillLivePanelProps {
     performanceBand: string;
     isPaused: boolean;
 }
+
+const RING_LABELS: Record<Ring, string> = {
+    bullseye: 'Bullseye!',
+    inner: 'Good Cast',
+    outer: 'Okay',
+    miss: 'Miss',
+};
+
 
 export function DrillLivePanel({ drill, drillType, sessionState, lastAttempt, performanceBand, isPaused }: DrillLivePanelProps) {
     const params = drill.params || {};
@@ -94,7 +102,7 @@ function TargetCanvas({ lastAttempt }: { lastAttempt: Attempt | null }) {
             )}
             </AnimatePresence>
             <AnimatePresence>
-                {lastAttempt && lastAttempt.outcome === 'hit' && (
+                {lastAttempt && lastAttempt.outcome === 'hit' && lastAttempt.ring &&(
                     <motion.div
                         key="score-flash"
                         initial={{ y: 0, scale: 0.5, opacity: 0 }}
@@ -104,7 +112,7 @@ function TargetCanvas({ lastAttempt }: { lastAttempt: Attempt | null }) {
                         className="absolute"
                     >
                         <Badge variant="default" className="text-sm border border-black/10" style={{ backgroundColor: lastAttempt.ring ? ringColors[lastAttempt.ring] : 'transparent' }}>
-                           {lastAttempt.ring === 'bullseye' ? 'Bullseye' : lastAttempt.ring === 'inner' ? 'Inner' : 'Outer'} +{lastAttempt.points}
+                           {RING_LABELS[lastAttempt.ring]} +{lastAttempt.points}
                         </Badge>
                     </motion.div>
                 )}
@@ -184,7 +192,7 @@ function StatusRow({ lastAttempt, sessionState }: { lastAttempt: Attempt | null,
                     transition={{ duration: 0.2 }}
                 >
                     <p className="font-bold text-lg text-white">
-                        {lastAttempt.ring === 'bullseye' ? 'Bullseye!' : lastAttempt.ring === 'inner' ? 'Inner Ring' : lastAttempt.ring === 'outer' ? 'Outer Ring' : 'Miss'}
+                        {RING_LABELS[lastAttempt.ring || 'miss']}
                         <span className="font-medium text-white/70"> +{lastAttempt.points}pts</span>
                     </p>
                     <p className="text-xs text-white/60">

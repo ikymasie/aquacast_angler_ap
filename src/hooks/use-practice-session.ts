@@ -4,10 +4,12 @@
 import { useState, useEffect, useCallback, useReducer } from 'react';
 
 // State and Types
+export type Ring = 'bullseye' | 'inner' | 'outer' | 'miss';
+
 export interface Attempt {
   outcome: 'hit' | 'miss';
   points: number;
-  ring?: 'bullseye' | 'inner' | 'outer' | 'miss';
+  ring?: Ring;
 }
 
 interface Round {

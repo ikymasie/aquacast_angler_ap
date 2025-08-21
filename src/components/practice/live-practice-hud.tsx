@@ -12,7 +12,7 @@ import { savePracticeAttemptAction, completePracticeSessionAction } from '@/app/
 import { useUser } from '@/hooks/use-user';
 import { useToast } from '@/hooks/use-toast';
 import { useTransition } from 'react';
-import { usePracticeSession } from '@/hooks/use-practice-session';
+import { usePracticeSession, type Ring } from '@/hooks/use-practice-session';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -125,7 +125,7 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
     const drillType = drill.techniques.some((tech: string) => accuracyDrillKeywords.includes(tech)) ? 'accuracy' : 'cadence';
 
 
-    const handleLogGenericAttempt = (outcome: 'hit' | 'miss', ring: 'bullseye' | 'inner' | 'outer' | 'miss') => {
+    const handleLogGenericAttempt = (outcome: 'hit' | 'miss', ring: Ring) => {
         if (!user || !drill.sessionId || isSaving || sessionState.status !== 'in-progress') return;
         
         let points = 0;
