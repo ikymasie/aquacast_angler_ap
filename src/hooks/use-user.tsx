@@ -3,68 +3,107 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { 
+    getAuth, 
+    onAuthStateChanged, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword,
+    signOut as firebaseSignOut,
+    type User as FirebaseUser
+} from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 
-interface User {
-  phone: string;
+interface AppUser {
+  uid: string;
+  email: string | null;
   displayName: string | null;
 }
 
 interface UserContextType {
-  user: User | null;
+  user: AppUser | null;
   isLoading: boolean;
-  updateUser: (displayName: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  updateUserProfile: (profileData: { displayName: string }) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// For demonstration, we'll use a hardcoded phone number as the userId.
-// In a real app, this would come from Firebase Auth.
-const MOCK_USER_ID = '+16505551234';
-
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const auth = getAuth();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      setIsLoading(true);
-      try {
-        const userRef = doc(db, 'users', MOCK_USER_ID);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        const userRef = doc(db, 'users', firebaseUser.uid);
         const userSnap = await getDoc(userRef);
-
         if (userSnap.exists()) {
-          setUser({ phone: MOCK_USER_ID, ...userSnap.data() } as User);
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            ...userSnap.data()
+          } as AppUser);
         } else {
-          // If user doesn't exist, we create a placeholder object.
-          // The UI will then trigger the profile creation dialog.
-          setUser({ phone: MOCK_USER_ID, displayName: null });
+          // This case might happen if Firestore doc creation fails after auth creation
+          // We'll create it here just in case.
+          const newUserProfile = { displayName: null, email: firebaseUser.email };
+          await setDoc(userRef, newUserProfile);
+          setUser({ uid: firebaseUser.uid, ...newUserProfile });
         }
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-        setUser(null); // Handle error case
-      } finally {
-        setIsLoading(false);
+      } else {
+        setUser(null);
       }
-    };
+      setIsLoading(false);
+    });
 
-    fetchUser();
+    return () => unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const updateUser = async (displayName: string) => {
-    if (!user) throw new Error("No user to update.");
+  const signIn = async (email: string, password: string) => {
     try {
-        const userRef = doc(db, 'users', user.phone);
-        await setDoc(userRef, { displayName }, { merge: true });
-        setUser(prevUser => prevUser ? { ...prevUser, displayName } : null);
+        await signInWithEmailAndPassword(auth, email, password);
+    } catch (error: any) {
+        if (error.code === 'auth/user-not-found') {
+            // If user doesn't exist, create a new account
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const firebaseUser = userCredential.user;
+            
+            // Create a corresponding user profile in Firestore
+            const userRef = doc(db, 'users', firebaseUser.uid);
+            await setDoc(userRef, {
+                displayName: null, // Initially null
+                email: firebaseUser.email,
+            });
+        } else {
+            // Re-throw other errors (like wrong password)
+            throw error;
+        }
+    }
+  };
+
+  const signOut = async () => {
+    await firebaseSignOut(auth);
+    setUser(null);
+  };
+
+  const updateUserProfile = async (profileData: { displayName: string }) => {
+    if (!user) throw new Error("No user is signed in to update.");
+    try {
+        const userRef = doc(db, 'users', user.uid);
+        await setDoc(userRef, profileData, { merge: true });
+        setUser(prevUser => prevUser ? { ...prevUser, ...profileData } : null);
     } catch (error) {
         console.error("Failed to update user profile:", error);
         throw error;
     }
   };
 
-  const value = { user, isLoading, updateUser };
+
+  const value = { user, isLoading, signIn, signOut, updateUserProfile };
 
   return (
     <UserContext.Provider value={value}>

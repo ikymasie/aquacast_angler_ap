@@ -23,7 +23,7 @@ interface UserAuthDialogProps {
 }
 
 export function UserAuthDialog({ isOpen, onOpenChange }: UserAuthDialogProps) {
-  const { user, updateUser } = useUser();
+  const { user, updateUserProfile } = useUser();
   const [displayName, setDisplayName] = useState('');
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -36,8 +36,8 @@ export function UserAuthDialog({ isOpen, onOpenChange }: UserAuthDialogProps) {
     
     startTransition(async () => {
       try {
-        await updateUser(displayName);
-        toast({ variant: 'success', title: 'Profile Created!', description: 'Welcome to AquaCast!' });
+        await updateUserProfile({ displayName });
+        toast({ variant: 'success', title: 'Profile Updated!', description: 'Welcome to AquaCast!' });
         onOpenChange(false);
       } catch (error) {
         console.error("Failed to update profile", error);
@@ -57,13 +57,13 @@ export function UserAuthDialog({ isOpen, onOpenChange }: UserAuthDialogProps) {
         <DialogHeader>
           <DialogTitle>Welcome to AquaCast!</DialogTitle>
           <DialogDescription>
-            Let's set up your profile. Your phone number is used as your unique ID.
+            Let's finish setting up your profile.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input id="phone" value={user?.phone || ''} readOnly disabled />
+            <Label htmlFor="email">Email Address</Label>
+            <Input id="email" value={user?.email || ''} readOnly disabled />
           </div>
           <div className="space-y-2">
             <Label htmlFor="name">Display Name</Label>

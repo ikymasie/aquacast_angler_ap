@@ -15,12 +15,22 @@ import { ConditionsPanel } from '@/components/conditions-panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/hooks/use-user';
 import { UserAuthDialog } from '@/components/user-auth-dialog';
+import { useRouter } from 'next/navigation';
 
 function AppContent() {
+  const { user, isLoading: isUserLoading } = useUser();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("recents");
   const [location, setLocation] = useState<Location | null>(null);
   const [weather, setWeather] = useState<WeatherApiResponse | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/login');
+    }
+  }, [isUserLoading, user, router]);
+
 
   useEffect(() => {
     if ('geolocation' in navigator) {
@@ -72,6 +82,14 @@ function AppContent() {
       loadWeather();
     }
   }, [location]);
+
+  if (isUserLoading || !user) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background items-center justify-center">
+        <Skeleton className="h-screen w-screen" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
