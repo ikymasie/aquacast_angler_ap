@@ -21,11 +21,11 @@ export function PracticeTab() {
     setSelectedLureFamily(lure);
   };
 
-  const filteredDrills = drillCatalog.filter(drill => {
+  const filteredDrills = Array.isArray(drillCatalog) ? drillCatalog.filter(drill => {
       const speciesMatch = drill.speciesKeys.includes(selectedSpecies.toLowerCase());
       const lureFamilyMatch = selectedLureFamily === 'All' || (drill.requiredFamilies && drill.requiredFamilies.includes(selectedLureFamily.toLowerCase().replace('/','_').replace(' ','_')));
       return speciesMatch && lureFamilyMatch;
-  });
+  }) : [];
 
   return (
     <div className="space-y-6">
