@@ -6,7 +6,8 @@ import { RecommendedSpotCard } from '@/components/recommended-spot-card';
 import { LureSelector } from '@/components/lure-selector';
 import { CastingAdvisorPanel } from '@/components/casting-advisor-panel';
 import type { LureFamily } from '@/lib/types';
-import type { LureAdviceOutput, CastingAdviceOutput } from '@/ai/flows/casting-advice-flow';
+import type { CastingAdviceOutput } from '@/ai/flows/casting-advice-flow';
+import type { LureAdviceOutput } from '@/ai/flows/lure-advice-flow';
 
 interface CastingTabProps {
     isLureAdviceLoading: boolean;

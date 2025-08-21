@@ -4,7 +4,6 @@
 import { Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { Header } from '@/components/header';
 import { SpotHeaderCard } from '@/components/spot-header-card';
-import { MapCard } from '@/components/map-card';
 import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, ScoredHour, LureFamily, DayContext, UserSpot } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
 import { getCachedWeatherData } from '@/services/weather/client';
@@ -28,7 +27,8 @@ import type { LureAdviceOutput } from '@/ai/flows/lure-advice-flow';
 import { RecommendedSpotCard } from '@/components/recommended-spot-card';
 import { PhotoGallery } from '@/components/photo-gallery';
 import { useUser } from '@/hooks/use-user';
-
+import { PracticeTab } from '@/components/practice-tab';
+import { MapCard } from '@/components/map-card';
 
 // Find a spot by name from a combined list of static and user spots.
 function getSpotByName(name: string | null, allSpots: any[]) {
@@ -37,7 +37,7 @@ function getSpotByName(name: string | null, allSpots: any[]) {
   return spot || allSpotsData[0];
 }
 
-export default function SpotDetailsPage() {
+function SpotDetailsContent() {
     const searchParams = useSearchParams();
     const spotName = searchParams.get('name');
     const { user } = useUser();
@@ -262,107 +262,119 @@ export default function SpotDetailsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isForecastLoading, selectedLure, dayContext, threeHourScores]);
 
+  return (
+    <>
+      <SpotHeaderCard spot={spot} />
+                
+      <Tabs defaultValue="forecast" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="forecast">Forecast</TabsTrigger>
+              <TabsTrigger value="casting">Casting</TabsTrigger>
+              <TabsTrigger value="practice">Practice</TabsTrigger>
+              <TabsTrigger value="gallery">Gallery</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="forecast" className="space-y-4 pt-4">
+              {isWeatherLoading || !weatherData ? (
+                  <Skeleton className="h-12 w-full" />
+              ) : (
+                  <DaySelector 
+                      dailyData={weatherData.daily}
+                      selectedDate={selectedDate}
+                      onDateSelect={setSelectedDate}
+                  />
+              )}
+              
+              {isForecastLoading ? (
+                 <Skeleton className="h-[180px] w-full rounded-xl" />
+              ) : forecastError ? (
+                 <Card className="h-[180px] w-full rounded-xl bg-destructive/10 border-destructive/50 flex items-center justify-center p-4">
+                     <p className="text-center text-destructive-foreground">{forecastError}</p>
+                 </Card>
+              ) : (threeHourScores.length > 0 && overallDayScore) ? (
+                 <DaypartScorePanel
+                     speciesKey={selectedSpecies.toLowerCase() as any}
+                     spotName={spot.name}
+                     dayAvgScore={overallDayScore.dayAvgScore}
+                     dayStatus={overallDayScore.dayStatus}
+                     intervals={threeHourScores}
+                     selectedDate={selectedDate}
+                 />
+              ) : (
+                 <Card className="h-[180px] w-full rounded-xl bg-secondary/50 flex items-center justify-center p-4">
+                     <p className="text-center text-muted-foreground">Not enough data for a full day summary. Check again later.</p>
+                 </Card>
+              )}
+              
+              <SpeciesSelector 
+                 selectedSpecies={selectedSpecies}
+                 onSelectSpecies={setSelectedSpecies}
+                 disabled={isForecastLoading}
+              />
 
+              {isForecastLoading ? (
+                  <Skeleton className="h-[88px] w-full rounded-xl" />
+              ) : recommendedWindow ? (
+                  <RecommendedTimeCard window={recommendedWindow} />
+              ) : null }
+
+              {isWeatherLoading ? (
+                  <Skeleton className="h-20 w-full rounded-xl" />
+              ) : weatherData && dayContext ? (
+                  <QuickMetricsPanel 
+                      dayContext={dayContext}
+                      recentWindow={weatherData.recent}
+                  />
+              ) : null}
+          </TabsContent>
+
+           <TabsContent value="casting" className="space-y-4 pt-4">
+              <CastingConditionsCard 
+                  isLoading={isLureAdviceLoading || isForecastLoading}
+                  advice={lureAdvice}
+              />
+
+              <RecommendedSpotCard 
+                  isLoading={isAdviceLoading || isForecastLoading}
+                  advice={advice}
+              />
+              
+              <LureSelector 
+                  selectedLure={selectedLure}
+                  onLureSelect={setSelectedLure}
+                  disabled={isAdviceLoading || isForecastLoading || isLureAdviceLoading}
+              />
+              <CastingAdvisorPanel 
+                  isLoading={isAdviceLoading || isForecastLoading}
+                  advice={advice}
+              />
+          </TabsContent>
+          
+          <TabsContent value="practice" className="pt-4 space-y-4">
+            <PracticeTab />
+          </TabsContent>
+
+          <TabsContent value="gallery" className="pt-4 space-y-4">
+              <MapCard
+                 center={{ lat: spot.coordinates.lat, lng: spot.coordinates.lon }}
+             />
+             <PhotoGallery spotName={spot.name} />
+          </TabsContent>
+
+      </Tabs>
+    </>
+  );
+}
+
+export default function SpotDetailsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
-        <Header/>
-        <main className="flex-1 p-4 md:p-6 space-y-4 pb-8">
-            <Suspense fallback={<Skeleton className="w-full h-screen" />}>
-                <SpotHeaderCard spot={spot} />
-                
-                <Tabs defaultValue="forecast" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="forecast">Forecast</TabsTrigger>
-                        <TabsTrigger value="casting">Casting</TabsTrigger>
-                        <TabsTrigger value="gallery">Gallery</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="forecast" className="space-y-4 pt-4">
-                        {isWeatherLoading || !weatherData ? (
-                            <Skeleton className="h-12 w-full" />
-                        ) : (
-                            <DaySelector 
-                                dailyData={weatherData.daily}
-                                selectedDate={selectedDate}
-                                onDateSelect={setSelectedDate}
-                            />
-                        )}
-                        
-                        {isForecastLoading ? (
-                           <Skeleton className="h-[180px] w-full rounded-xl" />
-                        ) : forecastError ? (
-                           <Card className="h-[180px] w-full rounded-xl bg-destructive/10 border-destructive/50 flex items-center justify-center p-4">
-                               <p className="text-center text-destructive-foreground">{forecastError}</p>
-                           </Card>
-                        ) : (threeHourScores.length > 0 && overallDayScore) ? (
-                           <DaypartScorePanel
-                               speciesKey={selectedSpecies.toLowerCase() as any}
-                               spotName={spot.name}
-                               dayAvgScore={overallDayScore.dayAvgScore}
-                               dayStatus={overallDayScore.dayStatus}
-                               intervals={threeHourScores}
-                               selectedDate={selectedDate}
-                           />
-                        ) : (
-                           <Card className="h-[180px] w-full rounded-xl bg-secondary/50 flex items-center justify-center p-4">
-                               <p className="text-center text-muted-foreground">Not enough data for a full day summary. Check again later.</p>
-                           </Card>
-                        )}
-                        
-                        <SpeciesSelector 
-                           selectedSpecies={selectedSpecies}
-                           onSelectSpecies={setSelectedSpecies}
-                           disabled={isForecastLoading}
-                        />
-
-                        {isForecastLoading ? (
-                            <Skeleton className="h-[88px] w-full rounded-xl" />
-                        ) : recommendedWindow ? (
-                            <RecommendedTimeCard window={recommendedWindow} />
-                        ) : null }
-
-                        {isWeatherLoading ? (
-                            <Skeleton className="h-20 w-full rounded-xl" />
-                        ) : weatherData && dayContext ? (
-                            <QuickMetricsPanel 
-                                dayContext={dayContext}
-                                recentWindow={weatherData.recent}
-                            />
-                        ) : null}
-                    </TabsContent>
-
-                     <TabsContent value="casting" className="space-y-4 pt-4">
-                        <CastingConditionsCard 
-                            isLoading={isLureAdviceLoading || isForecastLoading}
-                            advice={lureAdvice}
-                        />
-
-                        <RecommendedSpotCard 
-                            isLoading={isAdviceLoading || isForecastLoading}
-                            advice={advice}
-                        />
-                        
-                        <LureSelector 
-                            selectedLure={selectedLure}
-                            onLureSelect={setSelectedLure}
-                            disabled={isAdviceLoading || isForecastLoading || isLureAdviceLoading}
-                        />
-                        <CastingAdvisorPanel 
-                            isLoading={isAdviceLoading || isForecastLoading}
-                            advice={advice}
-                        />
-                    </TabsContent>
-                    
-                    <TabsContent value="gallery" className="pt-4 space-y-4">
-                        <MapCard
-                           center={{ lat: spot.coordinates.lat, lng: spot.coordinates.lon }}
-                       />
-                       <PhotoGallery spotName={spot.name} />
-                    </TabsContent>
-
-                </Tabs>
-            </Suspense>
-        </main>
+      <Header />
+      <main className="flex-1 p-4 md:p-6 space-y-4 pb-8">
+        <Suspense fallback={<Skeleton className="w-full h-screen" />}>
+          <SpotDetailsContent />
+        </Suspense>
+      </main>
     </div>
   );
 }

@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUser } from '@/hooks/use-user';
 import type { CastingAdviceInput, CastingAdviceOutput } from '@/ai/flows/casting-advice-flow';
 import type { LureAdviceOutput } from '@/ai/flows/lure-advice-flow';
+import { recommendWindows } from '@/lib/scoring';
 import { ForecastTab } from '@/components/spot-details/forecast-tab';
 import { CastingTab } from '@/components/spot-details/casting-tab';
 import { GalleryTab } from '@/components/spot-details/gallery-tab';
@@ -28,7 +29,8 @@ function getSpotByName(name: string | null, allSpots: any[]) {
   return spot || allSpotsData[0];
 }
 
-export default function SpotDetailsPage() {
+
+function SpotDetailsContent() {
     const searchParams = useSearchParams();
     const spotName = searchParams.get('name');
     const { user } = useUser();
@@ -44,7 +46,6 @@ export default function SpotDetailsPage() {
     const [recommendedWindow, setRecommendedWindow] = useState<RecommendedWindow | null>(null);
     const [isForecastLoading, setIsForecastLoading] = useState(true);
     const [forecastError, setForecastError] = useState<string | null>(null);
-    const [hourlyChartData, setHourlyChartData] = useState<any[]>([]);
     
     // Casting advice state
     const [selectedLure, setSelectedLure] = useState<LureFamily>('Soft');
@@ -96,7 +97,7 @@ export default function SpotDetailsPage() {
 
 
     const loadForecast = useCallback(async (species: Species, date: Date, loc: Location) => {
-        if (!user) return;
+        if (!user || !weatherData) return;
         setIsForecastLoading(true);
         setForecastError(null);
         
@@ -108,9 +109,7 @@ export default function SpotDetailsPage() {
         });
 
         if (forecastResult.data) {
-             const allHours = forecastResult.data.hourlyChartData || [];
-             
-             const allScoredHours: ScoredHour[] = allHours.map((d: any, i: number) => {
+             const allScoredHours: ScoredHour[] = (forecastResult.data.hourlyChartData || []).map((d: any, i: number) => {
                  if (!weatherData) return null;
                 const correspondingHour = weatherData.hourly.find(h => {
                     const hDate = parseISO(h.t);
@@ -126,21 +125,18 @@ export default function SpotDetailsPage() {
                     temperature: d.temperature ?? 0
                  };
              }).filter((h): h is ScoredHour => h !== null);
-
-            const futureHours = allScoredHours.filter((h: any) => isFuture(parseISO(h.time)));
-            const recWindow = await recommendWindows(allScoredHours, futureHours);
+            
+            const recWindow = await recommendWindows(allScoredHours.filter(h => isFuture(parseISO(h.time))));
             
             setRecommendedWindow(recWindow);
             setThreeHourScores(forecastResult.data.threeHourScores || []);
             setOverallDayScore(forecastResult.data.overallDayScore || null);
-            setHourlyChartData(forecastResult.data.hourlyChartData || []);
             setForecastError(null);
         } else {
              setForecastError(forecastResult.error);
              setRecommendedWindow(null);
              setThreeHourScores([]);
              setOverallDayScore(null);
-             setHourlyChartData([]);
         }
 
         setIsForecastLoading(false);
@@ -149,17 +145,22 @@ export default function SpotDetailsPage() {
     const loadCastingAdvice = useCallback(async (lure: LureFamily, currentDayContext: DayContext, currentThreeHourScores: ThreeHourIntervalScore[]) => {
         if (!currentDayContext || !currentThreeHourScores.length) return;
 
+        // Caching logic
         const cacheKey = `casting-advice-${spot.name}-${selectedSpecies}-${lure}-${format(selectedDate, 'yyyy-MM-dd')}`;
         const cachedData = localStorage.getItem(cacheKey);
 
         if (cachedData) {
             try {
-                setAdvice(JSON.parse(cachedData));
-                return;
+                const parsedData = JSON.parse(cachedData);
+                // Optional: add a timestamp to invalidate after a few hours
+                setAdvice(parsedData);
+                return; // Use cached data
             } catch (e) {
-                localStorage.removeItem(cacheKey);
+                console.error("Failed to parse cached advice", e);
+                localStorage.removeItem(cacheKey); // Clear bad data
             }
         }
+
 
         setIsAdviceLoading(true);
         const payload: CastingAdviceInput = {
@@ -186,19 +187,6 @@ export default function SpotDetailsPage() {
 
     const loadLureAdvice = useCallback(async (lure: LureFamily, currentDayContext: DayContext) => {
         if (!currentDayContext || !weatherData) return;
-        
-        const cacheKey = `lure-advice-${spot.name}-${selectedSpecies}-${lure}-${format(selectedDate, 'yyyy-MM-dd')}`;
-        const cachedData = localStorage.getItem(cacheKey);
-
-        if (cachedData) {
-            try {
-                setLureAdvice(JSON.parse(cachedData));
-                // Optional: add a timestamp check to re-fetch if cache is old
-            } catch (e) {
-                localStorage.removeItem(cacheKey);
-            }
-        }
-        
         setIsLureAdviceLoading(true);
 
         const now = new Date();
@@ -209,36 +197,27 @@ export default function SpotDetailsPage() {
             return;
         }
 
-        try {
-            const result = await getLureAdviceAction({
-                species: selectedSpecies,
-                lureFamily: lure,
-                dayContext: currentDayContext,
-                currentHour: currentHour,
-                recentWindow: weatherData.recent,
-            });
+        const result = await getLureAdviceAction({
+            species: selectedSpecies,
+            lureFamily: lure,
+            dayContext: currentDayContext,
+            currentHour: currentHour,
+            recentWindow: weatherData.recent,
+        });
 
-            if (result.data) {
-                setLureAdvice(result.data);
-                 try {
-                    localStorage.setItem(cacheKey, JSON.stringify(result.data));
-                } catch(e) {
-                    console.error("Failed to cache lure advice", e);
-                }
-            } else {
-                console.error("Lure Advice Error:", result.error);
-                if (!cachedData) setLureAdvice(null); // Only clear if no cache fallback
-            }
-        } catch (error) {
-            console.error("Lure Advice Fetch Error:", error);
-            if (!cachedData) setLureAdvice(null); // Only clear if no cache fallback
-        } finally {
-            setIsLureAdviceLoading(false);
+        if (result.data) {
+            setLureAdvice(result.data);
+        } else {
+            console.error("Lure Advice Error:", result.error);
+            setLureAdvice(null);
         }
+        
+        setIsLureAdviceLoading(false);
 
-    }, [selectedSpecies, weatherData, spot.name, selectedDate]);
+    }, [selectedSpecies, weatherData]);
 
 
+    // Effect 1: Fetch initial weather data for the location
     useEffect(() => {
         async function loadInitialData() {
             setIsWeatherLoading(true);
@@ -255,80 +234,91 @@ export default function SpotDetailsPage() {
         if (location.latitude && location.longitude) {
            loadInitialData();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location]);
 
+
+    // Effect 2: Load forecast when weather data is available or dependencies change
     useEffect(() => {
         if (weatherData && !isWeatherLoading && user) {
             loadForecast(selectedSpecies, selectedDate, location);
         }
-    }, [weatherData, isWeatherLoading, selectedSpecies, selectedDate, user, loadForecast, location]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [weatherData, isWeatherLoading, selectedSpecies, selectedDate, user]); // `loadForecast` is stable via useCallback
     
+    // Effect 3: Load casting and lure advice when dependencies are ready
     useEffect(() => {
         if (!isForecastLoading && dayContext && threeHourScores.length > 0) {
             loadCastingAdvice(selectedLure, dayContext, threeHourScores);
             loadLureAdvice(selectedLure, dayContext);
         }
-    }, [isForecastLoading, selectedLure, dayContext, threeHourScores, loadCastingAdvice, loadLureAdvice]);
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isForecastLoading, selectedLure, dayContext, threeHourScores]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-        <Header/>
-        <main className="flex-1 p-4 md:p-6 space-y-4 pb-8">
-            <Suspense fallback={<Skeleton className="w-full h-screen" />}>
-                <SpotHeaderCard spot={spot} />
+    <>
+      <SpotHeaderCard spot={spot} />
                 
-                <Tabs defaultValue="forecast" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4">
-                        <TabsTrigger value="forecast">Forecast</TabsTrigger>
-                        <TabsTrigger value="casting">Casting</TabsTrigger>
-                        <TabsTrigger value="practice">Practice</TabsTrigger>
-                        <TabsTrigger value="gallery">Gallery</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="forecast" className="space-y-4 pt-4">
-                       <ForecastTab
-                          isWeatherLoading={isWeatherLoading}
-                          weatherData={weatherData}
-                          selectedDate={selectedDate}
-                          onDateSelect={setSelectedDate}
-                          isForecastLoading={isForecastLoading}
-                          forecastError={forecastError}
-                          threeHourScores={threeHourScores}
-                          overallDayScore={overallDayScore}
-                          spotName={spot.name}
-                          selectedSpecies={selectedSpecies}
-                          onSelectSpecies={setSelectedSpecies}
-                          recommendedWindow={recommendedWindow}
-                          dayContext={dayContext}
-                       />
-                    </TabsContent>
+      <Tabs defaultValue="forecast" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="forecast">Forecast</TabsTrigger>
+              <TabsTrigger value="casting">Casting</TabsTrigger>
+              <TabsTrigger value="practice">Practice</TabsTrigger>
+              <TabsTrigger value="gallery">Gallery</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="forecast" className="space-y-4 pt-4">
+            <ForecastTab
+              isWeatherLoading={isWeatherLoading}
+              weatherData={weatherData}
+              selectedDate={selectedDate}
+              onDateSelect={setSelectedDate}
+              isForecastLoading={isForecastLoading}
+              forecastError={forecastError}
+              threeHourScores={threeHourScores}
+              overallDayScore={overallDayScore}
+              spotName={spot.name}
+              selectedSpecies={selectedSpecies}
+              onSelectSpecies={setSelectedSpecies}
+              recommendedWindow={recommendedWindow}
+              dayContext={dayContext}
+            />
+          </TabsContent>
 
-                     <TabsContent value="casting" className="space-y-4 pt-4">
-                        <CastingTab
-                           isLureAdviceLoading={isLureAdviceLoading}
-                           isForecastLoading={isForecastLoading}
-                           lureAdvice={lureAdvice}
-                           isAdviceLoading={isAdviceLoading}
-                           advice={advice}
-                           selectedLure={selectedLure}
-                           onLureSelect={setSelectedLure}
-                        />
-                    </TabsContent>
+           <TabsContent value="casting" className="space-y-4 pt-4">
+              <CastingTab
+                isLureAdviceLoading={isLureAdviceLoading}
+                isForecastLoading={isForecastLoading}
+                lureAdvice={lureAdvice}
+                isAdviceLoading={isAdviceLoading}
+                advice={advice}
+                selectedLure={selectedLure}
+                onLureSelect={setSelectedLure}
+              />
+          </TabsContent>
+          
+          <TabsContent value="practice" className="pt-4 space-y-4">
+            <PracticeTab />
+          </TabsContent>
 
-                    <TabsContent value="practice" className="pt-4 space-y-4">
-                        <PracticeTab />
-                    </TabsContent>
-                    
-                    <TabsContent value="gallery" className="pt-4 space-y-4">
-                       <GalleryTab
-                           spot={spot}
-                       />
-                    </TabsContent>
+          <TabsContent value="gallery" className="pt-4 space-y-4">
+            <GalleryTab spot={spot} />
+          </TabsContent>
 
-                </Tabs>
-            </Suspense>
-        </main>
+      </Tabs>
+    </>
+  );
+}
+
+export default function SpotDetailsPage() {
+  return (
+    <div className="flex flex-col min-h-screen bg-background">
+      <Header />
+      <main className="flex-1 p-4 md:p-6 space-y-4 pb-8">
+        <Suspense fallback={<Skeleton className="w-full h-screen" />}>
+          <SpotDetailsContent />
+        </Suspense>
+      </main>
     </div>
   );
 }

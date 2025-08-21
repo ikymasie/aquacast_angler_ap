@@ -176,7 +176,8 @@ export async function scoreHour(species: Species, h: HourPoint, ctx: DayContext,
   return Math.max(0, Math.min(100, Math.round(total)));
 }
 
-export async function recommendWindows(scores: ScoredHour[], threshold: number = 60, preferredDuration: number = 4, maxDuration: number = 8): Promise<RecommendedWindow | null> {
+export async function recommendWindows(allScores: ScoredHour[], futureScores: ScoredHour[], threshold: number = 60, preferredDuration: number = 4, maxDuration: number = 8): Promise<RecommendedWindow | null> {
+    const scores = futureScores.length > 0 ? futureScores : allScores;
     if (!scores || scores.length < preferredDuration) return null;
 
     let bestWindow: ScoredHour[] | null = null;
@@ -306,7 +307,7 @@ export async function getOverallDayScore(hourlyScores: ScoredHour[]): Promise<Ov
     }
     
     // Use a more robust mean of top scores to represent the day's potential
-    const sortedScores = [...hourlyScores].sort((a, b) => b.score - b.score);
+    const sortedScores = [...hourlyScores].sort((a, b) => b.score - a.score);
     const top70PercentCount = Math.ceil(sortedScores.length * 0.7);
     const topScores = sortedScores.slice(0, top70PercentCount);
     
