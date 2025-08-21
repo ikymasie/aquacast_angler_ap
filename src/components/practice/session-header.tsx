@@ -45,8 +45,8 @@ export function SessionHeader({ profile }: SessionHeaderProps) {
               </TooltipContent>
             </Tooltip>
             <div className="flex-1">
-              <p className="font-semibold text-sm flex items-center gap-1">
-                Level {level}
+              <div className="font-semibold text-sm flex items-center gap-1">
+                <span>Level {level}</span>
                 {isFallback && (
                   <Tooltip>
                     <TooltipTrigger>
@@ -57,7 +57,7 @@ export function SessionHeader({ profile }: SessionHeaderProps) {
                     </TooltipContent>
                   </Tooltip>
                 )}
-              </p>
+              </div>
               <Progress value={progress} className="h-2 mt-1" />
               <p className="text-xs text-muted-foreground mt-1">{xp} / {nextLevelXp} XP</p>
             </div>
