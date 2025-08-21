@@ -214,22 +214,20 @@ export default function SpotDetailsPage() {
                            disabled={isForecastLoading}
                         />
 
-                       <div className="pt-3 space-y-3">
-                            {isWeatherLoading ? (
-                                <Skeleton className="h-20 w-full rounded-xl" />
-                            ) : weatherData && dayContext ? (
-                                <QuickMetricsPanel 
-                                    dayContext={dayContext}
-                                    recentWindow={weatherData.recent}
-                                />
-                            ) : null}
+                        {isForecastLoading ? (
+                            <Skeleton className="h-[88px] w-full rounded-xl" />
+                        ) : recommendedWindow ? (
+                            <RecommendedTimeCard window={recommendedWindow} />
+                        ) : null }
 
-                            {isForecastLoading ? (
-                                <Skeleton className="h-[88px] w-full rounded-xl" />
-                            ) : recommendedWindow ? (
-                                <RecommendedTimeCard window={recommendedWindow} />
-                            ) : null }
-                       </div>
+                        {isWeatherLoading ? (
+                            <Skeleton className="h-20 w-full rounded-xl" />
+                        ) : weatherData && dayContext ? (
+                            <QuickMetricsPanel 
+                                dayContext={dayContext}
+                                recentWindow={weatherData.recent}
+                            />
+                        ) : null}
                     </TabsContent>
 
                      <TabsContent value="advisor" className="space-y-4 pt-4">
