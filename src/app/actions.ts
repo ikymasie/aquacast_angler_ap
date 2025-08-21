@@ -11,7 +11,7 @@ import { getLureAdvice } from "@/ai/flows/lure-advice-flow";
 import { z } from 'zod';
 import { analyzePhoto, type PhotoAnalysisInput } from "@/ai/flows/photo-analysis-flow";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp, query, orderBy, limit } from "firebase/firestore";
 import { getDrillAnalysis } from '@/ai/flows/drill-analysis-flow';
 
 
@@ -426,3 +426,30 @@ export async function getSessionReviewDataAction(payload: GetSessionReviewPayloa
     }
 }
 
+export async function getUsersAction(): Promise<{ data: any[] | null; error: string | null }> {
+    try {
+        const usersRef = collection(db, 'users');
+        const querySnapshot = await getDocs(usersRef);
+
+        const users = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                displayName: data.displayName,
+                rank: data.practiceProfile?.level || 1,
+            };
+        });
+
+        // Sort users by rank in descending order
+        const sortedUsers = users.sort((a, b) => b.rank - a.rank);
+
+        return { data: sortedUsers.slice(0, 50), error: null };
+
+    } catch (err) {
+        console.error("Failed to fetch users for leaderboard:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+        return { data: null, error: errorMessage };
+    }
+}
+
+    
