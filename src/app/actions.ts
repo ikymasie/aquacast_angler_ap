@@ -18,10 +18,9 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     const weatherData = await fetchWeatherData(location);
 
     const selectedDate = parseISO(date);
-    const selectedDayStart = startOfDay(selectedDate);
 
     // Find the daily data for the selected day
-    const dayIndex = weatherData.daily.findIndex(d => startOfDay(parseISO(d.sunrise)) >= selectedDayStart);
+    const dayIndex = weatherData.daily.findIndex(d => isSameDay(parseISO(d.sunrise), selectedDate));
     const selectedDayData = weatherData.daily[dayIndex >= 0 ? dayIndex : 0];
 
     if (!selectedDayData) {
@@ -92,6 +91,14 @@ export async function getFishingForecastAction(payload: GetScoreActionPayload) {
     return { data: null, error: errorMessage };
   }
 }
+
+
+function isSameDay(date1: Date, date2: Date): boolean {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+}
+
 
 interface AddSpotPayload {
     lat: number;
