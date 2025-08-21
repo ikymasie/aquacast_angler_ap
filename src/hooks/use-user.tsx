@@ -18,15 +18,15 @@ interface AppUser {
   uid: string;
   email: string | null;
   displayName: string | null;
+  phone?: string;
 }
 
 interface UserContextType {
   user: AppUser | null;
   isLoading: boolean;
   isInitialized: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  updateUserProfile: (profileData: { displayName: string }) => Promise<void>;
+  createAndSignInUser: (profileData: { displayName: string, email: string, phone: string }) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -50,11 +50,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             ...userSnap.data()
           } as AppUser);
         } else {
-          // This case might happen if Firestore doc creation fails after auth creation
-          // We'll create it here just in case.
-          const newUserProfile = { displayName: null, email: firebaseUser.email };
-          await setDoc(userRef, newUserProfile);
-          setUser({ uid: firebaseUser.uid, ...newUserProfile });
+          // This case can happen if Firestore doc creation fails after auth creation.
+          // Fallback to basic info.
+          setUser({ uid: firebaseUser.uid, email: firebaseUser.email, displayName: firebaseUser.displayName });
         }
       } else {
         setUser(null);
@@ -67,23 +65,31 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const createAndSignInUser = async (profileData: { displayName: string, email: string, phone: string }) => {
+    const { displayName, email, phone } = profileData;
+    const password = '123456'; // Default password
+
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Create a corresponding user profile in Firestore
+      const userRef = doc(db, 'users', firebaseUser.uid);
+      const newUserProfile = {
+          displayName,
+          email,
+          phone,
+      };
+      await setDoc(userRef, newUserProfile);
+      
+      setUser({ uid: firebaseUser.uid, ...newUserProfile });
+
     } catch (error: any) {
-        if (error.code === 'auth/user-not-found') {
-            // If user doesn't exist, create a new account
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const firebaseUser = userCredential.user;
-            
-            // Create a corresponding user profile in Firestore
-            const userRef = doc(db, 'users', firebaseUser.uid);
-            await setDoc(userRef, {
-                displayName: null, // Initially null
-                email: firebaseUser.email,
-            });
+        if (error.code === 'auth/email-already-in-use') {
+            // If user exists, just sign them in.
+            await signInWithEmailAndPassword(auth, email, password);
         } else {
-            // Re-throw other errors (like wrong password)
+            // Re-throw other errors
             throw error;
         }
     }
@@ -94,20 +100,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
-  const updateUserProfile = async (profileData: { displayName: string }) => {
-    if (!user) throw new Error("No user is signed in to update.");
-    try {
-        const userRef = doc(db, 'users', user.uid);
-        await setDoc(userRef, profileData, { merge: true });
-        setUser(prevUser => prevUser ? { ...prevUser, ...profileData } : null);
-    } catch (error) {
-        console.error("Failed to update user profile:", error);
-        throw error;
-    }
-  };
-
-
-  const value = { user, isLoading, isInitialized, signIn, signOut, updateUserProfile };
+  const value = { user, isLoading, isInitialized, signOut, createAndSignInUser };
 
   return (
     <UserContext.Provider value={value}>

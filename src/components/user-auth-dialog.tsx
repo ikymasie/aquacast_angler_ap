@@ -23,62 +23,94 @@ interface UserAuthDialogProps {
 }
 
 export function UserAuthDialog({ isOpen, onOpenChange }: UserAuthDialogProps) {
-  const { user, updateUserProfile } = useUser();
+  const { createAndSignInUser } = useUser();
   const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
+  const isFormValid = displayName.trim() && email.trim() && phone.trim();
+
   const handleSubmit = async () => {
-    if (!displayName.trim()) {
-        toast({ variant: 'destructive', title: 'Please enter a display name.' });
+    if (!isFormValid) {
+        toast({ variant: 'destructive', title: 'Please complete the form.' });
         return;
     }
     
     startTransition(async () => {
       try {
-        await updateUserProfile({ displayName });
-        toast({ variant: 'success', title: 'Profile Updated!', description: 'Welcome to AquaCast!' });
+        await createAndSignInUser({ displayName, email, phone });
+        toast({ variant: 'success', title: 'Welcome!', description: 'Your account has been created.' });
         onOpenChange(false);
-      } catch (error) {
-        console.error("Failed to update profile", error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not save your profile. Please try again.' });
+      } catch (error: any) {
+        console.error("Failed to create user", error);
+        toast({ 
+            variant: 'destructive', 
+            title: 'Registration Error', 
+            description: error.message || 'Could not create your account. Please try again.' 
+        });
       }
     });
   };
 
-  // Prevent closing the dialog by clicking outside or pressing Escape
   const handleInteractOutside = (e: Event) => {
     e.preventDefault();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent onInteractOutside={handleInteractOutside} hideCloseButton={true}>
+      <DialogContent onInteractOutside={handleInteractOutside} hideCloseButton={true} className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Welcome to AquaCast!</DialogTitle>
+          <DialogTitle>Welcome to AquaCast</DialogTitle>
           <DialogDescription>
-            Let's finish setting up your profile.
+            Create an account to get personalized forecasts.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input id="email" value={user?.email || ''} readOnly disabled />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="name">Display Name</Label>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Name
+            </Label>
             <Input
               id="name"
-              placeholder="e.g., John A."
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
+              className="col-span-3"
+              placeholder="e.g., John Angler"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="email" className="text-right">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="col-span-3"
+              placeholder="you@example.com"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="phone" className="text-right">
+              Phone
+            </Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="col-span-3"
+              placeholder="+1 555-123-4567"
             />
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSubmit} disabled={isPending || !displayName} className="w-full">
+          <Button onClick={handleSubmit} disabled={isPending || !isFormValid} className="w-full">
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save and Continue
+            Create Account & Sign In
           </Button>
         </DialogFooter>
       </DialogContent>

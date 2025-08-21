@@ -18,18 +18,19 @@ import { UserAuthDialog } from '@/components/user-auth-dialog';
 import { useRouter } from 'next/navigation';
 
 function AppContent() {
-  const { user, isInitialized } = useUser();
-  const router = useRouter();
+  const { user, isInitialized, isLoading } = useUser();
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("recents");
   const [location, setLocation] = useState<Location | null>(null);
   const [weather, setWeather] = useState<WeatherApiResponse | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(true);
 
   useEffect(() => {
-    if (isInitialized && !user) {
-      router.push('/login');
+    // Open the dialog if initialization is complete but there's no user.
+    if (isInitialized && !user && !isLoading) {
+      setIsAuthDialogOpen(true);
     }
-  }, [isInitialized, user, router]);
+  }, [isInitialized, user, isLoading]);
 
 
   useEffect(() => {
@@ -83,13 +84,23 @@ function AppContent() {
     }
   }, [location]);
 
-  if (!isInitialized || !user) {
+  if (!isInitialized) {
     return (
       <div className="flex flex-col min-h-screen bg-background items-center justify-center">
         <Skeleton className="h-screen w-screen" />
       </div>
     );
   }
+
+  if (!user) {
+    return (
+       <div className="flex flex-col min-h-screen bg-background items-center justify-center">
+        <UserAuthDialog isOpen={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
+        <Skeleton className="h-screen w-screen" />
+      </div>
+    )
+  }
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -138,15 +149,8 @@ function AppContent() {
 
 function GreetingBlock() {
     const { user, isLoading } = useUser();
-    const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
-
-    useEffect(() => {
-        if (!isLoading && user && !user.displayName) {
-            setIsAuthDialogOpen(true);
-        }
-    }, [user, isLoading]);
-
-    if (isLoading) {
+    
+    if (isLoading && !user) {
         return (
             <div>
                 <Skeleton className="h-8 w-48 mb-2" />
@@ -159,7 +163,6 @@ function GreetingBlock() {
         <div>
              <h1 className="font-headline text-h1 font-bold text-ink-900">Hello {user?.displayName || 'Angler'}</h1>
              <p className="font-body text-body text-ink-700">Here's your personalized fishing forecast.</p>
-             <UserAuthDialog isOpen={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
         </div>
     )
 }
