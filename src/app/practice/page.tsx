@@ -14,27 +14,26 @@ function PracticePageContent() {
     useEffect(() => {
         // This effect runs on the client-side after the component mounts.
         // The drill data is expected to be in the navigation state.
-        const state = window.history.state;
-        if (state && state.drill) {
-            setDrill(state.drill);
-        } else {
-            // If there's no drill data, the user likely landed here directly.
-            // Redirect them back to the home page or a more appropriate page.
-            router.replace('/');
+        // The `state` object can sometimes be null initially, so we don't
+        // redirect if it's missing, we just show a loading state.
+        if (window.history.state && window.history.state.drill) {
+            setDrill(window.history.state.drill);
         }
-    }, [router]);
+    }, []);
 
     const handleExit = () => {
         router.back();
     };
 
     if (!drill) {
-        // You can render a loading state or a skeleton component here.
+        // Render a loading state while waiting for the drill data from navigation state.
+        // This prevents redirecting if the state isn't immediately available.
         return (
              <div className="flex flex-col min-h-screen bg-background">
                 <Header />
                 <main className="flex-1 p-4 md:p-6">
-                    <Skeleton className="w-full h-[400px] rounded-xl" />
+                    <p className="text-center text-muted-foreground">Loading drill...</p>
+                    <Skeleton className="w-full h-[400px] rounded-xl mt-4" />
                 </main>
             </div>
         )
