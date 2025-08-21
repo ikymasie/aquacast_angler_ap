@@ -25,7 +25,7 @@ import { TrendsChart } from '../progress/trends-chart';
 import { AiCoachCard } from '../progress/ai-coach-card';
 import { QuestsCard } from '../progress/quests-card';
 import { HistoryCard } from '../progress/history-card';
-import { differenceInDays, startOfWeek, format, addDays, isSameDay, differenceInMinutes, parseISO } from 'date-fns';
+import { differenceInDays, startOfWeek, format, addDays, isSameDay, differenceInMinutes, parseISO, subDays } from 'date-fns';
 
 export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetails?: boolean }) {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
@@ -92,6 +92,48 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
       trend,
     }
   }, [sessions, user]);
+  
+  const skillData = useMemo(() => {
+    const now = new Date();
+    const thirtyDaysAgo = subDays(now, 30);
+    const recentSessions = sessions.filter(s => s.startTime && isAfter(parseISO(s.startTime), thirtyDaysAgo));
+
+    if (recentSessions.length === 0) {
+      // Return a default state if there's no recent data
+      return [
+        { skill: 'Accuracy', A: 20, fullMark: 100 },
+        { skill: 'Quiet Entry', A: 20, fullMark: 100 },
+        { skill: 'Cadence', A: 20, fullMark: 100 },
+        { skill: 'Lane/Edge', A: 20, fullMark: 100 },
+        { skill: 'Distance', A: 20, fullMark: 100 },
+        { skill: 'Grouping', A: 20, fullMark: 100 },
+        { skill: 'Timing', A: 20, fullMark: 100 },
+      ];
+    }
+    
+    const allAttempts = recentSessions.flatMap(s => s.rounds?.flatMap((r:any) => r.attempts) || []);
+    
+    const getAverageScore = () => {
+        if (allAttempts.length === 0) return 0;
+        const totalPoints = allAttempts.reduce((sum, attempt) => sum + (attempt.points || 0), 0);
+        return Math.round(totalPoints / allAttempts.length);
+    }
+    
+    // Placeholder: for now, we use a general score for all skills.
+    // In a real scenario, we'd calculate each skill based on specific metrics.
+    const averageSkillScore = getAverageScore();
+
+    return [
+      { skill: 'Accuracy', A: averageSkillScore + 5, fullMark: 100 },
+      { skill: 'Quiet Entry', A: averageSkillScore - 3, fullMark: 100 },
+      { skill: 'Cadence', A: averageSkillScore, fullMark: 100 },
+      { skill: 'Lane/Edge', A: averageSkillScore - 8, fullMark: 100 },
+      { skill: 'Distance', A: averageSkillScore + 2, fullMark: 100 },
+      { skill: 'Grouping', A: averageSkillScore - 5, fullMark: 100 },
+      { skill: 'Timing', A: averageSkillScore + 3, fullMark: 100 },
+    ].map(skill => ({ ...skill, A: Math.max(15, Math.min(95, skill.A)) })); // Clamp values for better visualization
+
+  }, [sessions]);
 
   useEffect(() => {
     const loadCatalog = async () => {
@@ -174,7 +216,7 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
         level={user?.practiceProfile?.level || 1}
       />
       <WeeklyOverviewCard {...weeklyStats} />
-      <SkillWheel />
+      <SkillWheel data={skillData} />
       <DrillOverviewCarousel />
       <MasteryOverview />
       <TrendsChart />
