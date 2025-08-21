@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useMemo } from 'react';
 import { Header } from '@/components/header';
 import { SectionHeader } from '@/components/section-header';
 import { DrillCard } from '@/components/drill-card';
@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SessionSetupSheet } from '@/components/practice/session-setup-sheet';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
-import { startPracticeSessionAction } from '@/app/actions';
+import { startPracticeSessionAction, getPracticeSessionsAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { usePracticeState } from '@/hooks/use-practice-state';
 import { RankBanner } from '../progress/rank-banner';
@@ -25,6 +25,7 @@ import { TrendsChart } from '../progress/trends-chart';
 import { AiCoachCard } from '../progress/ai-coach-card';
 import { QuestsCard } from '../progress/quests-card';
 import { HistoryCard } from '../progress/history-card';
+import { differenceInDays, startOfWeek, format } from 'date-fns';
 
 export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetails?: boolean }) {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
@@ -38,6 +39,49 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
   const { toast } = useToast();
   const { setActiveDrill } = usePracticeState();
 
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      const fetchSessions = async () => {
+        setIsLoadingSessions(true);
+        const { data } = await getPracticeSessionsAction(user.uid);
+        setSessions(data || []);
+        setIsLoadingSessions(false);
+      };
+      fetchSessions();
+    }
+  }, [user]);
+
+  const weeklyStats = useMemo(() => {
+    const now = new Date();
+    const startOfThisWeek = startOfWeek(now, { weekStartsOn: 1 });
+    const thisWeeksSessions = sessions.filter(s => s.endTime && differenceInDays(now, s.endTime.toDate()) <= 7);
+
+    const totalCasts = thisWeeksSessions.reduce((sum, s) => sum + (s.rounds?.reduce((rSum: number, r: any) => rSum + r.attempts.length, 0) || 0), 0);
+    const totalMinutes = thisWeeksSessions.reduce((sum, s) => {
+        if (!s.startTime || !s.endTime) return sum;
+        return sum + Math.round(differenceInDays(s.endTime.toDate(), s.startTime.toDate()) / 60)
+    }, 0);
+
+    const trend = Array(7).fill(0).map((_, i) => {
+        const day = format(addDays(startOfThisWeek, i), 'E');
+        const dayCasts = sessions
+            .filter(s => s.endTime && isSameDay(s.endTime.toDate(), addDays(startOfThisWeek, i)))
+            .reduce((sum, s) => sum + (s.rounds?.reduce((rSum: number, r: any) => rSum + r.attempts.length, 0) || 0), 0);
+        return { day: day.charAt(0), casts: dayCasts };
+    });
+
+    return {
+      sessions: thisWeeksSessions.length,
+      minutes: totalMinutes,
+      casts: totalCasts,
+      streak: user?.practiceProfile?.streak || 0,
+      band: "Good", // Placeholder
+      trend,
+    }
+  }, [sessions, user]);
 
   useEffect(() => {
     const loadCatalog = async () => {
@@ -113,8 +157,13 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
 
   const MainContent = () => (
     <div className="space-y-6">
-      {!isInsideSpotDetails && <RankBanner />}
-      <WeeklyOverviewCard />
+      <RankBanner
+        isLoading={isUserLoading}
+        rankPoints={user?.practiceProfile?.xp || 0}
+        nextRankPoints={user?.practiceProfile?.nextLevelXp || 1000}
+        level={user?.practiceProfile?.level || 1}
+      />
+      <WeeklyOverviewCard {...weeklyStats} />
       <SkillWheel />
       <DrillOverviewCarousel />
       <MasteryOverview />
@@ -179,3 +228,17 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
     </>
   );
 }
+
+function addDays(date: Date, days: number) {
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+}
+
+function isSameDay(d1: Date, d2: Date) {
+    return d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
+}
+
+    

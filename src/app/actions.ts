@@ -11,7 +11,7 @@ import { getLureAdvice } from "@/ai/flows/lure-advice-flow";
 import { z } from 'zod';
 import { analyzePhoto, type PhotoAnalysisInput } from "@/ai/flows/photo-analysis-flow";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp, query, orderBy, limit } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp, query, orderBy, limit, where } from "firebase/firestore";
 import { getDrillAnalysis } from '@/ai/flows/drill-analysis-flow';
 
 
@@ -451,5 +451,30 @@ export async function getUsersAction(): Promise<{ data: any[] | null; error: str
         return { data: null, error: errorMessage };
     }
 }
+
+
+export async function getPracticeSessionsAction(userId: string): Promise<{ data: any[] | null, error: string | null }> {
+    try {
+        if (!userId) {
+            throw new Error("User not authenticated.");
+        }
+        const sessionsRef = collection(db, 'users', userId, 'practiceSessions');
+        const q = query(sessionsRef, where('status', '==', 'completed'), orderBy('endTime', 'desc'), limit(50));
+        const querySnapshot = await getDocs(q);
+
+        const sessions = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        return { data: sessions, error: null };
+
+    } catch (err) {
+        console.error("Failed to fetch practice sessions:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+        return { data: null, error: errorMessage };
+    }
+}
+    
 
     

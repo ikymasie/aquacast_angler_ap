@@ -6,20 +6,14 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Check, Dot, HelpCircle } from 'lucide-react';
+import { Check, Dot } from 'lucide-react';
 import { RequirementsSheet } from './requirements-sheet';
 import { useUser } from '@/hooks/use-user';
 import { Skeleton } from '../ui/skeleton';
+import rankingLadder from '@/lib/ranking-ladder.json';
 
 
 const MOCK_DATA = {
-  rank: {
-    current: "Master Baiter",
-    next: "Master Caster",
-    rankPoints: 1240,
-    nextRankPoints: 2000,
-    progressPct: 62
-  },
   requirements: [
     { key: "weekly_accuracy", label: "Accuracy ≥ 75%", valuePct: 72, targetPct: 75, status: "in_progress" as const },
     { key: "cadence_in_band", label: "Cadence in-band ≥ 65%", valuePct: 68, targetPct: 65, status: "met" as const },
@@ -30,26 +24,43 @@ const MOCK_DATA = {
 };
 
 
-export function RankBanner() {
-    const { user, isLoading } = useUser();
+interface RankBannerProps {
+  isLoading: boolean;
+  rankPoints: number;
+  nextRankPoints: number;
+  level: number;
+}
+
+export function RankBanner({ isLoading, rankPoints, nextRankPoints, level }: RankBannerProps) {
     const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-    if (isLoading || !user) {
+    if (isLoading) {
         return <Skeleton className="h-[280px] w-full rounded-xl" />;
     }
-
-    const { rank, requirements } = MOCK_DATA;
-    const { practiceProfile } = user;
-    const rankPoints = practiceProfile?.xp || 0;
-    const nextRankPoints = practiceProfile?.nextLevelXp || 2000;
-    const progressPct = (rankPoints / nextRankPoints) * 100;
     
+    const { requirements } = MOCK_DATA;
+    const progressPct = nextRankPoints > 0 ? (rankPoints / nextRankPoints) * 100 : 0;
+    
+    const getRank = (lvl: number) => {
+        let currentRank = { title: `Level ${lvl}`, next: 'Next Level' };
+        for (let i = rankingLadder.ranks.length - 1; i >= 0; i--) {
+            if (lvl >= rankingLadder.ranks[i].level) {
+                currentRank.title = rankingLadder.ranks[i].title;
+                currentRank.next = rankingLadder.ranks[i+1]?.title || 'Max Rank';
+                break;
+            }
+        }
+        return currentRank;
+    }
+
+    const { title: currentRank, next: nextRank } = getRank(level);
+
     return (
         <>
             <Card className="rounded-xl shadow-card border-0 p-4 bg-gradient-to-br from-primary to-primary-dark text-white overflow-hidden">
                 <div className="flex justify-between items-center">
-                    <Badge variant="secondary" className="bg-white/10 border-0 text-white font-semibold">Master Baiter</Badge>
-                    <span className="text-xs text-white/70">Next: Master Caster</span>
+                    <Badge variant="secondary" className="bg-white/10 border-0 text-white font-semibold">{currentRank}</Badge>
+                    <span className="text-xs text-white/70">Next: {nextRank}</span>
                 </div>
 
                 <RankGauge progress={progressPct} />
@@ -136,3 +147,4 @@ function RankGauge({ progress }: { progress: number }) {
   );
 }
 
+    

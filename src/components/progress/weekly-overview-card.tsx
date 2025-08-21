@@ -6,22 +6,14 @@ import { Badge } from '@/components/ui/badge';
 import { Flame, Activity, Clock, Target } from 'lucide-react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
-const MOCK_DATA = {
-  sessions: 5,
-  minutes: 142,
-  casts: 196,
-  streak: 4,
-  band: "Good",
-  trend: [
-    { day: "M", casts: 30 },
-    { day: "T", casts: 45 },
-    { day: "W", casts: 20 },
-    { day: "T", casts: 55 },
-    { day: "F", casts: 60 },
-    { day: "S", casts: 15 },
-    { day: "S", casts: 70 },
-  ]
-};
+interface WeeklyOverviewCardProps {
+    sessions: number;
+    minutes: number;
+    casts: number;
+    streak: number;
+    band: string;
+    trend: { day: string; casts: number }[];
+}
 
 const bandColors: Record<string, string> = {
     "Good": "bg-score-good text-white",
@@ -41,8 +33,7 @@ function StatTile({ icon: Icon, value, label }: { icon: React.ElementType, value
     )
 }
 
-export function WeeklyOverviewCard() {
-    const { sessions, minutes, casts, streak, band, trend } = MOCK_DATA;
+export function WeeklyOverviewCard({ sessions, minutes, casts, streak, band, trend }: WeeklyOverviewCardProps) {
     const bandClass = bandColors[band] || 'bg-muted text-muted-foreground';
 
     return (
@@ -71,3 +62,5 @@ export function WeeklyOverviewCard() {
         </Card>
     );
 }
+
+    
