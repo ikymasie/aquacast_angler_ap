@@ -118,6 +118,8 @@ function practiceSessionReducer(state: PracticeSessionState, action: Action): Pr
 export function usePracticeSession({ initialDrill }: { initialDrill: any }) {
   const [sessionState, dispatch] = useReducer(practiceSessionReducer, initialState);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [canUndo, setCanUndo] = useState(false);
+
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -129,6 +131,11 @@ export function usePracticeSession({ initialDrill }: { initialDrill: any }) {
     }
     return () => clearInterval(timer);
   }, [sessionState.status, sessionState.startTime, sessionState.totalPausedDuration]);
+
+  useEffect(() => {
+    const currentRound = sessionState.history.find(r => r.roundNumber === sessionState.currentRound);
+    setCanUndo(currentRound ? currentRound.attempts.length > 0 : false);
+  }, [sessionState.history, sessionState.currentRound]);
   
   const logAttempt = useCallback((attemptData: Omit<Attempt, 'timestamp'>) => {
     const castsPerRound = initialDrill.params.castsPerRound || 10;
@@ -185,5 +192,6 @@ export function usePracticeSession({ initialDrill }: { initialDrill: any }) {
     undoLastAttempt,
     togglePause,
     getDisplayMetrics,
+    canUndo,
   };
 }

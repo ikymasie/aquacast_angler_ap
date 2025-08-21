@@ -104,8 +104,8 @@ function ScoreStrip({ roundScore, accuracy, performanceBand }: { roundScore: num
 
 function PauseOverlay({ onResume }: { onResume: () => void }) {
     return (
-        <div className="absolute inset-0 z-10 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4 rounded-b-xl">
-            <h2 className="text-2xl font-bold font-headline">Paused</h2>
+        <div className="absolute inset-0 z-10 bg-panel/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4 rounded-b-xl">
+            <h2 className="text-2xl font-bold font-headline text-white">Paused</h2>
             <Button onClick={onResume} size="lg">
                 <Play className="mr-2 h-5 w-5" />
                 Resume
@@ -126,7 +126,8 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
         logAttempt,
         undoLastAttempt,
         togglePause,
-        getDisplayMetrics
+        getDisplayMetrics,
+        canUndo,
     } = usePracticeSession({ initialDrill: drill });
     
     const accuracyDrillKeywords = ['pitch_flip', 'skip_sidearm', 'cast_sidearm', 'cast_overhead', 'float_entry'];
@@ -254,7 +255,7 @@ export function LivePracticeHUD({ drill, onExit }: LivePracticeHUDProps) {
                     onMiss={() => handleLogGenericAttempt('miss', 'miss')}
                     onBite={() => handleLogGenericAttempt('hit', 'bullseye')}
                     onUndo={undoLastAttempt}
-                    canUndo={sessionState.history.length > 0 && sessionState.history[sessionState.history.length - 1].attempts.length > 0}
+                    canUndo={canUndo}
                 />
             </div>
              <AlertDialog open={isExitDialogOpen} onOpenChange={setIsExitDialogOpen}>
