@@ -1,10 +1,10 @@
 
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { getSessionReviewDataAction } from '@/app/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/header';
@@ -14,9 +14,20 @@ import { KpiGrid } from '@/components/practice/review/kpi-grid';
 import { AiInsightsCard } from '@/components/practice/review/ai-insights-card';
 import { AttemptsTimeline } from '@/components/practice/review/attempts-timeline';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, RefreshCw, Share2 } from 'lucide-react';
+import { ArrowLeft, Check, RefreshCw, Share2, Lightbulb } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
+import { Card } from '@/components/ui/card';
+
 
 function ReviewPageContent() {
     const params = useParams();
@@ -25,6 +36,7 @@ function ReviewPageContent() {
     const { toast } = useToast();
     const [reviewData, setReviewData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
     const sessionId = params.sessionId as string;
 
     useEffect(() => {
@@ -52,12 +64,7 @@ function ReviewPageContent() {
     }, [user, sessionId, router, toast]);
 
     const handleReplay = () => {
-        // This would require more state management to restart the drill
         toast({ title: 'Replay coming soon!' });
-    };
-
-    const handleNewDrill = () => {
-        router.push('/spot-details?name=Gaborone%20Dam&tab=practice');
     };
 
     const handleDone = () => {
@@ -94,50 +101,79 @@ function ReviewPageContent() {
     };
 
     return (
-        <motion.div
-            className="space-y-4"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-        >
-            <motion.div variants={itemVariants}>
-                <PerformanceGauge
-                    score={reviewData.session.finalScore}
-                    band={reviewData.session.finalGrade}
-                    drillName={reviewData.session.drillName}
-                />
+        <>
+            <motion.div
+                className="space-y-4"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
+                <motion.div variants={itemVariants}>
+                    <PerformanceGauge
+                        score={reviewData.session.finalScore}
+                        band={reviewData.session.finalGrade}
+                        drillName={reviewData.session.drillName}
+                    />
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                    <GradeAndRewards
+                        grade={reviewData.session.finalGrade}
+                        rewards={reviewData.rewards}
+                    />
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                    <KpiGrid kpis={reviewData.kpis} drillType={reviewData.session.drillType || 'accuracy'} />
+                </motion.div>
+                
+                <motion.div variants={itemVariants}>
+                    <AttemptsTimeline timeline={reviewData.timeline} />
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                    <Card 
+                        className="p-4 rounded-xl flex items-center justify-between cursor-pointer hover:bg-secondary transition-colors"
+                        onClick={() => setIsAnalysisOpen(true)}
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <Lightbulb className="w-6 h-6 text-primary" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-foreground">View AquaCast Analysis</h3>
+                                <p className="text-xs text-muted-foreground">AI-powered tips for your next session.</p>
+                            </div>
+                        </div>
+                    </Card>
+                </motion.div>
             </motion.div>
 
-            <motion.div variants={itemVariants}>
-                <GradeAndRewards
-                    grade={reviewData.session.finalGrade}
-                    rewards={reviewData.rewards}
-                />
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-                <KpiGrid kpis={reviewData.kpis} drillType={reviewData.session.drillType || 'accuracy'} />
-            </motion.div>
-            
-            <motion.div variants={itemVariants}>
-                <AttemptsTimeline timeline={reviewData.timeline} />
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-                <AiInsightsCard insights={reviewData.insights} />
-            </motion.div>
-
-            <div className="flex justify-center items-center gap-2 p-4">
-                 <Button variant="outline" size="lg" onClick={handleReplay}>
-                    <RefreshCw className="mr-2 h-4 w-4"/>
-                    Replay
-                </Button>
-                <Button size="lg" onClick={handleDone} className="flex-1">
-                    <Check className="mr-2 h-4 w-4"/>
-                    Done
-                </Button>
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t">
+                <div className="flex justify-center items-center gap-2 max-w-md mx-auto">
+                     <Button variant="outline" size="lg" onClick={handleReplay}>
+                        <RefreshCw className="mr-2 h-4 w-4"/>
+                        Replay
+                    </Button>
+                    <Button size="lg" onClick={handleDone} className="flex-1">
+                        <Check className="mr-2 h-4 w-4"/>
+                        Done
+                    </Button>
+                </div>
             </div>
-        </motion.div>
+
+            <AlertDialog open={isAnalysisOpen} onOpenChange={setIsAnalysisOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-center text-2xl font-headline mb-2">AquaCast Analysis</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AiInsightsCard insights={reviewData.insights} />
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Close</AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 }
 
@@ -147,7 +183,7 @@ export default function SessionReviewPage() {
     return (
         <div className="flex flex-col min-h-screen bg-background">
             <Header />
-            <main className="flex-1 p-4 md:p-6 pb-24">
+            <main className="flex-1 p-4 md:p-6 pb-28">
                 <Suspense fallback={<div>Loading...</div>}>
                     <ReviewPageContent />
                 </Suspense>
@@ -155,4 +191,3 @@ export default function SessionReviewPage() {
         </div>
     );
 }
-

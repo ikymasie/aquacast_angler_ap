@@ -2,7 +2,8 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
-import { Lightbulb, TrendingUp, CheckCircle, Bot } from 'lucide-react';
+import { Lightbulb, TrendingUp, CheckCircle } from 'lucide-react';
+import { AquaCastLogo } from '@/components/aqua-cast-logo';
 
 interface AiInsightsCardProps {
     insights: {
@@ -45,11 +46,7 @@ export function AiInsightsCard({ insights }: AiInsightsCardProps) {
     }
     
     return (
-        <Card className="p-4 rounded-xl bg-secondary/70 border-line-200 space-y-4">
-            <div className="flex items-center gap-2">
-                 <Bot className="w-5 h-5 text-primary" />
-                 <h3 className="font-headline text-lg font-semibold text-foreground">AI Analysis</h3>
-            </div>
+        <Card className="p-4 rounded-xl bg-secondary/70 border-0 shadow-none space-y-4">
            
             <InsightSection title="Outcome" icon={CheckCircle} items={insights.outcome || []} />
             <InsightSection title="How to Improve" icon={TrendingUp} items={insights.improve || []} />
@@ -57,4 +54,3 @@ export function AiInsightsCard({ insights }: AiInsightsCardProps) {
         </Card>
     );
 }
-
