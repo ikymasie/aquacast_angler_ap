@@ -14,7 +14,7 @@ import { LureSpinnerIcon } from './icons/lure-spinner';
 interface DrillCardProps {
   drill: {
     name: string;
-    requiredFamilies: LureFamily[];
+    requiredFamilies?: LureFamily[];
     techniques: string[];
   };
 }
@@ -39,7 +39,7 @@ export function DrillCard({ drill }: DrillCardProps) {
         <div className="flex justify-between items-start">
             <h3 className="font-headline text-lg text-foreground">{drill.name}</h3>
             <div className="flex gap-1.5">
-                {drill.requiredFamilies.slice(0,3).map(lure => {
+                {drill.requiredFamilies && drill.requiredFamilies.slice(0,3).map(lure => {
                     const Icon = getLureIcon(lure);
                     return <Icon key={lure} className="h-5 w-5 text-muted-foreground" />
                 })}
@@ -60,5 +60,3 @@ export function DrillCard({ drill }: DrillCardProps) {
     </Card>
   );
 }
-
-    
