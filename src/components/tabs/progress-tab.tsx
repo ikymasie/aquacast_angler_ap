@@ -95,7 +95,11 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
   const skillData = useMemo(() => {
     const now = new Date();
     const thirtyDaysAgo = subDays(now, 30);
-    const recentSessions = sessions.filter(s => s.startTime && isAfter(parseISO(s.startTime), thirtyDaysAgo));
+    const recentSessions = sessions.filter(s => {
+      if (!s.startTime) return false;
+      const startTimeDate = parseISO(s.startTime);
+      return isAfter(startTimeDate, thirtyDaysAgo);
+    });
 
     if (recentSessions.length === 0) {
       // Return a default state if there's no recent data
@@ -175,10 +179,17 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
 
   const masteryData = useMemo(() => {
     if (sessions.length === 0 || !catalog) {
-      return { speciesMastery: [], familyMastery: [] };
+      const allSpecies = ['Bream', 'Bass', 'Carp'];
+      const speciesMastery = allSpecies.map(s => ({
+          key: s.toLowerCase(),
+          name: s,
+          pct: 0,
+          topSkill: "N/A",
+          image: `/images/fish/${s.toLowerCase()}.png`
+      }));
+      return { speciesMastery, familyMastery: [] };
     }
     
-    // Helper to find family for a drill
     const getFamilyForDrill = (drillKey: string) => {
         for (const family of catalog.speciesCatalog.families) {
             if (family.drills.some((d: any) => d.drillKey === drillKey)) {
@@ -196,6 +207,7 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
     };
 
     // Species Mastery
+    const allSpecies = ['Bream', 'Bass', 'Carp'];
     const speciesGroups = sessions.reduce((acc, session) => {
       const key = session.speciesKey || 'unknown';
       if (!acc[key]) acc[key] = [];
@@ -203,15 +215,17 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
       return acc;
     }, {} as Record<string, any[]>);
 
-    const speciesMastery = Object.keys(speciesGroups).map(key => {
-      const speciesSessions = speciesGroups[key];
-      return {
-        key: key,
-        name: key.charAt(0).toUpperCase() + key.slice(1),
-        pct: getAverageScore(speciesSessions),
-        topSkill: "Quiet Entry", // Placeholder
-        image: `/images/fish/${key.toLowerCase()}.png`,
-      };
+    const speciesMastery = allSpecies.map(s => {
+        const key = s.toLowerCase();
+        const speciesSessions = speciesGroups[key] || [];
+        const pct = getAverageScore(speciesSessions);
+        return {
+            key,
+            name: s,
+            pct,
+            topSkill: pct > 0 ? "Quiet Entry" : "N/A", // Placeholder
+            image: `/images/fish/${key}.png`,
+        };
     });
 
     // Family Mastery
@@ -424,3 +438,5 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
     </>
   );
 }
+
+    
