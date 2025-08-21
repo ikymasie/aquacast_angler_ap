@@ -83,8 +83,8 @@
             "metrics": ["time_in_lane", "correction_efficiency", "over_drag_penalty"],
             "scoring": { "weights": { "time_in_lane": 0.5, "correction_efficiency": 0.3, "over_drag_penalty": 0.2 } },
             "recommendedConditions": [
-              { "label": "After light rain", "rainMm24h": ">=0.1 && <=8" },
-              { "label": "Wind lanes present", "windKph": ">=8 && <=18" }
+              { "label": "After light rain", "rainMm24h": ">=0.1 &amp;&amp; <=8" },
+              { "label": "Wind lanes present", "windKph": "&gt;=8 &amp;&amp; <=18" }
             ],
             "coachingTemplates": {
               "biteConsiderations": [
@@ -169,7 +169,7 @@
             "metrics": ["skip_distance", "quiet_entry", "ring_hits"],
             "scoring": { "weights": { "skip_distance": 0.4, "quiet_entry": 0.3, "ring_hits": 0.3 } },
             "recommendedConditions": [
-              { "label": "Bluebird shade program", "cloudPct": "<=30", "pressureTrendHpaPer3h": ">=0.8" },
+              { "label": "Bluebird shade program", "cloudPct": "<=30", "pressureTrendHpaPer3h": "&gt;=0.8" },
               { "label": "Calm to light breeze", "windKph": "<=10" }
             ],
             "coachingTemplates": {
@@ -192,7 +192,7 @@
           },
           {
             "drillKey": "bream_soft_bottom_clock_v1",
-            "name": "Bottom Clock & Slack Read",
+            "name": "Bottom Clock &amp; Slack Read",
             "learningOutcome": "Learning to detect subtle bottom bites by feeling for changes in line tension.",
             "difficulty": 3,
             "unlockAtLevel": 4,
@@ -203,7 +203,7 @@
             "scoring": { "weights": { "countdown_error": 0.45, "line_control": 0.3, "bite_detection": 0.25 } },
             "recommendedConditions": [
               { "label": "Cool morning edges", "season": "cool", "daypart": "morning" },
-              { "label": "Light wind over flats", "windKph": "<=12", "cloudPct": ">=40" }
+              { "label": "Light wind over flats", "windKph": "<=12", "cloudPct": "&gt;=40" }
             ],
             "coachingTemplates": {
               "biteConsiderations": [
@@ -225,7 +225,7 @@
           },
           {
             "drillKey": "bream_soft_shake_drag_v1",
-            "name": "Micro-Jig Shake & Drag",
+            "name": "Micro-Jig Shake &amp; Drag",
             "learningOutcome": "Mastering a slow drag-and-shake retrieve to trigger bites from finicky bream.",
             "difficulty": 2,
             "unlockAtLevel": 3,
@@ -234,7 +234,7 @@
             "params": { "rounds": 3, "runsPerRound": 4, "pattern_s": { "drag": 3, "shake": 2, "pause": 2 } },
             "metrics": ["bottom_contact_time", "rhythm_variance", "bite_detection"],
             "scoring": { "weights": { "bottom_contact_time": 0.5, "rhythm_variance": 0.3, "bite_detection": 0.2 } },
-            "recommendedConditions": [{ "label": "Post-front high pressure", "pressureTrendHpaPer3h": ">=0.8", "windKph": "<=12" }],
+            "recommendedConditions": [{ "label": "Post-front high pressure", "pressureTrendHpaPer3h": "&gt;=0.8", "windKph": "<=12" }],
             "coachingTemplates": {
               "biteConsiderations": [
                 "High pressure makes bream lethargic, requiring slow, deliberate presentations on the bottom.",
@@ -264,7 +264,9 @@
         "techniques": [
           { "techniqueKey": "cast_sidearm", "label": "Sidearm, Low Profile" },
           { "techniqueKey": "retrieve_control", "label": "Retrieve Cadence" },
-          { "techniqueKey": "lane_discipline", "label": "Lane Discipline" }
+          { "techniqueKey": "lane_discipline", "label": "Lane Discipline" },
+          { "techniqueKey": "pitch_flip", "label": "Pitch/Flip Precision" },
+          { "techniqueKey": "slack_management", "label": "Line/Slack Management" }
         ],
         "drills": [
           {
@@ -279,7 +281,7 @@
             "metrics": ["lane_hits", "cadence_consistency", "depth_control"],
             "scoring": { "weights": { "lane_hits": 0.4, "cadence_consistency": 0.35, "depth_control": 0.25 } },
             "recommendedConditions": [
-              { "label": "Overcast with breeze", "cloudPct": ">=60", "windKph": ">=6 && <=16" }
+              { "label": "Overcast with breeze", "cloudPct": "&gt;=60", "windKph": "&gt;=6 &amp;&amp; <=16" }
             ],
             "coachingTemplates": {
               "biteConsiderations": [
@@ -342,7 +344,8 @@
           { "techniqueKey": "cast_overhead", "label": "Overhead Distance + Accuracy" },
           { "techniqueKey": "depth_track", "label": "Depth Track" },
           { "techniqueKey": "cover_deflect", "label": "Cover Deflection" },
-          { "techniqueKey": "stop_go", "label": "Stop-Go Cadence" }
+          { "techniqueKey": "stop_go", "label": "Stop-Go Cadence" },
+          { "techniqueKey": "retrieve_control", "label": "Retrieve Cadence" }
         ],
         "drills": [
           {
@@ -357,7 +360,7 @@
             "metrics": ["depth_control", "accuracy", "edge_time_on_path"],
             "scoring": { "weights": { "depth_control": 0.45, "edge_time_on_path": 0.35, "accuracy": 0.20 } },
             "recommendedConditions": [
-              { "label": "Cloudy flats", "cloudPct": ">=50", "windKph": "6-14" }
+              { "label": "Cloudy flats", "cloudPct": "&gt;=50", "windKph": "6-14" }
             ],
             "coachingTemplates": {
               "biteConsiderations": [
@@ -388,7 +391,7 @@
             "params": { "rounds": 3, "castsPerRound": 10, "obstacle": "rock_pile", "distance_m": 12 },
             "metrics": ["deflection_quality", "re-engagement_time_s", "accuracy"],
             "scoring": { "weights": { "deflection_quality": 0.5, "re-engagement_time_s": 0.3, "accuracy": 0.2 } },
-            "recommendedConditions": [{ "label": "Windy points", "windKph": ">=10", "body": "lake" }],
+            "recommendedConditions": [{ "label": "Windy points", "windKph": "&gt;=10", "body": "lake" }],
             "coachingTemplates": {
               "biteConsiderations": [
                 "Deflecting a crankbait off cover creates an erratic action that mimics fleeing prey.",
@@ -409,7 +412,7 @@
           },
           {
             "drillKey": "bream_swimbait_stop_go_v1",
-            "name": "Swimbait Stop & Go",
+            "name": "Swimbait Stop &amp; Go",
             "learningOutcome": "Using a stop-and-go retrieve with a swimbait to convert following fish.",
             "difficulty": 2,
             "unlockAtLevel": 6,
@@ -533,10 +536,8 @@
     "uiRecommendations": {
       "emptyStateCopy": "Select a species and lure to see relevant drills.",
       "filterBehavior": "Show drills where `requires.family` matches the selected family; `All` shows every drill for the species.",
-      "badges": {
-        "duration": "duration or casts x rounds",
-        "difficultyDots": 3
-      }
+      "badges": { "duration": "duration or casts x rounds", "difficultyDots": 3 }
     }
   }
-}
+
+    
