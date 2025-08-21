@@ -22,8 +22,8 @@ export function AttemptControls({ round, attempt, onLog, onMiss, onUndo, canUndo
             <div className="max-w-md mx-auto">
                 <p className="text-xs text-center text-muted-foreground mb-1">Cast {attempt}/{totalCasts} • R{round}/{totalRounds}</p>
                 <div className="grid grid-cols-5 gap-2 items-center">
-                    <Button variant="outline" className="col-span-1 h-12" onClick={onMiss}>Miss</Button>
-                    <Button onClick={onLog} className="col-span-3 h-12 text-base font-semibold">Log Outcome</Button>
+                    <Button variant="outline" className="col-span-1 h-12" onClick={onMiss}>No Luck</Button>
+                    <Button onClick={onLog} className="col-span-3 h-12 text-base font-semibold">It Worked</Button>
                     <Button variant="ghost" size="icon" className="col-span-1 h-12 w-12" onClick={onUndo} disabled={!canUndo}>
                         <Undo className="w-5 h-5"/>
                     </Button>
