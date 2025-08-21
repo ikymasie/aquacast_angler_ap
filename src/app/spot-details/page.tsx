@@ -115,7 +115,7 @@ export default function SpotDetailsPage() {
 
     // Fetch casting advice when species or lure selection changes
     useEffect(() => {
-        if (weatherData) {
+        if (weatherData && threeHourScores.length > 0) {
             setIsAdviceLoading(true);
             getCastingAdviceAction({
                 species: selectedSpecies,
@@ -124,7 +124,12 @@ export default function SpotDetailsPage() {
                 dayContext: weatherData.daily[0], // Use today's context for advice
                 scoredHours: threeHourScores,
             }).then(result => {
-                setCastingAdvice(result);
+                if(result.data) {
+                   setCastingAdvice(result.data);
+                } else {
+                   console.error("Casting advice error:", result.error);
+                   setCastingAdvice(null);
+                }
                 setIsAdviceLoading(false);
             });
         }

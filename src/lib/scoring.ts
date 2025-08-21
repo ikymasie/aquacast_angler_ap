@@ -309,3 +309,15 @@ export async function getOverallDayScore(hourlyScores: ScoredHour[]): Promise<Ov
     
     return { dayAvgScore, dayStatus };
 }
+
+export function getMoonPhaseName(phase: number): string {
+  if (phase < 0.06 || phase > 0.94) return 'New Moon';
+  if (phase < 0.18) return 'Waxing Crescent';
+  if (phase < 0.31) return 'First Quarter';
+  if (phase < 0.44) return 'Waxing Gibbous';
+  if (phase < 0.56) return 'Full Moon';
+  if (phase < 0.69) return 'Waning Gibbous';
+  if (phase < 0.81) return 'Last Quarter';
+  if (phase < 0.94) return 'Waning Crescent';
+  return 'New Moon';
+}

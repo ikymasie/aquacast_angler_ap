@@ -6,9 +6,18 @@ import { format, parseISO } from 'date-fns';
 import { Sunrise, Sunset, Sun, Moon, Thermometer, ShieldCheck } from "lucide-react";
 import type { DayContext, RecentWindow } from "@/lib/types";
 import { Skeleton } from "./ui/skeleton";
-import { useEffect, useState } from "react";
-import { getMoonPhaseName } from "@/lib/scoring";
 
+function getMoonPhaseName(phase: number): string {
+    if (phase < 0.06 || phase > 0.94) return 'New Moon';
+    if (phase < 0.18) return 'Waxing Crescent';
+    if (phase < 0.31) return 'First Quarter';
+    if (phase < 0.44) return 'Waxing Gibbous';
+    if (phase < 0.56) return 'Full Moon';
+    if (phase < 0.69) return 'Waning Gibbous';
+    if (phase < 0.81) return 'Last Quarter';
+    if (phase < 0.94) return 'Waning Crescent';
+    return 'New Moon';
+}
 
 interface QuickMetricsPanelProps {
     dayContext?: DayContext;
@@ -16,13 +25,6 @@ interface QuickMetricsPanelProps {
 }
 
 export function QuickMetricsPanel({ dayContext, recentWindow }: QuickMetricsPanelProps) {
-    const [moonPhaseName, setMoonPhaseName] = useState<string>('...');
-
-    useEffect(() => {
-        if (dayContext?.moonPhase) {
-            getMoonPhaseName(dayContext.moonPhase).then(setMoonPhaseName);
-        }
-    }, [dayContext?.moonPhase]);
 
     if (!dayContext || !recentWindow) {
         return (
@@ -36,6 +38,8 @@ export function QuickMetricsPanel({ dayContext, recentWindow }: QuickMetricsPane
             </Card>
         )
     }
+
+    const moonPhaseName = getMoonPhaseName(dayContext.moonPhase);
 
     return (
         <Card className="rounded-xl bg-secondary/50 border-line-200">

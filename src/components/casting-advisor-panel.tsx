@@ -27,11 +27,11 @@ interface CastingAdvisorPanelProps {
 }
 
 export function CastingAdvisorPanel({ advice, selectedLure, onLureSelect }: CastingAdvisorPanelProps) {
-    if (!advice || !advice.data) {
+    if (!advice) {
         return <Skeleton className="h-[400px] w-full" />;
     }
     
-    const { where_to_cast, how_to_fish, when_to_fish } = advice.data;
+    const { where_to_cast, how_to_fish, when_to_fish } = advice;
 
     return (
         <Card className="rounded-xl shadow-card">

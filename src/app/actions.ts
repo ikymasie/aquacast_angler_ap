@@ -1,10 +1,12 @@
 
 'use server';
 
-import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore } from "@/lib/types";
+import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
 import { format, parseISO, startOfDay, endOfDay, isWithinInterval, isToday, isFuture } from "date-fns";
+import type { CastingAdviceInput } from "@/ai/flows/casting-advice-flow";
+import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
 
 interface GetScoreActionPayload {
   species: Species;
@@ -151,6 +153,17 @@ export async function addSpotAction(payload: AddSpotPayload) {
     } catch (err) {
         console.error("Failed to process new spot:", err);
         const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while adding the spot.";
+        return { data: null, error: errorMessage };
+    }
+}
+
+export async function getCastingAdviceAction(payload: CastingAdviceInput) {
+    try {
+        const advice = await getCastingAdvice(payload);
+        return { data: advice, error: null };
+    } catch (err) {
+        console.error("Failed to get casting advice:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while getting casting advice.";
         return { data: null, error: errorMessage };
     }
 }
