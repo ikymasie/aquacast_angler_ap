@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SpeciesSelector } from '@/components/species-selector';
 import { RecommendedTimeCard } from '@/components/recommended-time-card';
 import { DaySelector } from '@/components/day-selector';
-import { startOfToday, isFuture } from 'date-fns';
+import { startOfToday, isFuture, parseISO, format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DaypartScorePanel } from '@/components/daypart-score-panel';
 import { recommendWindows } from '@/lib/scoring';
@@ -85,8 +85,7 @@ export default function SpotDetailsPage() {
         });
 
         if (forecastResult.data && weatherData?.hourly) {
-             const allScoredHours: ScoredHour[] = weatherData.hourly.map((h, i) => {
-                // This mapping is simplified as the action now returns all necessary data
+            const allScoredHours: ScoredHour[] = weatherData.hourly.map((h, i) => {
                 const correspondingForecast = forecastResult.data.hourlyChartData.find(d => d.time === format(parseISO(h.t), 'ha'));
                 return {
                     time: h.t,
@@ -103,11 +102,9 @@ export default function SpotDetailsPage() {
             setThreeHourScores(forecastResult.data.threeHourScores || []);
             setOverallDayScore(forecastResult.data.overallDayScore || null);
             
-            if (forecastResult.error) {
-                setForecastError(forecastResult.error);
-            }
-
-        } else if (forecastResult.error) {
+        } 
+        
+        if (forecastResult.error) {
             console.error("Forecast Error:", forecastResult.error);
             setForecastError(forecastResult.error);
             // Clear previous results on error
@@ -115,6 +112,7 @@ export default function SpotDetailsPage() {
             setThreeHourScores([]);
             setOverallDayScore(null);
         }
+
         setIsForecastLoading(false);
     }, [weatherData?.hourly]);
 
@@ -154,7 +152,17 @@ export default function SpotDetailsPage() {
     // Subsequent forecast calculation when dependencies change
     useEffect(() => {
         if (weatherData && !isWeatherLoading) {
-            loadForecast(selectedSpecies, selectedDate, location);
+            // --- FIX: Add guardrail to ensure date is valid ---
+            const firstForecastDate = parseISO(weatherData.daily[0].sunrise);
+            let dateToLoad = selectedDate;
+
+            if (selectedDate < firstForecastDate) {
+                console.warn("Selected date is out of forecast range. Resetting to today.");
+                dateToLoad = startOfToday();
+                setSelectedDate(dateToLoad);
+            }
+            // --- END FIX ---
+            loadForecast(selectedSpecies, dateToLoad, location);
         }
     }, [weatherData, isWeatherLoading, selectedSpecies, selectedDate, location, loadForecast]);
 
@@ -264,3 +272,5 @@ export default function SpotDetailsPage() {
     </div>
   );
 }
+
+    
