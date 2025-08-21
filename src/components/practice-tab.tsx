@@ -53,7 +53,7 @@ export function PracticeTab() {
         <p className="text-muted-foreground text-sm mt-1">
           Browse techniques to improve your casting and presentation skills.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
           {techniqueCatalog.map(tech => (
             <TechniqueCard key={tech.techniqueKey} technique={tech as any} />
           ))}
