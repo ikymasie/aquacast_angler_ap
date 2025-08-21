@@ -27,6 +27,7 @@ import { CastingConditionsCard } from '@/components/casting-conditions-card';
 import type { LureAdviceOutput } from '@/ai/flows/lure-advice-flow';
 import { RecommendedSpotCard } from '@/components/recommended-spot-card';
 import { PhotoGallery } from '@/components/photo-gallery';
+import { PracticeTab } from '@/components/practice-tab';
 
 
 // Find a spot by name, or return the first one as a fallback.
@@ -91,20 +92,21 @@ export default function SpotDetailsPage() {
         });
 
         if (forecastResult.data) {
-             const selectedDateString = date.toISOString().substring(0, 10);
-             const allScoredHours: ScoredHour[] = (forecastResult.data.hourlyChartData || []).map((d: any) => {
-                if (!weatherData) return null;
-                // Correct way to find corresponding hour without timezone issues
-                const correspondingHour = weatherData.hourly.find(h => 
-                     h.t.startsWith(selectedDateString) && format(parseISO(h.t), 'ha') === d.time
-                );
+             const allScoredHours: ScoredHour[] = (forecastResult.data.hourlyChartData || []).map((d: any, i: number) => {
+                 if (!weatherData) return null;
+                const correspondingHour = weatherData.hourly.find(h => {
+                    const hDate = parseISO(h.t);
+                    return format(hDate, 'ha') === d.time && h.t.startsWith(format(date, 'yyyy-MM-dd'));
+                });
+
                 if (!correspondingHour) return null;
-                return {
+
+                 return {
                     time: correspondingHour.t,
                     score: d.success ?? 0,
                     condition: d.condition ?? 'Clear',
                     temperature: d.temperature ?? 0
-                };
+                 };
              }).filter((h): h is ScoredHour => h !== null);
 
             const recWindow = await recommendWindows(allScoredHours.filter(h => isFuture(parseISO(h.time))));
@@ -114,7 +116,6 @@ export default function SpotDetailsPage() {
             setOverallDayScore(forecastResult.data.overallDayScore || null);
             setForecastError(null);
         } else {
-             console.error("Forecast Error:", forecastResult.error);
              setForecastError(forecastResult.error);
              setRecommendedWindow(null);
              setThreeHourScores([]);
@@ -244,10 +245,11 @@ export default function SpotDetailsPage() {
                 <SpotHeaderCard spot={spot} />
                 
                 <Tabs defaultValue="forecast" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="forecast">Forecast</TabsTrigger>
                         <TabsTrigger value="advisor">Casting Advisor</TabsTrigger>
                         <TabsTrigger value="map">Map & Photos</TabsTrigger>
+                        <TabsTrigger value="practice">Practice</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="forecast" className="space-y-4 pt-4">
@@ -332,9 +334,15 @@ export default function SpotDetailsPage() {
                        />
                        <PhotoGallery spotName={spot.name} />
                     </TabsContent>
+
+                    <TabsContent value="practice" className="pt-4 space-y-4">
+                        <PracticeTab />
+                    </TabsContent>
                 </Tabs>
             </Suspense>
         </main>
     </div>
   );
 }
+
+    

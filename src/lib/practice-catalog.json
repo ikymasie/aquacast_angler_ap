@@ -1,0 +1,82 @@
+
+{
+  "techniqueCatalog": [
+    {
+      "techniqueKey": "cast_overhead",
+      "name": "Overhead Cast",
+      "category": "Casting",
+      "lureFamilies": ["spinner", "crank_swim", "soft", "live"],
+      "skillAxes": ["accuracy", "distance", "trajectory_control"],
+      "defaultTargets": [
+        { "distance_m": 10, "radius_cm": 60 },
+        { "distance_m": 15, "radius_cm": 50 },
+        { "distance_m": 20, "radius_cm": 60 }
+      ]
+    },
+    {
+      "techniqueKey": "cast_sidearm",
+      "name": "Sidearm Cast",
+      "category": "Casting",
+      "lureFamilies": ["spinner", "crank_swim", "soft"],
+      "skillAxes": ["accuracy", "low_clearance", "skip_setup"],
+      "defaultTargets": [
+        { "distance_m": 8, "radius_cm": 45 },
+        { "distance_m": 12, "radius_cm": 45 }
+      ]
+    },
+    {
+      "techniqueKey": "pitch_flip",
+      "name": "Pitching & Flipping",
+      "category": "Short-Range",
+      "lureFamilies": ["soft", "live"],
+      "skillAxes": ["quiet_entry", "precision", "line_control"],
+      "defaultTargets": [
+        { "distance_m": 3, "radius_cm": 25 },
+        { "distance_m": 5, "radius_cm": 30 }
+      ]
+    },
+    {
+      "techniqueKey": "retrieve_control",
+      "name": "Retrieve Control",
+      "category": "Presentation",
+      "lureFamilies": ["crank_swim", "spinner", "soft"],
+      "skillAxes": ["cadence_consistency", "depth_control", "contact_cover"],
+      "defaultTargets": []
+    }
+  ],
+  "drillCatalog": [
+    {
+      "drillKey": "accuracy_rings_v1",
+      "name": "Accuracy Rings",
+      "description": "A classic drill to hone your casting accuracy at various distances.",
+      "techniques": ["cast_overhead", "cast_sidearm", "pitch_flip"],
+      "params": {
+        "rounds": 3,
+        "castsPerRound": 10,
+        "timeLimit_s": 600,
+        "targets": [
+          { "distance_m": 10, "radius_cm": 60 },
+          { "distance_m": 15, "radius_cm": 50 },
+          { "distance_m": 5, "radius_cm": 30 }
+        ]
+      },
+      "scoring": {
+        "hit_center_points": 100,
+        "inner_ring_points": 75,
+        "outer_ring_points": 50,
+        "miss_points": 0,
+        "quiet_entry_bonus": 10,
+        "combo_multiplier_per_consecutive_hit": 0.05,
+        "max_combo_multiplier": 1.5,
+        "gradeBands": [
+          { "min": 90, "grade": "S" },
+          { "min": 80, "grade": "A" },
+          { "min": 70, "grade": "B" },
+          { "min": 60, "grade": "C" }
+        ]
+      }
+    }
+  ]
+}
+
+    
