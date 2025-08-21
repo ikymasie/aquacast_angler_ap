@@ -5,13 +5,21 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Flame, Star, Shield } from 'lucide-react';
 
-export function SessionHeader() {
-  const level = 6;
-  const xp = 1250;
-  const nextLevelXp = 2000;
+interface PracticeProfile {
+    level: number;
+    xp: number;
+    streak: number;
+    coins: number;
+    nextLevelXp: number;
+}
+
+interface SessionHeaderProps {
+  profile: PracticeProfile;
+}
+
+export function SessionHeader({ profile }: SessionHeaderProps) {
+  const { level, xp, nextLevelXp, streak, coins } = profile;
   const progress = (xp / nextLevelXp) * 100;
-  const streak = 3;
-  const coins = 1450;
 
   return (
     <Card className="rounded-xl p-4 shadow-sm border-line-200">

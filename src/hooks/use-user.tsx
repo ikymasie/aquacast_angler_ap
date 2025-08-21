@@ -14,11 +14,20 @@ import {
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 
+interface PracticeProfile {
+    level: number;
+    xp: number;
+    streak: number;
+    coins: number;
+    nextLevelXp: number;
+}
+
 interface AppUser {
   uid: string;
   email: string | null;
   displayName: string | null;
   phone?: string;
+  practiceProfile?: PracticeProfile;
 }
 
 interface UserContextType {
@@ -79,24 +88,30 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const firebaseUser = userCredential.user;
                 
-                // Create a corresponding user profile in Firestore
                 const userRef = doc(db, 'users', firebaseUser.uid);
+                
+                const defaultPracticeProfile: PracticeProfile = {
+                    level: 1,
+                    xp: 0,
+                    streak: 0,
+                    coins: 100,
+                    nextLevelXp: 1000,
+                };
+                
                 const newUserProfile = {
                     displayName,
                     email,
                     phone,
+                    practiceProfile: defaultPracticeProfile
                 };
                 await setDoc(userRef, newUserProfile);
                 
-                // Manually set the user in state, as onAuthStateChanged might not fire immediately.
                 setUser({ uid: firebaseUser.uid, ...newUserProfile });
             } catch (createError) {
-                // Handle errors during creation (e.g., email already in use by another flow)
                 console.error("Error creating user after sign-in failed:", createError);
                 throw createError;
             }
         } else {
-            // Re-throw other sign-in errors (e.g., wrong password, network issues)
             console.error("Sign-in error:", error);
             throw error;
         }

@@ -105,7 +105,11 @@ export function PracticeTab() {
 
   return (
     <div className="space-y-6">
-      <SessionHeader />
+      {user?.practiceProfile ? (
+          <SessionHeader profile={user.practiceProfile} />
+      ) : (
+          <Skeleton className="h-[96px] w-full rounded-xl" />
+      )}
       
       <div className="sticky top-[56px] z-10 bg-background/95 backdrop-blur-sm py-4 -mx-4 px-4 border-b">
           <div className="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
