@@ -1,0 +1,410 @@
+{
+  "schemaVersion": "2.0-practice-catalog",
+  "lastUpdatedISO": "2025-08-21T00:00:00Z",
+  "speciesCatalog": {
+    "speciesKey": "bass",
+    "displayName": "Largemouth/Black Bass",
+    "preferredFamilies": ["crank_swim", "spinner", "soft"],
+    "gradeBands": [
+      { "min": 90, "grade": "S" },
+      { "min": 80, "grade": "A" },
+      { "min": 70, "grade": "B" },
+      { "min": 60, "grade": "C" },
+      { "min": 0,  "grade": "D" }
+    ],
+    "ui": {
+      "icon": "fish_bass",
+      "palette": { "primary": "#27BFA6", "bgSoft": "#E6F7F4" }
+    },
+    "families": [
+      {
+        "familyKey": "spinner",
+        "label": "Spinner (Inline & Spinnerbait)",
+        "recommendedBaits": [
+          { "baitKey": "spinner_willow_1_2oz", "name": "Willow Spinnerbait 1/2oz" },
+          { "baitKey": "spinner_inline_size3", "name": "Inline Spinner #3" }
+        ],
+        "techniques": [
+          { "techniqueKey": "cast_sidearm", "label": "Sidearm, Low Profile" },
+          { "techniqueKey": "retrieve_control", "label": "Retrieve Cadence Control" },
+          { "techniqueKey": "lane_discipline", "label": "Lane Discipline on Edges" }
+        ],
+        "drills": [
+          {
+            "drillKey": "bass_spinner_lane_cadence_v1",
+            "name": "Spinner Lane Cadence",
+            "difficulty": 2,
+            "unlockAtLevel": 1,
+            "requires": { "family": "spinner", "baits": ["spinner_willow_1_2oz", "spinner_inline_size3"] },
+            "techniques": ["cast_sidearm", "retrieve_control"],
+            "params": {
+              "rounds": 3,
+              "castsPerRound": 10,
+              "laneWidth_m": 4,
+              "distance_m": [12, 18],
+              "targetCadence_spm": 60,
+              "tolerance_spm": 6,
+              "windHint_kph": [8, 16]
+            },
+            "metrics": ["cadence_consistency", "lane_hits", "contact_cover"],
+            "scoring": { "weights": { "cadence_consistency": 0.5, "lane_hits": 0.3, "contact_cover": 0.2 } },
+            "recommendedConditions": [
+              { "label": "Overcast + falling pressure", "cloudPct": ">=60", "pressureTrendHpaPer3h": "<=-0.8" },
+              { "label": "Wind lanes", "windKph": ">=8 && <=18" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Low light and a breeze push shad and bass onto edge lanes, so a steady spinner cadence excels.",
+                "Falling pressure increases aggression, making reaction strikes more likely.",
+                "Staying inside the lane maximizes time in the strike zone along weeds or banks."
+              ],
+              "possibleStrategies": [
+                "Aim 1 m upwind so the lure sweeps parallel to the edge.",
+                "Hold rod tip low to keep the blade under the chop without surfacing.",
+                "Tick cover briefly, then resume cadence to clear the bait and trigger bites."
+              ],
+              "insights": [
+                "Your lane-hit streaks rise when cadence stays within ±6 spm.",
+                "Most blow-outs occurred above 80 spm; trim speed to hold depth.",
+                "Contact-cover events that were brief correlated with higher points."
+              ]
+            }
+          },
+          {
+            "drillKey": "bass_windward_edge_sweep_v1",
+            "name": "Windward Edge Sweep",
+            "difficulty": 3,
+            "unlockAtLevel": 3,
+            "requires": { "family": "spinner", "baits": ["spinner_willow_1_2oz"] },
+            "techniques": ["cast_sidearm", "lane_discipline"],
+            "params": { "rounds": 2, "castsPerRound": 12, "edgeLength_m": 20, "allowedOffsetUpwind_m": 1.0 },
+            "metrics": ["entry_offset_upwind", "edge_time_on_path", "tick_events"],
+            "scoring": { "weights": { "edge_time_on_path": 0.45, "entry_offset_upwind": 0.30, "tick_events": 0.25 } },
+            "recommendedConditions": [
+              { "label": "Wind 10–20 kph onshore", "windKph": ">=10 && <=20" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Wind pushes bait to windward edges where bass set up to ambush.",
+                "Correct upwind aim allows a natural S-curve sweep along the edge.",
+                "Short, controlled cover ticks trigger reaction without fouling."
+              ],
+              "possibleStrategies": [
+                "Cast slightly upwind and retrieve so the lure rides the edge line.",
+                "Relax grip at impact to let the bait glance off cover and keep running.",
+                "If surfacing, lower rod angle rather than slowing too much."
+              ],
+              "insights": [
+                "Best edge-time occurred when upwind offset was 0.6–1.0 m.",
+                "Too many tick events back-to-back reduce score—space them out.",
+                "Edge adherence improved when casts were parallel rather than at 30°."
+              ]
+            }
+          },
+          {
+            "drillKey": "bass_flash_thump_modulation_v1",
+            "name": "Flash & Thump Modulation",
+            "difficulty": 3,
+            "unlockAtLevel": 5,
+            "requires": { "family": "spinner", "baits": ["spinner_willow_1_2oz"] },
+            "techniques": ["retrieve_control"],
+            "params": { "runs": 3, "runDuration_s": 60, "cadenceProfiles_spm": [48, 60, 80], "depthBand_m": [0.6, 1.2] },
+            "metrics": ["depth_control", "cadence_consistency"],
+            "scoring": { "weights": { "depth_control": 0.55, "cadence_consistency": 0.45 } },
+            "recommendedConditions": [
+              { "label": "Mixed sun/cloud", "cloudPct": "30–70" },
+              { "label": "Wind chop", "windKph": "8–16" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Changing light and chop demand precise speed to hold the thump in zone.",
+                "Rod height adjusts depth without changing cadence, preserving flash pattern.",
+                "Maintaining banded depth keeps you above grass tops where bass track."
+              ],
+              "possibleStrategies": [
+                "Try 48 spm for slow-roll near grass tips, 80 spm for wind lanes.",
+                "Lower rod to dig slightly when the lure rides too high.",
+                "If thump fades, bump cadence then settle back to target."
+              ],
+              "insights": [
+                "Depth stability improved when cadence variance stayed under ±5 spm.",
+                "Most out-of-band time occurred during directional changes; smooth the turn.",
+                "Rod-tip adjustments corrected depth faster than speed changes."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "familyKey": "crank_swim",
+        "label": "Crank & Swimbaits",
+        "recommendedBaits": [
+          { "baitKey": "crank_squarebill_1_5", "name": "Squarebill 1.5" },
+          { "baitKey": "swimbait_paddle_4in", "name": "Paddle-Tail Swimbait 4\"" }
+        ],
+        "techniques": [
+          { "techniqueKey": "cast_overhead", "label": "Overhead Distance + Accuracy" },
+          { "techniqueKey": "depth_track", "label": "Depth Track Control" },
+          { "techniqueKey": "cover_deflect", "label": "Cover Deflection" },
+          { "techniqueKey": "stop_go", "label": "Stop–Go Rhythm" }
+        ],
+        "drills": [
+          {
+            "drillKey": "bass_squarebill_contact_course_v1",
+            "name": "Squarebill Contact Course",
+            "difficulty": 3,
+            "unlockAtLevel": 2,
+            "requires": { "family": "crank_swim", "baits": ["crank_squarebill_1_5"] },
+            "techniques": ["cast_overhead", "cover_deflect"],
+            "params": { "rounds": 3, "castsPerRound": 8, "obstacles": 6, "distance_m": [12, 15] },
+            "metrics": ["cover_deflection", "depth_track_error", "accuracy"],
+            "scoring": { "weights": { "cover_deflection": 0.45, "depth_track_error": 0.35, "accuracy": 0.20 } },
+            "recommendedConditions": [
+              { "label": "Pre-front wind & cloud", "pressureTrendHpaPer3h": "<=-0.8", "cloudPct": ">=50" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Pre-front fish push shallow and react to deflections off cover.",
+                "Clean rebounds keep the lure in play and trigger follows.",
+                "Depth recovery after impact prevents fouling and lost pace."
+              ],
+              "possibleStrategies": [
+                "Loosen grip at impact to allow the bait to glance off.",
+                "After a tick, speed up half a turn to re-center the track.",
+                "Aim parallel to maximize cover contact along the run."
+              ],
+              "insights": [
+                "Your best scores came when rebounds occurred every 2–3 m.",
+                "Depth track errors spiked when rod angle stayed too high.",
+                "Accuracy improved with a slightly lower trajectory cast."
+              ]
+            }
+          },
+          {
+            "drillKey": "bass_depth_ladder_hold_v1",
+            "name": "Depth Ladder Hold",
+            "difficulty": 2,
+            "unlockAtLevel": 3,
+            "requires": { "family": "crank_swim", "baits": ["swimbait_paddle_4in"] },
+            "techniques": ["depth_track"],
+            "params": { "ladders": 3, "stepDurations_s": [30, 30, 30], "bands_m": [[1.2, 1.3], [1.5, 1.6], [1.8, 1.9]] },
+            "metrics": ["depth_control", "depth_track_error"],
+            "scoring": { "weights": { "depth_control": 0.6, "depth_track_error": 0.4 } },
+            "recommendedConditions": [
+              { "label": "Midday heat/thermocline", "season": "hot", "daypart": "midday" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Midday heat pushes bass to stable depth bands near the thermocline.",
+                "Consistent depth keeps the swimbait in the layer bass patrol.",
+                "Small speed tweaks correct depth faster than big changes."
+              ],
+              "possibleStrategies": [
+                "Point rod down to gain 0.2–0.3 m without altering cadence.",
+                "Count the bait down before starting retrieve for deeper bands.",
+                "If you bump bottom, lift the tip and hold cadence steady."
+              ],
+              "insights": [
+                "Time-in-band exceeded 80% when cadence variance stayed minimal.",
+                "Early ladder steps had more errors—pre-count helps consistency.",
+                "Depth corrections under 2 s led to the highest ladder scores."
+              ]
+            }
+          },
+          {
+            "drillKey": "bass_stop_go_trigger_sets_v1",
+            "name": "Stop–Go Trigger Sets",
+            "difficulty": 3,
+            "unlockAtLevel": 4,
+            "requires": { "family": "crank_swim", "baits": ["crank_squarebill_1_5", "swimbait_paddle_4in"] },
+            "techniques": ["stop_go", "depth_track"],
+            "params": { "rounds": 3, "runsPerRound": 5, "pattern_s": { "run": 4, "stop": 1 } },
+            "metrics": ["rhythm_variance", "depth_control"],
+            "scoring": { "weights": { "rhythm_variance": 0.55, "depth_control": 0.45 } },
+            "recommendedConditions": [
+              { "label": "Follower-heavy days", "cloudPct": "40–80", "windKph": "6–14" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Programmed pauses convert followers that track the bait.",
+                "Holding depth through the pause keeps the lure in view.",
+                "Clean restarts prevent the bait from blowing out."
+              ],
+              "possibleStrategies": [
+                "Count the stop—one beat—then accelerate two beats to restart.",
+                "Lower the rod during the stop to maintain depth.",
+                "If the bait rolls on restart, reduce the first crank half-turn."
+              ],
+              "insights": [
+                "Your best conversion rate followed pauses of 0.9–1.1 s.",
+                "Depth climb during the stop reduced scores; lower the tip.",
+                "Rhythm variance tightened after using a metronome cue."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "familyKey": "soft",
+        "label": "Soft Plastics (Stickbait, Ned, Fluke, Jig)",
+        "recommendedBaits": [
+          { "baitKey": "soft_stickbait_5in", "name": "Stickbait 5\"" },
+          { "baitKey": "soft_ned_2_75in", "name": "Ned Worm 2.75\"" }
+        ],
+        "techniques": [
+          { "techniqueKey": "skip_sidearm", "label": "Skipping (Sidearm)" },
+          { "techniqueKey": "pitch_flip", "label": "Pitch/Flip Precision" },
+          { "techniqueKey": "slack_management", "label": "Line/Slack Management" }
+        ],
+        "drills": [
+          {
+            "drillKey": "bass_soft_skip_precision_v1",
+            "name": "Soft Bait Skip Precision",
+            "difficulty": 3,
+            "unlockAtLevel": 2,
+            "requires": { "family": "soft", "baits": ["soft_stickbait_5in"] },
+            "techniques": ["skip_sidearm"],
+            "params": { "rounds": 4, "castsPerRound": 6, "targets": [{ "distance_m": 8, "radius_cm": 45 }, { "distance_m": 10, "radius_cm": 45 }], "minSkips": 2 },
+            "metrics": ["skip_distance", "quiet_entry", "ring_hits"],
+            "scoring": { "weights": { "skip_distance": 0.4, "quiet_entry": 0.3, "ring_hits": 0.3 } },
+            "recommendedConditions": [
+              { "label": "Bluebird post-front shade", "cloudPct": "<=30", "pressureTrendHpaPer3h": ">=0.8" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "High pressure pushes bass tight to shade where skips get the bait deep.",
+                "Quiet entries preserve skittish fish under docks and reeds.",
+                "Multiple skips reduce splash and extend travel under cover."
+              ],
+              "possibleStrategies": [
+                "Flatten release angle to <20° and aim short to let momentum carry.",
+                "Thumb the spool at first skip to deaden sound.",
+                "Hold slack 1–2 s after landing to let the bait settle naturally."
+              ],
+              "insights": [
+                "Inner-ring hits increased with lower trajectory and neutral wrist.",
+                "Most blow-ups came from overpowered swings—smooth rather than hard.",
+                "Quiet-entry rate strongly predicted total scoring hits."
+              ]
+            }
+          },
+          {
+            "drillKey": "bass_quiet_entry_pitch_v1",
+            "name": "Quiet Entry Pitch",
+            "difficulty": 2,
+            "unlockAtLevel": 3,
+            "requires": { "family": "soft", "baits": ["soft_stickbait_5in", "soft_ned_2_75in"] },
+            "techniques": ["pitch_flip"],
+            "params": { "rounds": 3, "castsPerRound": 10, "targets": [{ "distance_m": 3, "radius_cm": 25 }, { "distance_m": 5, "radius_cm": 30 }] },
+            "metrics": ["quiet_entry", "precision", "first_move_latency"],
+            "scoring": { "weights": { "quiet_entry": 0.45, "precision": 0.35, "first_move_latency": 0.20 } },
+            "recommendedConditions": [
+              { "label": "Calm afternoons into shade", "windKph": "<=10", "daypart": "afternoon" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Afternoon heat stacks fish in vertical cover that requires silent drops.",
+                "Immediate rod movement after splash spooks bass—let it soak.",
+                "Precise targets increase presentations to active fish."
+              ],
+              "possibleStrategies": [
+                "Feather line just before splash to level the bait and reduce noise.",
+                "Count to two before first move unless line jumps.",
+                "Pick the darkest pocket and repeat from two angles before moving."
+              ],
+              "insights": [
+                "Shorter first-move latency improved hit rate on warm days.",
+                "Precision rose when you aimed to the inside shade line, not the edge.",
+                "Over-tight line created drag and reduced quiet-entry scores."
+              ]
+            }
+          },
+          {
+            "drillKey": "bass_bottom_clock_slack_read_v1",
+            "name": "Bottom Clock & Slack Read",
+            "difficulty": 3,
+            "unlockAtLevel": 4,
+            "requires": { "family": "soft", "baits": ["soft_ned_2_75in"] },
+            "techniques": ["slack_management"],
+            "params": { "rounds": 3, "runsPerRound": 3, "depths_m": [1.5, 2.0, 3.0], "weights_g": [5, 7, 10] },
+            "metrics": ["countdown_error", "line_control", "bite_detection"],
+            "scoring": { "weights": { "countdown_error": 0.45, "line_control": 0.30, "bite_detection": 0.25 } },
+            "recommendedConditions": [
+              { "label": "Cool mornings / edges", "season": "cool", "daypart": "morning" },
+              { "label": "Light drift over flats", "windKph": "<=12", "cloudPct": ">=40" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "Bass often nip on the fall; accurate countdowns catch those windows.",
+                "Slack control lets you feel taps without moving the bait.",
+                "Cooler water favors slower, bottom-oriented bites."
+              ],
+              "possibleStrategies": [
+                "Log contact times for each weight and depth to build your clock.",
+                "Pinch the line to sense ticks and let the bait soak before lifting.",
+                "If line jumps early, hold and then reel into pressure to confirm."
+              ],
+              "insights": [
+                "Detection rate peaked when countdown variance was <0.5 s.",
+                "Excess rod-tip motion produced false taps; stabilize the tip.",
+                "Heavier heads needed shorter pauses to maintain bottom contact."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "familyKey": "live",
+        "label": "Live (Optional for Bass)",
+        "recommendedBaits": [
+          { "baitKey": "live_worm_float", "name": "Live Worm under Float" }
+        ],
+        "techniques": [
+          { "techniqueKey": "float_entry", "label": "Quiet Entry under Float" },
+          { "techniqueKey": "hookset_timing", "label": "Hookset Timing" }
+        ],
+        "drills": [
+          {
+            "drillKey": "bass_live_pitch_quiet_entry_v1",
+            "name": "Live Pitch — Quiet Entry",
+            "difficulty": 2,
+            "unlockAtLevel": 1,
+            "requires": { "family": "live", "baits": ["live_worm_float"] },
+            "techniques": ["float_entry"],
+            "params": { "rounds": 3, "castsPerRound": 10, "targets": [{ "distance_m": 3, "radius_cm": 25 }, { "distance_m": 5, "radius_cm": 30 }] },
+            "metrics": ["quiet_entry", "precision", "setup_time"],
+            "scoring": { "weights": { "quiet_entry": 0.45, "precision": 0.35, "setup_time": 0.20 } },
+            "recommendedConditions": [
+              { "label": "Post-front calm", "pressureTrendHpaPer3h": ">=0.8", "windKph": "<=8" }
+            ],
+            "coachingTemplates": {
+              "biteConsiderations": [
+                "After a front, bass sulk in precise shade pockets where quiet live bait excels.",
+                "Shorter setup keeps more presentations in high-value targets.",
+                "Silent landings extend soak time and confidence bites."
+              ],
+              "possibleStrategies": [
+                "Stop the float mid-air to flatten before splash.",
+                "Target the darkest pocket and hold the float still for 10–15 s.",
+                "Recast if drift begins; avoid dragging the bait across the pocket."
+              ],
+              "insights": [
+                "Your quiet-entry percentage predicted session points closely.",
+                "Setup times over 20 s reduced total quality presentations.",
+                "Center hits increased when entry angle was flatter than 25°."
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "uiRecommendations": {
+      "emptyStateCopy": "Select a species and lure to see relevant drills.",
+      "filterBehavior": "Show drills where `requires.family` equals the selected family; `All` shows every drill for bass.",
+      "badges": {
+        "duration": "casts × rounds or duration",
+        "difficultyDots": 3
+      }
+    }
+  }
+}

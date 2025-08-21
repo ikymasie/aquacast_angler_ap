@@ -1,36 +1,54 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SectionHeader } from './section-header';
-import catalog from '@/lib/practice-catalog.json';
 import { DrillCard } from './drill-card';
 import { SpeciesSelector } from './species-selector';
 import type { Species, LureFamily } from '@/lib/types';
 import { LureSelector } from './lure-selector';
 import { SessionHeader } from './practice/session-header';
 import { cn } from '@/lib/utils';
+import { Skeleton } from './ui/skeleton';
 
 export function PracticeTab() {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bass');
   const [selectedLureFamily, setSelectedLureFamily] = useState<LureFamily | 'All'>('All');
+  const [catalog, setCatalog] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { drillCatalog } = catalog;
+  useEffect(() => {
+    const loadCatalog = async () => {
+      setIsLoading(true);
+      try {
+        const speciesKey = selectedSpecies.toLowerCase();
+        const catalogModule = await import(`@/lib/practice-catalog-${speciesKey}.json`);
+        setCatalog(catalogModule.default);
+      } catch (error) {
+        console.error(`Failed to load catalog for ${selectedSpecies}:`, error);
+        // Fallback to bream or a default state if loading fails
+        const fallbackModule = await import(`@/lib/practice-catalog-bream.json`);
+        setCatalog(fallbackModule.default);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCatalog();
+  }, [selectedSpecies]);
+
 
   const handleLureSelect = (lure: LureFamily | 'All') => {
     setSelectedLureFamily(lure);
   };
+  
+  const allDrills = catalog?.speciesCatalog?.families?.flatMap((family: any) => family.drills) || [];
 
-  const filteredDrills = Array.isArray(drillCatalog) ? drillCatalog.filter(drill => {
-      if (!drill.speciesKeys || !Array.isArray(drill.speciesKeys)) return false;
-      
-      const speciesMatch = drill.speciesKeys.includes(selectedSpecies.toLowerCase());
-      
-      const lureFamilyMatch = selectedLureFamily === 'All' || 
-          (drill.requiredFamilies && drill.requiredFamilies.includes(selectedLureFamily.toLowerCase().replace(/[\s/]/g, '_')));
-          
-      return speciesMatch && lureFamilyMatch;
-  }) : [];
+  const filteredDrills = selectedLureFamily === 'All'
+    ? allDrills
+    : catalog?.speciesCatalog?.families
+        ?.find((family: any) => family.label.toLowerCase().includes(selectedLureFamily.toLowerCase().split('/')[0]))
+        ?.drills || [];
 
 
   return (
@@ -51,16 +69,22 @@ export function PracticeTab() {
               Select a species and lure to see relevant drills.
           </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          {filteredDrills.map(drill => (
-            <DrillCard key={drill.drillKey} drill={drill as any} />
-          ))}
+            {isLoading ? (
+                <>
+                    <Skeleton className="h-[150px] w-full rounded-xl" />
+                    <Skeleton className="h-[150px] w-full rounded-xl" />
+                </>
+            ) : filteredDrills.length > 0 ? (
+                filteredDrills.map((drill: any) => (
+                    <DrillCard key={drill.drillKey} drill={drill} />
+                ))
+            ) : (
+                 <div className="col-span-1 md:col-span-2 text-center py-10 px-4 border-2 border-dashed rounded-lg mt-4">
+                    <h3 className="text-lg font-semibold text-foreground">No Drills Found</h3>
+                    <p className="text-muted-foreground mt-2 text-sm">Try a different combination of species and lure family.</p>
+                </div>
+            )}
         </div>
-        {filteredDrills.length === 0 && (
-            <div className="text-center py-10 px-4 border-2 border-dashed rounded-lg mt-4">
-                <h3 className="text-lg font-semibold text-foreground">No Drills Found</h3>
-                <p className="text-muted-foreground mt-2 text-sm">Try a different combination of species and lure family.</p>
-            </div>
-        )}
       </div>
 
     </div>
