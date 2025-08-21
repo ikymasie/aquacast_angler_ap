@@ -7,20 +7,20 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '../ui/badge';
 import Image from 'next/image';
 
-const MOCK_SPECIES = [
-  { key: "bream", name: "Bream", pct: 61, lastSessionISO: "2025-08-19", topSkill: "Quiet Entry", image: "/images/fish/bream.png" },
-  { key: "bass",  name: "Bass", pct: 54, lastSessionISO: "2025-08-20", topSkill: "Lane/Edge", image: "/images/fish/bass.webp" },
-  { key: "carp",  name: "Carp", pct: 48, lastSessionISO: "2025-08-17", topSkill: "Distance Acc", image: "/images/fish/carp.png" },
-];
+interface MasteryItem {
+    key: string;
+    name: string;
+    pct: number;
+    topSkill?: string;
+    image: string;
+}
 
-const MOCK_FAMILIES = [
-  { key: "soft", name: "Soft", pct: 63, image: "/images/baits/soft.png" },
-  { key: "spinner", name: "Spinner", pct: 51, image: "/images/baits/spinner.webp" },
-  { key: "crank_swim", name: "Crank/Swim", pct: 46, image: "/images/baits/crank.webp" },
-  { key: "live", name: "Live", pct: 58, image: "/images/baits/live.png" },
-];
+interface MasteryOverviewProps {
+    speciesMastery: MasteryItem[];
+    familyMastery: MasteryItem[];
+}
 
-function MasteryBar({ name, pct, topSkill, image }: { name: string, pct: number, topSkill?: string, image: string }) {
+function MasteryBar({ name, pct, topSkill, image }: MasteryItem) {
     return (
         <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center flex-shrink-0">
@@ -42,20 +42,20 @@ function MasteryBar({ name, pct, topSkill, image }: { name: string, pct: number,
     )
 }
 
-export function MasteryOverview() {
+export function MasteryOverview({ speciesMastery, familyMastery }: MasteryOverviewProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="rounded-xl p-4 space-y-4">
             <SectionHeader title="Species Mastery" />
-            {MOCK_SPECIES.map(species => (
-                <MasteryBar key={species.key} name={species.name} pct={species.pct} topSkill={species.topSkill} image={species.image} />
-            ))}
+            {speciesMastery.length > 0 ? speciesMastery.map(species => (
+                <MasteryBar key={species.key} {...species} />
+            )) : <p className="text-sm text-muted-foreground">Practice to see your species mastery.</p>}
         </Card>
         <Card className="rounded-xl p-4 space-y-4">
             <SectionHeader title="Bait Family Mastery" />
-            {MOCK_FAMILIES.map(family => (
-                 <MasteryBar key={family.key} name={family.name} pct={family.pct} image={family.image} />
-            ))}
+            {familyMastery.length > 0 ? familyMastery.map(family => (
+                 <MasteryBar key={family.key} {...family} />
+            )) : <p className="text-sm text-muted-foreground">Practice to see your lure mastery.</p>}
         </Card>
     </div>
   );

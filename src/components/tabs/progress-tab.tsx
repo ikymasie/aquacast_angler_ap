@@ -65,7 +65,6 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
 
     const totalCasts = thisWeeksSessions.reduce((sum, s) => sum + (s.rounds?.reduce((rSum: number, r: any) => rSum + r.attempts.length, 0) || 0), 0);
     
-    // Only calculate minutes for completed sessions with a valid endTime
     const totalMinutes = thisWeeksSessions.reduce((sum, s) => {
         if (!s.startTime || !s.endTime) return sum;
         const startTimeDate = parseISO(s.startTime);
@@ -116,13 +115,13 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
     const getAverageScore = () => {
         if (allAttempts.length === 0) return 0;
         const totalPoints = allAttempts.reduce((sum, attempt) => sum + (attempt.points || 0), 0);
+        // Assuming points are out of 100
         return Math.round(totalPoints / allAttempts.length);
     }
     
-    // Placeholder: for now, we use a general score for all skills.
-    // In a real scenario, we'd calculate each skill based on specific metrics.
     const averageSkillScore = getAverageScore();
 
+    // Distribute score with some variance for visual effect
     return [
       { skill: 'Accuracy', A: averageSkillScore + 5, fullMark: 100 },
       { skill: 'Quiet Entry', A: averageSkillScore - 3, fullMark: 100 },
@@ -174,29 +173,117 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
     }).slice(0, 5); // Take the 5 most recent unique drills
   }, [sessions]);
 
+  const masteryData = useMemo(() => {
+    if (sessions.length === 0 || !catalog) {
+      return { speciesMastery: [], familyMastery: [] };
+    }
+    
+    // Helper to find family for a drill
+    const getFamilyForDrill = (drillKey: string) => {
+        for (const family of catalog.speciesCatalog.families) {
+            if (family.drills.some((d: any) => d.drillKey === drillKey)) {
+                return family.familyKey;
+            }
+        }
+        return 'unknown';
+    };
+
+    const getAverageScore = (sessionList: any[]) => {
+      const allAttempts = sessionList.flatMap(s => s.rounds?.flatMap((r: any) => r.attempts) || []);
+      if (allAttempts.length === 0) return 0;
+      const totalPoints = allAttempts.reduce((sum, attempt) => sum + (attempt.points || 0), 0);
+      return Math.round(totalPoints / allAttempts.length);
+    };
+
+    // Species Mastery
+    const speciesGroups = sessions.reduce((acc, session) => {
+      const key = session.speciesKey || 'unknown';
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(session);
+      return acc;
+    }, {} as Record<string, any[]>);
+
+    const speciesMastery = Object.keys(speciesGroups).map(key => {
+      const speciesSessions = speciesGroups[key];
+      return {
+        key: key,
+        name: key.charAt(0).toUpperCase() + key.slice(1),
+        pct: getAverageScore(speciesSessions),
+        topSkill: "Quiet Entry", // Placeholder
+        image: `/images/fish/${key.toLowerCase()}.png`,
+      };
+    });
+
+    // Family Mastery
+    const familyGroups = sessions.reduce((acc, session) => {
+      const key = getFamilyForDrill(session.drillKey);
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(session);
+      return acc;
+    }, {} as Record<string, any[]>);
+    
+    const familyMastery = Object.keys(familyGroups).map(key => {
+      const familySessions = familyGroups[key];
+      const familyInfo = catalog.speciesCatalog.families.find((f: any) => f.familyKey === key);
+      return {
+        key: key,
+        name: familyInfo?.label || key,
+        pct: getAverageScore(familySessions),
+        image: `/images/baits/${key.toLowerCase().split('/')[0]}.png`
+      }
+    });
+
+    return { speciesMastery, familyMastery };
+
+  }, [sessions, catalog]);
+
   useEffect(() => {
     const loadCatalog = async () => {
       setIsLoadingCatalog(true);
       try {
-        const speciesKey = selectedSpecies.toLowerCase();
-        const catalogModule = await import(`@/lib/practice-catalog-${speciesKey}.json`);
-        setCatalog(catalogModule.default);
+        // For mastery calculation, we need a general catalog.
+        // We will load all of them. This is not ideal but works for now.
+        const [bream, bass, carp] = await Promise.all([
+            import(`@/lib/practice-catalog-bream.json`),
+            import(`@/lib/practice-catalog-bass.json`),
+            import(`@/lib/practice-catalog-carp.json`)
+        ]);
+        
+        // This is a simplified merge, assuming families are what we need to look up drills
+        const mergedFamilies = [
+            ...bream.default.speciesCatalog.families,
+            ...bass.default.speciesCatalog.families,
+            ...carp.default.speciesCatalog.families,
+        ];
+
+        // Create a temporary, merged catalog structure for lookups
+        const mergedCatalog = {
+            speciesCatalog: {
+                families: mergedFamilies.reduce((acc, family) => {
+                    const existing = acc.find((f: any) => f.familyKey === family.familyKey);
+                    if (existing) {
+                        // Merge drills if family already exists
+                        existing.drills = [...existing.drills, ...family.drills];
+                    } else {
+                        acc.push(family);
+                    }
+                    return acc;
+                }, [] as any[])
+            }
+        };
+        
+        setCatalog(mergedCatalog);
+
       } catch (error) {
-        console.error(`Failed to load catalog for ${selectedSpecies}:`, error);
-        try {
-            const fallbackModule = await import(`@/lib/practice-catalog-bream.json`);
-            setCatalog(fallbackModule.default);
-        } catch (fallbackError) {
-            console.error('Failed to load fallback catalog:', fallbackError);
-            setCatalog(null);
-        }
+        console.error(`Failed to load catalogs:`, error);
+        setCatalog(null);
       } finally {
         setIsLoadingCatalog(false);
       }
     };
 
     loadCatalog();
-  }, [selectedSpecies]);
+  }, []);
 
 
   const handleLureSelect = (lure: LureFamily | 'All') => {
@@ -238,13 +325,28 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
     });
   };
 
-  const allDrills = catalog?.speciesCatalog?.families?.flatMap((family: any) => family.drills) || [];
+  // Drills to display in the list are now based on the single, selected species catalog
+  const drillsForSelectedSpecies = useMemo(() => {
+    if (!catalog) return [];
+     // This logic needs to be revisited if we want to show all drills
+     // For now, let's assume the first loaded catalog is what we use for display
+    const getDrillsFromCatalog = (c: any) => c?.speciesCatalog?.families?.flatMap((family: any) => family.drills) || [];
+    
+    // We need to reload the specific catalog for the selected species for display
+    // This is getting complex. A better approach would be one large catalog file.
+    // For now, let's just show from the merged one.
+    const allDrills = catalog?.speciesCatalog?.families?.flatMap((family: any) => family.drills) || [];
 
-  const filteredDrills = selectedLureFamily === 'All'
-    ? allDrills
-    : catalog?.speciesCatalog?.families
+     if (selectedLureFamily === 'All') {
+        return allDrills.filter((drill: any) => drill.drillKey.includes(selectedSpecies.toLowerCase()));
+     }
+
+    return catalog?.speciesCatalog?.families
         ?.find((family: any) => family.label.toLowerCase().includes(selectedLureFamily.toLowerCase().split('/')[0]))
-        ?.drills || [];
+        ?.drills?.filter((drill: any) => drill.drillKey.includes(selectedSpecies.toLowerCase())) || [];
+
+  }, [catalog, selectedLureFamily, selectedSpecies]);
+
 
   const MainContent = () => (
     <div className="space-y-6">
@@ -257,7 +359,10 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
       <WeeklyOverviewCard {...weeklyStats} />
       <SkillWheel data={skillData} />
       <DrillOverviewCarousel drills={recentDrills} />
-      <MasteryOverview />
+      <MasteryOverview
+        speciesMastery={masteryData.speciesMastery}
+        familyMastery={masteryData.familyMastery}
+      />
       <TrendsChart />
       <AiCoachCard />
       <QuestsCard />
@@ -283,8 +388,8 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
                     <Skeleton className="h-[150px] w-full rounded-xl" />
                     <Skeleton className="h-[150px] w-full rounded-xl" />
                 </>
-            ) : filteredDrills.length > 0 ? (
-                filteredDrills.map((drill: any) => (
+            ) : drillsForSelectedSpecies.length > 0 ? (
+                drillsForSelectedSpecies.map((drill: any) => (
                     <DrillCard key={drill.drillKey} drill={drill} onStart={handleStartDrill} />
                 ))
             ) : (
