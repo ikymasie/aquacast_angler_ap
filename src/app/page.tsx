@@ -60,7 +60,7 @@ export default function HomePage() {
             x: { type: 'spring', stiffness: 300, damping: 30 },
             opacity: { duration: 0.2 },
           }}
-          className="absolute top-0 left-0 w-full h-full"
+          className="absolute top-0 left-0 w-full h-full overflow-y-auto"
         >
           <ActiveComponent />
         </motion.div>
