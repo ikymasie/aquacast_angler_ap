@@ -35,7 +35,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     return (
         <footer className="sticky bottom-0 z-50 w-full p-3 bg-transparent">
             <div 
-                className="safe-area-pb pointer-events-auto relative mx-auto max-w-[720px] bg-card shadow-floating rounded-t-[20px] h-[64px] flex items-center justify-around"
+                className="safe-area-pb pointer-events-auto relative mx-auto max-w-[720px] bg-card shadow-floating rounded-full h-[64px] flex items-center justify-around"
             >
                 
                 {activeIndex !== -1 && (
