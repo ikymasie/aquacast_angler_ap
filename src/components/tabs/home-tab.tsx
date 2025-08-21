@@ -14,6 +14,7 @@ import { ConditionsPanel } from '@/components/conditions-panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/navigation';
+import { SponsorCarousel } from '../sponsor-carousel';
 
 function GreetingBlock() {
     const { user, isLoading } = useUser();
@@ -142,6 +143,9 @@ export function HomeTab() {
             <SectionHeader title="Popular Locations" />
           </div>
           <LocationsRail />
+        </div>
+        <div className="space-y-3 pt-4">
+          <SponsorCarousel />
         </div>
       </main>
     </>
