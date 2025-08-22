@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Header } from '@/components/header';
@@ -13,6 +14,7 @@ import { TodaysChancesCard } from '../todays-chances-card';
 import { GreetingBlock } from '../home/greeting-block';
 import { MyLocations } from '../home/my-locations';
 import { isToday } from 'date-fns';
+import { PopularPlaces } from '../home/popular-places';
 
 export function HomeTab() {
   const { user, isInitialized, isLoading } = useUser();
@@ -111,6 +113,7 @@ export function HomeTab() {
         </div>
         
         <MyLocations />
+        <PopularPlaces />
       </main>
     </>
   );
