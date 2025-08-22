@@ -26,6 +26,9 @@ import { AiCoachCard } from '../progress/ai-coach-card';
 import { QuestsCard } from '../progress/quests-card';
 import { HistoryCard } from '../progress/history-card';
 import { differenceInDays, startOfWeek, format, addDays, isSameDay, differenceInMinutes, parseISO, subDays, isAfter } from 'date-fns';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
+import { Card } from '../ui/card';
 
 export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetails?: boolean }) {
   const [selectedSpecies, setSelectedSpecies] = useState<Species>('Bream');
@@ -34,6 +37,7 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(true);
   const [isStartingSession, startSessionTransition] = useTransition();
   const [drillForSetup, setDrillForSetup] = useState<any | null>(null);
+  const [isDrillsOpen, setIsDrillsOpen] = useState(false);
   const router = useRouter();
   const { user, isLoading: isUserLoading } = useUser();
   const { toast } = useToast();
@@ -274,12 +278,11 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
     }, {} as Record<string, any[]>);
     
     const familyMastery = Object.keys(familyGroups).map(key => {
-      const familySessions = familyGroups[key];
       const familyInfo = catalog.speciesCatalog.families.find((f: any) => f.familyKey === key);
       return {
         key: key,
         name: familyInfo?.label || key,
-        pct: getAverageScore(familySessions),
+        pct: getAverageScore(familyGroups[key]),
         image: `/images/baits/${key.toLowerCase().split('/')[0]}.webp`
       }
     });
@@ -412,38 +415,47 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
       />
       <HistoryCard />
       
-      <div className={cn(!isInsideSpotDetails && "sticky top-[56px] z-10 bg-background/95 backdrop-blur-sm py-4 -mx-4 px-4 border-b")}>
-          <div className="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
-               <p className="text-sm font-medium text-muted-foreground">Show drills for</p>
-              <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} />
-               <p className="text-sm font-medium text-muted-foreground mt-2">using</p>
-              <LureSelector selectedLure={selectedLureFamily} onLureSelect={handleLureSelect as any} showAllOption />
-          </div>
-      </div>
-      
-      <div>
-        <SectionHeader title="Recommended Drills"/>
-          <p className="text-muted-foreground text-sm mt-1">
-              Select a species and lure to see relevant drills.
-          </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {isLoadingCatalog ? (
-                <>
-                    <Skeleton className="h-[150px] w-full rounded-xl" />
-                    <Skeleton className="h-[150px] w-full rounded-xl" />
-                </>
-            ) : drillsForSelectedSpecies.length > 0 ? (
-                drillsForSelectedSpecies.map((drill: any) => (
-                    <DrillCard key={drill.drillKey} drill={drill} onStart={handleStartDrill} />
-                ))
-            ) : (
-                 <div className="col-span-1 md:col-span-2 text-center py-10 px-4 border-2 border-dashed rounded-lg mt-4">
-                    <h3 className="text-lg font-semibold text-foreground">No Drills Found</h3>
-                    <p className="text-muted-foreground mt-2 text-sm">Try a different combination of species and lure family.</p>
+      <Collapsible open={isDrillsOpen} onOpenChange={setIsDrillsOpen}>
+        <CollapsibleTrigger asChild>
+           <Card className="rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-secondary transition-colors">
+              <div>
+                 <SectionHeader title="Practice Drills" />
+                 <p className="text-muted-foreground text-sm mt-1">
+                    Select a species and lure to see relevant drills.
+                 </p>
+              </div>
+              <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform", isDrillsOpen && "rotate-180")} />
+           </Card>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+            <div className="py-4 space-y-4">
+                 <div className="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
+                    <p className="text-sm font-medium text-muted-foreground">Show drills for</p>
+                    <SpeciesSelector selectedSpecies={selectedSpecies} onSelectSpecies={setSelectedSpecies} />
+                    <p className="text-sm font-medium text-muted-foreground mt-2">using</p>
+                    <LureSelector selectedLure={selectedLureFamily} onLureSelect={handleLureSelect as any} showAllOption />
                 </div>
-            )}
-        </div>
-      </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {isLoadingCatalog ? (
+                        <>
+                            <Skeleton className="h-[150px] w-full rounded-xl" />
+                            <Skeleton className="h-[150px] w-full rounded-xl" />
+                        </>
+                    ) : drillsForSelectedSpecies.length > 0 ? (
+                        drillsForSelectedSpecies.map((drill: any) => (
+                            <DrillCard key={drill.drillKey} drill={drill} onStart={handleStartDrill} />
+                        ))
+                    ) : (
+                        <div className="col-span-1 md:col-span-2 text-center py-10 px-4 border-2 border-dashed rounded-lg mt-4">
+                            <h3 className="text-lg font-semibold text-foreground">No Drills Found</h3>
+                            <p className="text-muted-foreground mt-2 text-sm">Try a different combination of species and lure family.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </CollapsibleContent>
+      </Collapsible>
+      
        <SessionSetupSheet 
           drill={drillForSetup}
           isOpen={!!drillForSetup}
