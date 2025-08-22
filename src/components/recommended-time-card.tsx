@@ -3,14 +3,17 @@
 
 import { Card } from "@/components/ui/card";
 import { format, parseISO } from 'date-fns';
-import type { RecommendedWindow } from "@/lib/types";
+import type { RecommendedWindow, Window as ChancesWindow } from "@/lib/types";
 
 interface RecommendedTimeCardProps {
-    window: RecommendedWindow;
+    window: RecommendedWindow | ChancesWindow | null;
+    fallbackWindow?: RecommendedWindow | ChancesWindow | null;
 }
 
-export function RecommendedTimeCard({ window }: RecommendedTimeCardProps) {
-    if (!window || !window.start || !window.end) {
+export function RecommendedTimeCard({ window, fallbackWindow }: RecommendedTimeCardProps) {
+    const displayWindow = window || fallbackWindow;
+
+    if (!displayWindow || !displayWindow.start || !displayWindow.end) {
         return (
             <Card className="p-3 rounded-xl text-center bg-accent/80 border-primary/20 border">
                 <p className="text-xs text-primary-dark font-medium">No ideal window found.</p>
@@ -19,6 +22,10 @@ export function RecommendedTimeCard({ window }: RecommendedTimeCardProps) {
         );
     }
     
+    // The window prop can be one of two types, so we need to check for the correct start/end properties
+    const startISO = 'start' in displayWindow ? displayWindow.start : displayWindow.startISO;
+    const endISO = 'end' in displayWindow ? displayWindow.end : displayWindow.endISO;
+
     const formatTime = (isoString: string) => {
         const date = parseISO(isoString);
         return format(date, "h:mm");
@@ -29,10 +36,10 @@ export function RecommendedTimeCard({ window }: RecommendedTimeCardProps) {
         return format(date, "a");
     }
 
-    const startTime = formatTime(window.start);
-    const endTime = formatTime(window.end);
-    const startAmPm = getAmPm(window.start);
-    const endAmPm = getAmPm(window.end);
+    const startTime = formatTime(startISO);
+    const endTime = formatTime(endISO);
+    const startAmPm = getAmPm(startISO);
+    const endAmPm = getAmPm(endISO);
 
     return (
         <Card className="p-3 rounded-xl text-center bg-accent/80 border-primary/20 border">
@@ -43,4 +50,3 @@ export function RecommendedTimeCard({ window }: RecommendedTimeCardProps) {
         </Card>
     );
 }
-

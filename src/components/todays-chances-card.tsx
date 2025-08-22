@@ -14,6 +14,7 @@ import { ChevronDown, Info } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import { DaypartScorePanel } from './daypart-score-panel';
 import { RecommendedTimeCard } from './recommended-time-card';
+import { FactorTiles } from './todays-chances/factor-tiles';
 
 interface TodaysChancesCardProps {
     weatherData: WeatherApiResponse;
@@ -39,6 +40,8 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
         return (!best || current.score > best.score) ? current : best;
     }, null as any);
 
+    const fallbackWindow = chances.windows.find(w => w.label === "Sunrise") || chances.windows[0] || null;
+
     const todaysDaily = weatherData.daily.find(d => d.sunrise.startsWith(chances.date));
 
     return (
@@ -54,13 +57,13 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
                     <div className="flex-1 relative h-[100px]">
                        {todaysDaily && <DayArc windows={chances.windows} dailyData={todaysDaily} />}
                     </div>
-                </div>
-                
-                <div className="mt-4">
-                    {bestWindow && <RecommendedTimeCard window={bestWindow} />}
+                     <div className="flex-1">
+                        {bestWindow && <RecommendedTimeCard window={bestWindow} fallbackWindow={fallbackWindow} />}
+                    </div>
                 </div>
 
                 <CollapsibleContent className="mt-4 space-y-3">
+                     <FactorTiles windows={chances.windows} />
                     <RecommendationCard 
                         recommendations={chances.recommendations}
                         factors={chances.factors}
@@ -75,9 +78,7 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
                         </Button>
                     </CollapsibleTrigger>
                 </div>
-
             </Card>
         </Collapsible>
     );
 }
-
