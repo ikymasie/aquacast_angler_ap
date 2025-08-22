@@ -7,7 +7,7 @@ import { SpotHeaderCard } from '@/components/spot-header-card';
 import type { Species, Location, WeatherApiResponse, ThreeHourIntervalScore, OverallDayScore, RecommendedWindow, ScoredHour, LureFamily, DayContext, UserSpot } from '@/lib/types';
 import allSpotsData from "@/lib/locations.json";
 import { getCachedWeatherData } from '@/services/weather/client';
-import { getFishingForecastAction, getCastingAdviceAction, getLureAdviceAction, getUserSpotsAction } from '../actions';
+import { getFishingForecastAction, getCastingAdviceAction, getLureAdviceAction, getUserSpotsAction, toggleFavoriteSpotAction } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSearchParams } from 'next/navigation';
 import { startOfToday, isFuture, parseISO, format } from 'date-fns';
@@ -20,6 +20,7 @@ import { ForecastTab } from '@/components/spot-details/forecast-tab';
 import { CastingTab } from '@/components/spot-details/casting-tab';
 import { GalleryTab } from '@/components/spot-details/gallery-tab';
 import { ProgressTab } from '@/components/tabs/progress-tab';
+import { useToast } from '@/hooks/use-toast';
 
 
 // Find a spot by name from a combined list of static and user spots.
@@ -34,6 +35,7 @@ function SpotDetailsContent() {
     const searchParams = useSearchParams();
     const spotName = searchParams.get('name');
     const { user } = useUser();
+    const { toast } = useToast();
     
     const [allAvailableSpots, setAllAvailableSpots] = useState<any[]>([...allSpotsData]);
     const [spot, setSpot] = useState(() => getSpotByName(spotName, allAvailableSpots));
@@ -255,9 +257,53 @@ function SpotDetailsContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isForecastLoading, selectedLure, dayContext, threeHourScores]);
 
+    const handleToggleFavorite = async () => {
+        if (!user || !spot.isUserSpot || !spot.id) {
+            toast({
+                variant: 'destructive',
+                title: 'Cannot favorite this spot',
+                description: 'Only custom-added spots can be marked as favorites.',
+            });
+            return;
+        }
+        
+        const originalIsFavorite = spot.isFavorite;
+
+        // Optimistic update
+        setSpot((prev: any) => ({ ...prev, isFavorite: !prev.isFavorite }));
+        setAllAvailableSpots(prevSpots => prevSpots.map(s => 
+            s.id === spot.id ? { ...s, isFavorite: !s.isFavorite } : s
+        ));
+
+        const { success, error } = await toggleFavoriteSpotAction({
+            userId: user.uid,
+            spotId: spot.id,
+            isFavorite: originalIsFavorite,
+        });
+
+        if (error) {
+            // Revert on error
+            setSpot((prev: any) => ({ ...prev, isFavorite: originalIsFavorite }));
+            setAllAvailableSpots(prevSpots => prevSpots.map(s => 
+                s.id === spot.id ? { ...s, isFavorite: originalIsFavorite } : s
+            ));
+            toast({
+                variant: 'destructive',
+                title: 'Failed to update favorite',
+                description: error,
+            });
+        } else {
+             toast({
+                variant: 'success',
+                title: originalIsFavorite ? 'Removed from favorites' : 'Added to favorites',
+            });
+        }
+    };
+
+
   return (
     <>
-      <SpotHeaderCard spot={spot} />
+      <SpotHeaderCard spot={spot} onToggleFavorite={handleToggleFavorite} />
                 
       <Tabs defaultValue="forecast" className="w-full">
           <TabsList className="grid w-full grid-cols-4">

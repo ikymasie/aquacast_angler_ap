@@ -573,4 +573,26 @@ export async function getSuggestedDrillAction(payload: GetSuggestedDrillPayload)
         return { data: null, error: errorMessage };
     }
 }
+
+interface ToggleFavoriteSpotPayload {
+  userId: string;
+  spotId: string;
+  isFavorite: boolean;
+}
+
+export async function toggleFavoriteSpotAction(payload: ToggleFavoriteSpotPayload): Promise<{ success: boolean; error: string | null }> {
+  try {
+    const { userId, spotId, isFavorite } = payload;
+    if (!userId) {
+      throw new Error("User not authenticated.");
+    }
+    const spotRef = doc(db, 'users', userId, 'spots', spotId);
+    await updateDoc(spotRef, { isFavorite: !isFavorite });
+    return { success: true, error: null };
+  } catch (err) {
+    console.error("Failed to toggle favorite status:", err);
+    const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+    return { success: false, error: errorMessage };
+  }
+}
     

@@ -58,16 +58,15 @@ export function RankBanner({ isLoading, rankPoints, nextRankPoints, level }: Ran
     return (
         <>
             <Card className="rounded-xl shadow-card border-0 p-4 bg-gradient-to-br from-primary to-primary-dark text-white overflow-hidden">
-                <div className="flex justify-between items-center">
-                    <Badge variant="secondary" className="bg-white/10 border-0 text-white font-semibold">{currentRank}</Badge>
-                    <span className="text-xs text-white/70">Next: {nextRank}</span>
-                </div>
 
                 <RankGauge progress={progressPct} />
 
-                <div className="text-center -mt-8">
+                <div className="relative text-center -mt-8 z-10">
                     <p className="font-headline text-3xl font-bold">{rankPoints}<span className="text-2xl text-white/70"> / {nextRankPoints}</span></p>
-                    <p className="text-sm text-white/80">Rank Points</p>
+                    <div className="flex justify-between items-center max-w-[200px] mx-auto mt-1">
+                        <Badge variant="secondary" className="bg-white/10 border-0 text-white font-semibold text-xs">{currentRank}</Badge>
+                        <span className="text-xs text-white/70">Next: {nextRank}</span>
+                    </div>
                 </div>
                 
                 <div className="mt-4">
