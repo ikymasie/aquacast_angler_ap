@@ -51,7 +51,8 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
         latitude: latitude.toString(),
         longitude: longitude.toString(),
         timezone: "auto",
-        forecast_days: "7"
+        forecast_days: "7",
+        past_days: "2", // Fetch 2 past days to ensure today's data is always available
     });
 
     HOURLY_FORECAST_VARS.forEach(v => params.append('hourly', v));
@@ -101,7 +102,6 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
         sunset: forecastData.daily.sunset[i],
         moonPhase: getMoonPhase(new Date(t)), // Calculate moon phase here
         uvMax: forecastData.daily.uv_index_max[i],
-        precipSum: 0, // No longer fetching this, so default to 0
     }));
     
     // Calculate recent window values from the first 24-48 hours of the forecast
