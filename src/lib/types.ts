@@ -1,5 +1,3 @@
-
-
 export type Species = 'Bream' | 'Bass' | 'Carp';
 export type LureFamily = 'Live' | 'Crank/Swim' | 'Spinner' | 'Soft';
 
@@ -34,11 +32,13 @@ export type HourPoint = {
   t: string; // ISO
   tempC: number;
   rh: number;
+  precipMm: number;
+  precipProb?: number;
+  isDay?: number;
+  cloudPct: number;
+  pressureHpa: number;
   windKph: number;
   windDeg: number;
-  pressureHpa: number;
-  cloudPct: number;
-  precipMm: number;
   uv: number;
   shortwave: number;
   derived: {
@@ -53,6 +53,7 @@ export type DayContext = {
   sunset: string;
   moonPhase: number;
   uvMax: number;
+  precipSum?: number;
 };
 
 export interface RecentWindow {
@@ -146,6 +147,30 @@ export interface RankingOutput {
         label: string;
         primaryLure: LureFamily;
     };
+}
+
+// --- Today's Chances Types ---
+export interface Window {
+    label: "Sunrise" | "Sunset" | "Rain" | "Moon (new)" | "Moon (full)";
+    startISO: string;
+    endISO: string;
+    score: number;
+    reasons: string[];
+}
+
+export interface TodaysChances {
+    date: string;
+    location: string;
+    todayScore: number;
+    band: ScoreStatus;
+    windows: Window[];
+    factors: {
+        windKphNow: number;
+        pressureTrend6h_hPa: number;
+        uvIndexMax: number;
+        tempNowC: number;
+    };
+    recommendations: string[];
 }
 
 

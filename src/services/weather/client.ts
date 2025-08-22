@@ -7,15 +7,14 @@ import { format, subDays, isAfter } from "date-fns";
 const FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast";
 const CACHE_KEY_PREFIX = 'weather-cache-';
 
-// Re-using parts of the server-side fetcher for consistency
 const HOURLY_FORECAST_VARS = [
-    "temperature_2m", "relative_humidity_2m", "precipitation",
-    "cloud_cover", "pressure_msl", "wind_speed_10m", "wind_direction_10m",
-    "dew_point_2m", "uv_index", "shortwave_radiation"
+    "temperature_2m", "relative_humidity_2m", "precipitation_probability", "precipitation",
+    "cloud_cover", "surface_pressure", "wind_speed_10m", "wind_direction_10m",
+    "dew_point_2m", "uv_index", "shortwave_radiation", "is_day"
 ].join(",");
 
 const DAILY_FORECAST_VARS = [
-    "sunrise", "sunset", "uv_index_max"
+    "sunrise", "sunset", "uv_index_max", "moon_phase", "precipitation_sum"
 ].join(",");
 
 
@@ -70,12 +69,14 @@ async function fetchWeatherDataFromServer(location: Location): Promise<WeatherAp
             tempC: forecastData.hourly.temperature_2m[i],
             rh: forecastData.hourly.relative_humidity_2m[i],
             precipMm: forecastData.hourly.precipitation[i],
+            precipProb: forecastData.hourly.precipitation_probability[i],
             cloudPct: forecastData.hourly.cloud_cover[i],
-            pressureHpa: forecastData.hourly.pressure_msl[i],
+            pressureHpa: forecastData.hourly.surface_pressure[i],
             windKph: forecastData.hourly.wind_speed_10m[i],
             windDeg: forecastData.hourly.wind_direction_10m[i],
             uv: forecastData.hourly.uv_index[i],
             shortwave: forecastData.hourly.shortwave_radiation[i],
+            isDay: forecastData.hourly.is_day[i],
              derived: { // These will be calculated more accurately on the server
                 pressureTrend3h: 0,
                 light: 0,
@@ -85,8 +86,9 @@ async function fetchWeatherDataFromServer(location: Location): Promise<WeatherAp
         daily: forecastData.daily.time.map((t:string, i:number): DayContext => ({
             sunrise: forecastData.daily.sunrise[i],
             sunset: forecastData.daily.sunset[i],
-            moonPhase: 0.5, // Placeholder
+            moonPhase: forecastData.daily.moon_phase[i],
             uvMax: forecastData.daily.uv_index_max[i],
+            precipSum: forecastData.daily.precipitation_sum[i],
         })),
         recent: { // Placeholder, server action will provide real values
             waterTempC: 15,

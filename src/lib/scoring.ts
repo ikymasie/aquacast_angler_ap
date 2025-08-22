@@ -1,8 +1,6 @@
 
-'use server';
-
-import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour, ScoreStatus, OverallDayScore, RecommendedWindow, ThreeHourIntervalScore } from './types';
-import { parseISO, isWithinInterval, addMinutes, subMinutes, format, getHours, getMinutes, differenceInMinutes, addHours, differenceInHours, startOfHour, isSameHour } from 'date-fns';
+import type { Species, HourPoint, DayContext, RecentWindow, ScoredHour, ScoreStatus, OverallDayScore, RecommendedWindow, ThreeHourIntervalScore, TodaysChances, WeatherApiResponse, Window } from './types';
+import { parseISO, isWithinInterval, addMinutes, subMinutes, format, getHours, getMinutes, differenceInMinutes, addHours, differenceInHours, startOfHour, isSameHour, isToday, startOfDay, endOfDay } from 'date-fns';
 import speciesRules from './species-rules.json';
 
 type SpeciesKey = keyof typeof speciesRules;
@@ -237,13 +235,13 @@ export async function recommendWindows(allScores: ScoredHour[], futureScores: Sc
 
 // --- Daypart Scoring ---
 
-export async function getScoreStatus(score: number): Promise<ScoreStatus> {
-    if (score >= 95) return "Prime";
+export function getScoreStatus(score: number): ScoreStatus {
+    if (score >= 90) return "Prime";
     if (score >= 80) return "Very Good";
-    if (score >= 67) return "Good";
-    if (score >= 55) return "Fair";
-    if (score >= 45) return "Fair-Slow";
-    if (score >= 30) return "Poor";
+    if (score >= 70) return "Good";
+    if (score >= 60) return "Fair";
+    if (score >= 50) return "Fair-Slow";
+    if (score >= 35) return "Poor";
     return "Very Poor";
 }
 
@@ -268,7 +266,7 @@ export async function calculate3HourIntervalScores(hourlyScores: ScoredHour[]): 
         if (chunk.length === 0) continue;
 
         const avgScore = Math.round(chunk.reduce((sum, h) => sum + h.score, 0) / chunk.length);
-        const status = await getScoreStatus(avgScore);
+        const status = getScoreStatus(avgScore);
 
         // Find the most frequent condition in the chunk
         const conditionCounts = chunk.reduce((acc, h) => {
@@ -312,7 +310,7 @@ export async function getOverallDayScore(hourlyScores: ScoredHour[]): Promise<Ov
     const topScores = sortedScores.slice(0, top70PercentCount);
     
     const dayAvgScore = Math.round(topScores.reduce((sum, h) => sum + h.score, 0) / topScores.length);
-    const dayStatus = await getScoreStatus(dayAvgScore);
+    const dayStatus = getScoreStatus(dayAvgScore);
     
     return { dayAvgScore, dayStatus };
 }
@@ -327,4 +325,133 @@ export async function getMoonPhaseName(phase: number): Promise<string> {
   if (phase < 0.81) return 'Last Quarter';
   if (phase < 0.94) return 'Waning Crescent';
   return 'New Moon';
+}
+
+// --- Today's Chances Logic ---
+
+function scoreWindow(base: number, modifiers: number[]): number {
+    return Math.max(0, Math.min(100, Math.round(base + modifiers.reduce((a, b) => a + b, 0))));
+}
+
+export function computeTodaysChances(weather: WeatherApiResponse, species: Species | 'auto'): TodaysChances {
+    const today = new Date();
+    const todaysHourly = weather.hourly.filter(h => isToday(parseISO(h.t)));
+    const todaysDaily = weather.daily.find(d => isToday(parseISO(d.sunrise)));
+
+    if (!todaysDaily || todaysHourly.length < 24) {
+        // Fallback for incomplete data
+        return {
+            date: format(today, "yyyy-MM-dd"),
+            location: "Unknown",
+            todayScore: 45,
+            band: 'Poor',
+            windows: [],
+            factors: { windKphNow: 0, pressureTrend6h_hPa: 0, uvIndexMax: 0, tempNowC: 0 },
+            recommendations: ["Not enough data for a reliable forecast."]
+        };
+    }
+
+    const now = new Date();
+    const currentHourIndex = todaysHourly.findIndex(h => getHours(parseISO(h.t)) === getHours(now));
+    const currentHour = todaysHourly[currentHourIndex >= 0 ? currentHourIndex : 0];
+
+    const sunrise = parseISO(todaysDaily.sunrise);
+    const sunset = parseISO(todaysDaily.sunset);
+
+    const windows: Window[] = [];
+
+    // Sunrise window
+    const sunriseWindowStart = subMinutes(sunrise, 45);
+    const sunriseWindowEnd = addMinutes(sunrise, 90);
+    const sunriseHourly = todaysHourly.filter(h => isWithinInterval(parseISO(h.t), { start: sunriseWindowStart, end: sunriseWindowEnd }));
+    if (sunriseHourly.length > 0) {
+        const avgCloud = sunriseHourly.reduce((s, h) => s + h.cloudPct, 0) / sunriseHourly.length;
+        const avgWind = sunriseHourly.reduce((s, h) => s + h.windKph, 0) / sunriseHourly.length;
+        const avgTemp = sunriseHourly.reduce((s, h) => s + h.tempC, 0) / sunriseHourly.length;
+        const sunriseMods = [
+            avgCloud >= 30 && avgCloud <= 70 ? 10 : avgCloud > 70 ? 5 : -10,
+            avgWind >= 6 && avgWind <= 20 ? 10 : avgWind > 28 ? -10 : avgWind < 3 ? -5 : 0,
+            avgTemp >= 12 && avgTemp <= 24 ? 5 : 0
+        ];
+        windows.push({ label: 'Sunrise', startISO: sunriseWindowStart.toISOString(), endISO: sunriseWindowEnd.toISOString(), score: scoreWindow(70, sunriseMods), reasons: [] });
+    }
+
+    // Sunset window
+    const sunsetWindowStart = subMinutes(sunset, 90);
+    const sunsetWindowEnd = addMinutes(sunset, 45);
+    const sunsetHourly = todaysHourly.filter(h => isWithinInterval(parseISO(h.t), { start: sunsetWindowStart, end: sunsetWindowEnd }));
+    if (sunsetHourly.length > 0) {
+        const avgCloud = sunsetHourly.reduce((s, h) => s + h.cloudPct, 0) / sunsetHourly.length;
+        const avgWind = sunsetHourly.reduce((s, h) => s + h.windKph, 0) / sunsetHourly.length;
+        const avgTemp = sunsetHourly.reduce((s, h) => s + h.tempC, 0) / sunsetHourly.length;
+        const sunsetMods = [
+            avgCloud >= 30 && avgCloud <= 70 ? 10 : avgCloud > 70 ? 5 : -10,
+            avgWind >= 6 && avgWind <= 20 ? 10 : avgWind > 28 ? -10 : avgWind < 3 ? -5 : 0,
+            avgTemp >= 12 && avgTemp <= 24 ? 5 : 0
+        ];
+        windows.push({ label: 'Sunset', startISO: sunsetWindowStart.toISOString(), endISO: sunsetWindowEnd.toISOString(), score: scoreWindow(70, sunsetMods), reasons: [] });
+    }
+
+    // Rain window(s)
+    const pressure6hAgoIndex = Math.max(0, currentHourIndex - 6);
+    const pressureTrend6h_hPa = currentHour.pressureHpa - todaysHourly[pressure6hAgoIndex].pressureHpa;
+    const rainHours = todaysHourly.filter(h => h.isDay && (h.precipProb ?? 0) >= 25 && (h.precipProb ?? 0) <= 85 && h.precipMm <= 2);
+    if (rainHours.length > 0) {
+        const rainMods = [
+            rainHours[0].precipMm >= 0.2 && rainHours[0].precipMm <= 1.0 ? 10 : rainHours[0].precipMm > 1.0 && rainHours[0].precipMm <= 2.0 ? 5 : -15,
+            rainHours[0].cloudPct >= 40 && rainHours[0].cloudPct <= 90 ? 5 : 0,
+            rainHours[0].windKph >= 6 && rainHours[0].windKph <= 18 ? 5 : rainHours[0].windKph > 30 ? -10 : 0,
+            pressureTrend6h_hPa <= -1.5 ? 10 : pressureTrend6h_hPa >= 1.5 ? -10 : 0
+        ];
+        windows.push({ label: 'Rain', startISO: rainHours[0].t, endISO: rainHours[rainHours.length - 1].t, score: scoreWindow(65, rainMods), reasons: [] });
+    }
+    
+    // Moon boost
+    const phase = todaysDaily.moonPhase;
+    const isNewOrFull = (phase >= 0.9 || phase <= 0.1) || (phase >= 0.45 && phase <= 0.55);
+    if(isNewOrFull) {
+        const moonMods = [
+             (phase > 0.95 || phase < 0.05 || (phase > 0.48 && phase < 0.52)) ? 10 : 0
+        ];
+         windows.push({ label: phase > 0.9 || phase < 0.1 ? 'Moon (new)' : 'Moon (full)', startISO: sunset.toISOString(), endISO: addHours(sunset, 4).toISOString(), score: scoreWindow(60, moonMods), reasons: [] });
+    }
+
+    // Today Score
+    const maxBiteTimeScore = Math.max(...windows.filter(w => w.label === "Sunrise" || w.label === "Sunset").map(w => w.score), 0);
+    const rainScore = windows.find(w => w.label === "Rain")?.score || 0;
+    const moonScore = windows.find(w => w.label.includes("Moon"))?.score || 0;
+    
+    const contextBonus = [
+        pressureTrend6h_hPa < 0 ? 6 : 0,
+        currentHour.windKph >= 6 && currentHour.windKph <= 20 ? 4 : 0,
+        currentHour.tempC >= 34 || currentHour.tempC <= 5 ? -6 : 0,
+        todaysDaily.uvMax > 8 && currentHour.cloudPct < 30 ? -4 : 0
+    ].reduce((a, b) => a + b, 0);
+
+    const todayScore = Math.round(
+        0.35 * maxBiteTimeScore +
+        0.25 * rainScore +
+        0.20 * moonScore +
+        0.20 * contextBonus
+    );
+
+    const recommendations = [
+        "Prioritize sunrise windward points or shade lines; move fast in first 90 minutes.",
+        "If drizzle arrives, fish inflows and color-change edges; slow presentations."
+    ];
+
+    return {
+        date: format(today, "yyyy-MM-dd"),
+        location: 'Current Location',
+        todayScore: Math.max(0, Math.min(100, todayScore)),
+        band: getScoreStatus(todayScore),
+        windows,
+        factors: {
+            windKphNow: currentHour.windKph,
+            pressureTrend6h_hPa,
+            uvIndexMax: todaysDaily.uvMax,
+            tempNowC: currentHour.tempC
+        },
+        recommendations
+    };
 }

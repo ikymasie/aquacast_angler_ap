@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Header } from '@/components/header';
@@ -14,7 +13,7 @@ import { ConditionsPanel } from '@/components/conditions-panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/navigation';
-import { SponsorCarousel } from '../sponsor-carousel';
+import { TodaysChancesCard } from '../todays-chances-card';
 
 function GreetingBlock() {
     const { user, isLoading } = useUser();
@@ -115,11 +114,19 @@ export function HomeTab() {
         <SearchBar />
 
         <div className="pt-2">
-            {isWeatherLoading ? (
+            {isWeatherLoading || !weather || !location ? (
                 <Skeleton className="h-[180px] w-full rounded-xl" />
-            ) : location && weather ? (
+            ) : (
                 <ConditionsPanel location={location} initialData={weather} />
-            ) : null}
+            )}
+        </div>
+        
+        <div className="pt-2">
+            {isWeatherLoading || !weather || !location ? (
+                <Skeleton className="h-[280px] w-full rounded-xl" />
+            ) : (
+                <TodaysChancesCard weatherData={weather} location={location} />
+            )}
         </div>
 
         <div className="space-y-3 pt-4">
@@ -136,16 +143,6 @@ export function HomeTab() {
             <div>
                 <FavoritesRecents tab={activeTab as any} />
             </div>
-        </div>
-
-        <div className="space-y-3">
-          <div>
-            <SectionHeader title="Popular Locations" />
-          </div>
-          <LocationsRail />
-        </div>
-        <div className="space-y-3 pt-4">
-          <SponsorCarousel />
         </div>
       </main>
     </>

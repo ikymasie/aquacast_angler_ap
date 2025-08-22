@@ -1,0 +1,70 @@
+'use client';
+
+import { useState, useMemo, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import { WeatherApiResponse, Location } from '@/lib/types';
+import { computeTodaysChances, type TodaysChances } from '@/lib/scoring';
+import { DayArc } from './todays-chances/day-arc';
+import { ScoreDisplay } from './todays-chances/score-display';
+import { FactorTiles } from './todays-chances/factor-tiles';
+import { RecommendationCard } from './todays-chances/recommendation-card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Button } from './ui/button';
+import { ChevronDown, Info } from 'lucide-react';
+import { Skeleton } from './ui/skeleton';
+
+interface TodaysChancesCardProps {
+    weatherData: WeatherApiResponse;
+    location: Location;
+}
+
+export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardProps) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [chances, setChances] = useState<TodaysChances | null>(null);
+
+    useEffect(() => {
+        if (weatherData && location) {
+            const result = computeTodaysChances(weatherData, 'auto');
+            setChances(result);
+        }
+    }, [weatherData, location]);
+    
+    if (!chances) {
+        return <Skeleton className="h-[280px] w-full rounded-xl" />;
+    }
+
+    return (
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <Card className="w-full rounded-xl shadow-card border-0 p-4 gradient-fishing-panel text-white overflow-hidden">
+                <div className="flex justify-between items-center text-white/80 text-sm">
+                    <p>{location.name}</p>
+                    <p>{chances.date}</p>
+                </div>
+                
+                <ScoreDisplay score={chances.todayScore} band={chances.band} />
+                <DayArc windows={chances.windows} dailyData={weatherData.daily[0]} />
+                
+                <div className="mt-4">
+                    <FactorTiles windows={chances.windows} />
+                </div>
+                
+                <CollapsibleContent className="mt-4 space-y-3">
+                    <RecommendationCard 
+                        recommendations={chances.recommendations}
+                        factors={chances.factors}
+                    />
+                </CollapsibleContent>
+
+                <div className="text-center mt-3">
+                    <CollapsibleTrigger asChild>
+                        <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10 text-xs h-8">
+                            {isOpen ? 'Show less' : 'Show details'}
+                            <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                        </Button>
+                    </CollapsibleTrigger>
+                </div>
+
+            </Card>
+        </Collapsible>
+    );
+}
