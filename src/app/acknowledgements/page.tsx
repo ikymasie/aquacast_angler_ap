@@ -12,7 +12,7 @@ const pageData = {
   donations: {
     raised: 3250,
     goal: 8000,
-    currency: "BWP",
+    currency: "USD",
     donorCount: 42,
     progressPct: 41
   },
@@ -29,21 +29,8 @@ const pageData = {
 };
 
 export default function AcknowledgementsPage() {
-  const [donationAmount, setDonationAmount] = useState(100);
+  const [donationAmount, setDonationAmount] = useState(10);
   const [donationType, setDonationType] = useState<'one_time' | 'monthly'>('one_time');
-
-  const handleDonation = () => {
-    const payload = {
-        type: donationType,
-        amount: donationAmount,
-        currency: pageData.donations.currency,
-        source: 'acknowledgements_page',
-        returnUrl: '/acknowledgements?thanks=1'
-    };
-    // In a real app, this would trigger a checkout flow
-    console.log("Donation Payload:", payload);
-    alert(`Thank you for your ${donationType} donation of ${payload.currency} ${payload.amount}!`);
-  };
   
   return (
     <div className="bg-background min-h-screen">
@@ -57,7 +44,6 @@ export default function AcknowledgementsPage() {
           onDonationTypeChange={setDonationType}
           donationAmount={donationAmount}
           onDonationAmountChange={setDonationAmount}
-          onDonate={handleDonation}
         />
         <TransparencyCard />
         <CommunityCard />
