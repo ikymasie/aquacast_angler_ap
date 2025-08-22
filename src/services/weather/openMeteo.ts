@@ -11,7 +11,7 @@ const HOURLY_FORECAST_VARS = [
 ].join(",");
 
 const DAILY_FORECAST_VARS = [
-    "sunrise", "sunset", "uv_index_max"
+    "sunrise", "sunset", "uv_index_max", "moon_phase", "precipitation_sum"
 ].join(",");
 
 
@@ -86,7 +86,7 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
     const daily: DayContext[] = forecastData.daily.time.map((t:string, i:number): DayContext => ({
         sunrise: forecastData.daily.sunrise[i],
         sunset: forecastData.daily.sunset[i],
-        moonPhase: 0.5, // Placeholder, as moon phase is not in free tier
+        moonPhase: forecastData.daily.moon_phase[i],
         uvMax: forecastData.daily.uv_index_max[i],
     }));
     

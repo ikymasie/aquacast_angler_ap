@@ -174,16 +174,15 @@ export async function scoreHour(species: Species, h: HourPoint, ctx: DayContext,
   return Math.max(0, Math.min(100, Math.round(total)));
 }
 
-export async function recommendWindows(allScores: ScoredHour[], futureScores: ScoredHour[], threshold: number = 60, preferredDuration: number = 4, maxDuration: number = 8): Promise<RecommendedWindow | null> {
-    const scores = futureScores.length > 0 ? futureScores : allScores;
-    if (!scores || scores.length < preferredDuration) return null;
+export async function recommendWindows(allScores: ScoredHour[], threshold: number = 60, preferredDuration: number = 4, maxDuration: number = 8): Promise<RecommendedWindow | null> {
+    if (!allScores || allScores.length < preferredDuration) return null;
 
     let bestWindow: ScoredHour[] | null = null;
     let maxAvgScore = -1;
 
     // 1. Find the best continuous 4-hour window
-    for (let i = 0; i <= scores.length - preferredDuration; i++) {
-        const window = scores.slice(i, i + preferredDuration);
+    for (let i = 0; i <= allScores.length - preferredDuration; i++) {
+        const window = allScores.slice(i, i + preferredDuration);
         const avgScore = window.reduce((sum, h) => sum + h.score, 0) / preferredDuration;
         if (avgScore > maxAvgScore) {
             maxAvgScore = avgScore;
@@ -197,13 +196,13 @@ export async function recommendWindows(allScores: ScoredHour[], futureScores: Sc
     }
 
     // 2. Expand this window outwards up to 8 hours, as long as scores are above threshold
-    let startIndex = scores.indexOf(bestWindow[0]);
-    let endIndex = scores.indexOf(bestWindow[bestWindow.length - 1]);
+    let startIndex = allScores.indexOf(bestWindow[0]);
+    let endIndex = allScores.indexOf(bestWindow[bestWindow.length - 1]);
 
     // Expand backwards
     let currentStartIndex = startIndex;
     while (currentStartIndex > 0) {
-        const nextHour = scores[currentStartIndex - 1];
+        const nextHour = allScores[currentStartIndex - 1];
         if (nextHour.score >= threshold && (endIndex - (currentStartIndex - 1)) < maxDuration) {
             currentStartIndex--;
         } else {
@@ -213,8 +212,8 @@ export async function recommendWindows(allScores: ScoredHour[], futureScores: Sc
 
     // Expand forwards
     let currentEndIndex = endIndex;
-    while (currentEndIndex < scores.length - 1) {
-        const nextHour = scores[currentEndIndex + 1];
+    while (currentEndIndex < allScores.length - 1) {
+        const nextHour = allScores[currentEndIndex + 1];
         if (nextHour.score >= threshold && ((currentEndIndex + 1) - currentStartIndex) < maxDuration) {
             currentEndIndex++;
         } else {
@@ -222,7 +221,7 @@ export async function recommendWindows(allScores: ScoredHour[], futureScores: Sc
         }
     }
     
-    const finalWindow = scores.slice(currentStartIndex, currentEndIndex + 1);
+    const finalWindow = allScores.slice(currentStartIndex, currentEndIndex + 1);
     const finalAvgScore = finalWindow.reduce((sum, h) => sum + h.score, 0) / finalWindow.length;
 
     return {
@@ -315,16 +314,24 @@ export async function getOverallDayScore(hourlyScores: ScoredHour[]): Promise<Ov
     return { dayAvgScore, dayStatus };
 }
 
+function getMoonPhase(date: Date = new Date()): number {
+  const JD = date.getTime() / 86400000 + 2440587.5; // Julian day
+  const JD0 = 2451550.1; // Known new moon (2000-01-06 18:14 UTC)
+  const LUNAR_CYCLE = 29.530588853; // Synodic month
+  let phase = ((JD - JD0) / LUNAR_CYCLE) % 1;
+  if (phase < 0) phase += 1;
+  return phase; // Returns a value from 0 (new) to 1 (new)
+}
+
 export async function getMoonPhaseName(phase: number): Promise<string> {
-  if (phase < 0.06 || phase > 0.94) return 'New Moon';
-  if (phase < 0.18) return 'Waxing Crescent';
-  if (phase < 0.31) return 'First Quarter';
-  if (phase < 0.44) return 'Waxing Gibbous';
-  if (phase < 0.56) return 'Full Moon';
-  if (phase < 0.69) return 'Waning Gibbous';
-  if (phase < 0.81) return 'Last Quarter';
-  if (phase < 0.94) return 'Waning Crescent';
-  return 'New Moon';
+  if (phase < 0.03 || phase > 0.97) return 'New Moon';
+  if (phase < 0.22) return 'Waxing Crescent';
+  if (phase < 0.28) return 'First Quarter';
+  if (phase < 0.47) return 'Waxing Gibbous';
+  if (phase < 0.53) return 'Full Moon';
+  if (phase < 0.72) return 'Waning Gibbous';
+  if (phase < 0.78) return 'Last Quarter';
+  return 'Waning Crescent';
 }
 
 // --- Today's Chances Logic ---
@@ -407,7 +414,7 @@ export function computeTodaysChances(weather: WeatherApiResponse, species: Speci
     }
     
     // Moon boost
-    const phase = todaysDaily.moonPhase;
+    const phase = getMoonPhase(today);
     const isNewOrFull = (phase >= 0.9 || phase <= 0.1) || (phase >= 0.45 && phase <= 0.55);
     if(isNewOrFull) {
         const moonMods = [

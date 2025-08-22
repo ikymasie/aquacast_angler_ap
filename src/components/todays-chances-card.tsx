@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -12,6 +13,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Button } from './ui/button';
 import { ChevronDown, Info } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
+import { DaypartScorePanel } from './daypart-score-panel';
+import { RecommendedTimeCard } from './recommended-time-card';
 
 interface TodaysChancesCardProps {
     weatherData: WeatherApiResponse;
@@ -33,6 +36,10 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
         return <Skeleton className="h-[280px] w-full rounded-xl" />;
     }
 
+    const bestWindow = chances.windows.reduce((best, current) => {
+        return (!best || current.score > best.score) ? current : best;
+    }, null as any);
+
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <Card className="w-full rounded-xl shadow-card border-0 p-4 gradient-fishing-panel text-white overflow-hidden">
@@ -41,12 +48,12 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
                     <p>{chances.date}</p>
                 </div>
                 
-                <ScoreDisplay score={chances.todayScore} band={chances.band} />
-                <DayArc windows={chances.windows} dailyData={weatherData.daily[0]} />
-                
-                <div className="mt-4">
-                    <FactorTiles windows={chances.windows} />
-                </div>
+                 <div className="grid grid-cols-2 gap-4 items-center my-4">
+                     <ScoreDisplay score={chances.todayScore} band={chances.band} />
+                     {bestWindow && <RecommendedTimeCard window={bestWindow} />}
+                 </div>
+
+                 <FactorTiles windows={chances.windows} />
                 
                 <CollapsibleContent className="mt-4 space-y-3">
                     <RecommendationCard 
