@@ -9,6 +9,8 @@ import { QuickMetricsPanel } from '@/components/quick-metrics-panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import type { WeatherApiResponse, DayContext, ThreeHourIntervalScore, OverallDayScore, Species, RecommendedWindow } from '@/lib/types';
+import { isToday } from 'date-fns';
+import { TodaysChancesCard } from '../todays-chances-card';
 
 interface ForecastTabProps {
     isWeatherLoading: boolean;
@@ -54,11 +56,13 @@ export function ForecastTab({
             )}
             
             {isForecastLoading ? (
-               <Skeleton className="h-[180px] w-full rounded-xl" />
+               <Skeleton className="h-[280px] w-full rounded-xl" />
             ) : forecastError ? (
                <Card className="h-[180px] w-full rounded-xl bg-destructive/10 border-destructive/50 flex items-center justify-center p-4">
                    <p className="text-center text-destructive-foreground">{forecastError}</p>
                </Card>
+            ) : isToday(selectedDate) && weatherData ? (
+                <TodaysChancesCard weatherData={weatherData} location={{ name: spotName, latitude: 0, longitude: 0 }} />
             ) : (threeHourScores.length > 0 && overallDayScore) ? (
                <DaypartScorePanel
                    speciesKey={selectedSpecies.toLowerCase() as any}
