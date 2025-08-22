@@ -20,7 +20,7 @@ export default function WelcomePage() {
             <main className="relative z-10 flex flex-col flex-1 h-full px-6">
                 <div className="flex-1 flex flex-col justify-center">
                     <div className="mt-16">
-                        <LogoRow />
+                        <LogoRow width={250} height={250} />
                     </div>
 
                     <div className="text-center mt-12 space-y-3">
