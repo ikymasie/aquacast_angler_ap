@@ -25,7 +25,7 @@ export function DaySelector({ dailyData, selectedDate, onDateSelect }: DaySelect
 
   return (
     <div className="w-full overflow-x-auto no-scrollbar pb-2">
-        <div className="grid grid-cols-7 gap-2 min-w-[420px]">
+        <div className="flex gap-2 min-w-[420px]">
             {days.map((day, index) => {
             const dayData = dailyData.find(d => d.sunrise.startsWith(format(day, 'yyyy-MM-dd')));
             const isSelected = isSameDay(day, selectedDate);
@@ -35,11 +35,12 @@ export function DaySelector({ dailyData, selectedDate, onDateSelect }: DaySelect
                 key={day.toString()}
                 onClick={() => onDateSelect(day)}
                 className={cn(
-                    "flex-shrink-0 p-1 flex flex-col items-center justify-center rounded-lg cursor-pointer transition-all aspect-[10/12]",
+                    "flex-shrink-0 p-1 flex flex-col items-center justify-center rounded-lg cursor-pointer transition-all aspect-[10/12] w-[54px]",
                     "border shadow-sm",
                     isSelected
                     ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card hover:bg-secondary"
+                    : "bg-card hover:bg-secondary",
+                    index === 0 && "mr-2"
                 )}
                 >
                 <p className="font-semibold text-[11px] sm:text-xs">{getDayLabel(day)}</p>
