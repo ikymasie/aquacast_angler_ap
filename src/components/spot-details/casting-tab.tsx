@@ -40,14 +40,14 @@ export function CastingTab({
                 isLoading={isLoading}
                 advice={lureAdvice}
             />
-            <RecommendedSpotCard 
-                isLoading={isLoading}
-                advice={advice}
-            />
-             <SpeciesSelector 
+            <SpeciesSelector 
                selectedSpecies={selectedSpecies}
                onSelectSpecies={onSelectSpecies}
                disabled={isLoading}
+            />
+            <RecommendedSpotCard 
+                isLoading={isLoading}
+                advice={advice}
             />
             <LureSelector 
                 selectedLure={selectedLure}
