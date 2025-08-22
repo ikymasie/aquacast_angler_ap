@@ -6,36 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-const MOCK_TRENDS_7D = {
-    accuracyPct: [
-        { day: 'Mon', value: 71 },
-        { day: 'Tue', value: 73 },
-        { day: 'Wed', value: 69 },
-        { day: 'Thu', value: 76 },
-        { day: 'Fri', value: 74 },
-        { day: 'Sat', value: 75 },
-        { day: 'Sun', value: 72 },
-    ],
-    inBandPct: [
-        { day: 'Mon', value: 60 },
-        { day: 'Tue', value: 65 },
-        { day: 'Wed', value: 62 },
-        { day: 'Thu', value: 68 },
-        { day: 'Fri', value: 64 },
-        { day: 'Sat', value: 66 },
-        { day: 'Sun', value: 68 },
-    ],
-    laneTimePct: [
-        { day: 'Mon', value: 44 },
-        { day: 'Tue', value: 51 },
-        { day: 'Wed', value: 49 },
-        { day: 'Thu', value: 55 },
-        { day: 'Fri', value: 53 },
-        { day: 'Sat', value: 56 },
-        { day: 'Sun', value: 54 },
-    ]
-};
-
 const chartConfig = {
   value: {
     label: "Value",
@@ -43,7 +13,15 @@ const chartConfig = {
   },
 };
 
-export function TrendsChart() {
+interface TrendsChartProps {
+    trends: {
+        accuracyPct: { day: string; value: number }[];
+        inBandPct: { day: string; value: number }[];
+        laneTimePct: { day: string; value: number }[];
+    }
+}
+
+export function TrendsChart({ trends }: TrendsChartProps) {
   
   return (
     <Card className="bg-panel text-primary-foreground rounded-xl">
@@ -60,17 +38,17 @@ export function TrendsChart() {
           </TabsList>
           
           <ChartTabContent 
-            data={MOCK_TRENDS_7D.accuracyPct}
+            data={trends.accuracyPct}
             value="accuracy"
             unit="%"
           />
           <ChartTabContent 
-            data={MOCK_TRENDS_7D.inBandPct}
+            data={trends.inBandPct}
             value="cadence"
             unit="%"
           />
           <ChartTabContent 
-            data={MOCK_TRENDS_7D.laneTimePct}
+            data={trends.laneTimePct}
             value="lane_time"
             unit="%"
           />

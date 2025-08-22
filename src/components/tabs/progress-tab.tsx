@@ -138,6 +138,46 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
 
   }, [sessions]);
 
+  const sevenDayTrends = useMemo(() => {
+    const now = new Date();
+    const today = startOfWeek(now, { weekStartsOn: 1 });
+    const last7Days = Array(7).fill(0).map((_, i) => addDays(today, i));
+
+    const trendData = {
+        accuracyPct: [] as { day: string; value: number }[],
+        inBandPct: [] as { day: string; value: number }[],
+        laneTimePct: [] as { day: string; value: number }[],
+    };
+
+    last7Days.forEach(day => {
+        const dayStr = format(day, 'E');
+        const sessionsForDay = sessions.filter(s => s.startTime && isSameDay(parseISO(s.startTime), day));
+        const attemptsForDay = sessionsForDay.flatMap(s => s.rounds?.flatMap((r: any) => r.attempts) || []);
+
+        if (attemptsForDay.length === 0) {
+            trendData.accuracyPct.push({ day: dayStr, value: 0 });
+            trendData.inBandPct.push({ day: dayStr, value: 0 });
+            trendData.laneTimePct.push({ day: dayStr, value: 0 });
+            return;
+        }
+
+        const accuracy = Math.round(
+            (attemptsForDay.filter(a => a.outcome === 'hit').length / attemptsForDay.length) * 100
+        );
+
+        // Placeholder for more detailed metrics
+        const avgScore = attemptsForDay.reduce((sum, a) => sum + (a.points || 0), 0) / attemptsForDay.length;
+        const inBand = Math.round(avgScore * 0.8); // Example calculation
+        const laneTime = Math.round(avgScore * 0.7); // Example calculation
+
+        trendData.accuracyPct.push({ day: dayStr, value: accuracy });
+        trendData.inBandPct.push({ day: dayStr, value: inBand });
+        trendData.laneTimePct.push({ day: dayStr, value: laneTime });
+    });
+
+    return trendData;
+}, [sessions]);
+
   const recentDrills = useMemo(() => {
     if (!sessions || sessions.length === 0) return [];
     
@@ -377,7 +417,7 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
         speciesMastery={masteryData.speciesMastery}
         familyMastery={masteryData.familyMastery}
       />
-      <TrendsChart />
+      <TrendsChart trends={sevenDayTrends} />
       <AiCoachCard />
       <QuestsCard />
       <HistoryCard />
@@ -438,5 +478,3 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
     </>
   );
 }
-
-    
