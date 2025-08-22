@@ -1,8 +1,7 @@
-
 'use client';
 
 import { Header } from '@/components/header';
-import { SearchBar } from '@/components/search-bar';
+import { PlacesSearch } from '@/components/places-search';
 import { useState, useEffect } from 'react';
 import type { Location, WeatherApiResponse } from '@/lib/types';
 import { getCachedWeatherData } from '@/services/weather/client';
@@ -91,7 +90,7 @@ export function HomeTab() {
       <Header />
       <main className="flex-1 space-y-4 p-4 pb-24 overflow-y-auto">
         <GreetingBlock />
-        <SearchBar />
+        <PlacesSearch />
 
         <div className="pt-2">
             {isWeatherLoading || !weather || !location ? (
