@@ -12,9 +12,9 @@ interface RecommendedTimeCardProps {
 export function RecommendedTimeCard({ window }: RecommendedTimeCardProps) {
     if (!window || !window.start || !window.end) {
         return (
-            <Card className="p-4 rounded-xl text-center bg-accent border-primary/20 border">
-                <p className="text-sm text-primary-dark font-medium">No ideal window found.</p>
-                <p className="text-lg font-bold text-primary-dark mt-1">Try dawn or dusk</p>
+            <Card className="p-3 rounded-xl text-center bg-accent/80 border-primary/20 border">
+                <p className="text-xs text-primary-dark font-medium">No ideal window found.</p>
+                <p className="text-base font-bold text-primary-dark mt-1">Try dawn or dusk</p>
             </Card>
         );
     }
@@ -35,11 +35,12 @@ export function RecommendedTimeCard({ window }: RecommendedTimeCardProps) {
     const endAmPm = getAmPm(window.end);
 
     return (
-        <Card className="p-4 rounded-xl text-center bg-accent border-primary/20 border">
-            <p className="text-sm text-primary-dark/80 font-medium">Recommended time interval.</p>
-            <p className="font-headline text-3xl font-bold text-primary-dark mt-1">
-                {startTime} <span className="text-2xl">{startAmPm}</span> - {endTime} <span className="text-2xl">{endAmPm}</span>
+        <Card className="p-3 rounded-xl text-center bg-accent/80 border-primary/20 border">
+            <p className="text-xs text-primary-dark/80 font-medium">Recommended Time</p>
+            <p className="font-headline text-xl font-bold text-primary-dark -mt-1">
+                {startTime} <span className="text-lg">{startAmPm}</span> - {endTime} <span className="text-lg">{endAmPm}</span>
             </p>
         </Card>
     );
 }
+

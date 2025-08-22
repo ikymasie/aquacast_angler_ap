@@ -80,3 +80,4 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
         </Collapsible>
     );
 }
+
