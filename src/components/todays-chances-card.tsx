@@ -12,7 +12,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Button } from './ui/button';
 import { ChevronDown, Info } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
-import { DaypartScorePanel } from './daypart-score-panel';
 import { RecommendedTimeCard } from './recommended-time-card';
 import { FactorTiles } from './todays-chances/factor-tiles';
 
@@ -52,13 +51,15 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
                     <p>{chances.date}</p>
                 </div>
                 
-                <div className="flex items-center justify-between gap-4 my-2">
-                    <ScoreDisplay score={chances.todayScore} band={chances.band} />
-                    <div className="flex-1 relative h-[100px]">
+                <div className="flex items-center justify-between gap-2 my-2">
+                    <div className="w-1/4">
+                       <ScoreDisplay score={chances.todayScore} band={chances.band} />
+                    </div>
+                    <div className="flex-1">
                        {todaysDaily && <DayArc windows={chances.windows} dailyData={todaysDaily} />}
                     </div>
-                     <div className="flex-1">
-                        {bestWindow && <RecommendedTimeCard window={bestWindow} fallbackWindow={fallbackWindow} />}
+                    <div className="w-1/3">
+                        <RecommendedTimeCard window={bestWindow} fallbackWindow={fallbackWindow} />
                     </div>
                 </div>
 
@@ -70,7 +71,7 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
                     />
                 </CollapsibleContent>
 
-                <div className="text-center mt-3">
+                <div className="text-center mt-3 -mb-2">
                     <CollapsibleTrigger asChild>
                         <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10 text-xs h-8">
                             {isOpen ? 'Show less' : 'Show details'}
