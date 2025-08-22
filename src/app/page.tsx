@@ -7,13 +7,13 @@ import { BottomNav } from '@/components/bottom-nav';
 import { HomeTab } from '@/components/tabs/home-tab';
 import { FavoritesTab } from '@/components/tabs/favorites-tab';
 import { ProgressTab } from '@/components/tabs/progress-tab';
-import { MapsTab } from '@/components/tabs/maps-tab';
+import AcknowledgementsPage from '@/app/acknowledgements/page';
 
 const tabs: { [key: string]: React.ComponentType } = {
   home: HomeTab,
   favorites: FavoritesTab,
   progress: ProgressTab,
-  maps: MapsTab,
+  about: AcknowledgementsPage,
 };
 
 const variants = {
@@ -60,9 +60,11 @@ export default function HomePage() {
             x: { type: 'spring', stiffness: 300, damping: 30 },
             opacity: { duration: 0.2 },
           }}
-          className="absolute top-0 left-0 w-full h-full overflow-y-auto"
+          className="absolute top-0 left-0 w-full h-full"
         >
-          <ActiveComponent />
+          <div className="h-full overflow-y-auto">
+            <ActiveComponent />
+          </div>
         </motion.div>
       </AnimatePresence>
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
