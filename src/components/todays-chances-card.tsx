@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { WeatherApiResponse, Location } from '@/lib/types';
-import { computeTodaysChances, type TodaysChances } from '@/lib/scoring';
+import { WeatherApiResponse, Location, TodaysChances } from '@/lib/types';
+import { computeTodaysChances } from '@/lib/scoring';
 import { DayArc } from './todays-chances/day-arc';
 import { ScoreDisplay } from './todays-chances/score-display';
 import { RecommendationCard } from './todays-chances/recommendation-card';
@@ -13,7 +14,7 @@ import { Button } from './ui/button';
 import { ChevronDown, Info } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import { RecommendedTimeCard } from './recommended-time-card';
-import { FactorTiles } from './todays-chances/factor-tiles';
+import { DaypartScorePanel } from './daypart-score-panel';
 
 interface TodaysChancesCardProps {
     weatherData: WeatherApiResponse;
@@ -23,37 +24,48 @@ interface TodaysChancesCardProps {
 export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [chances, setChances] = useState<TodaysChances | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (weatherData && location) {
-            const result = computeTodaysChances(weatherData, 'auto');
-            setChances(result);
+        async function calculateChances() {
+            setIsLoading(true);
+            if (weatherData && location) {
+                const result = await computeTodaysChances(weatherData, 'auto');
+                setChances(result);
+            }
+            setIsLoading(false);
         }
+        calculateChances();
     }, [weatherData, location]);
     
-    if (!chances) {
+    if (isLoading || !chances) {
         return <Skeleton className="h-[280px] w-full rounded-xl" />;
     }
 
-    const bestWindow = chances.windows.reduce((best, current) => {
-        return (!best || current.score > best.score) ? current : best;
-    }, null as any);
+    const { date, todayScore, band, recommendations, factors, bestOverallWindow, daypartScores } = chances;
+    const todaysDaily = weatherData.daily.find(d => d.sunrise.startsWith(date));
 
-    const fallbackWindow = chances.windows.find(w => w.label === "Sunrise") || chances.windows[0] || null;
+    // Fallback window logic
+    const sunriseWindow = {
+        start: todaysDaily?.sunrise || new Date().toISOString(),
+        end: addHours(parseISO(todaysDaily?.sunrise || new Date().toISOString()), 2).toISOString(),
+        avgScore: 0 // Score isn't relevant for fallback display
+    };
+    
+    const fallbackWindow = bestOverallWindow || sunriseWindow;
 
-    const todaysDaily = weatherData.daily.find(d => d.sunrise.startsWith(chances.date));
 
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <Card className="w-full rounded-xl shadow-card border-0 p-4 gradient-fishing-panel text-white overflow-hidden">
                 <div className="flex justify-between items-center text-white/80 text-sm">
                     <p>{location.name}</p>
-                    <p>{chances.date}</p>
+                    <p>{date}</p>
                 </div>
                 
-                <div className="flex items-center justify-between gap-2 my-2">
-                    <div className="w-1/4">
-                       <ScoreDisplay score={chances.todayScore} band={chances.band} />
+                 <div className="flex items-center justify-between gap-2 my-2">
+                    <div className="w-1/4 flex-shrink-0">
+                       <ScoreDisplay score={todayScore} band={band} />
                     </div>
                     <div className="flex-1">
                        {todaysDaily && <DayArc windows={chances.windows} dailyData={todaysDaily} />}
@@ -61,14 +73,21 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
                 </div>
 
                 <div className="mt-2">
-                    <RecommendedTimeCard window={bestWindow} fallbackWindow={fallbackWindow} />
+                    <RecommendedTimeCard window={bestOverallWindow} fallbackWindow={fallbackWindow} />
                 </div>
 
                 <CollapsibleContent className="mt-4 space-y-3">
-                     <FactorTiles windows={chances.windows} />
+                    <DaypartScorePanel 
+                        speciesKey={'bream'}
+                        spotName={location.name}
+                        dayAvgScore={todayScore}
+                        dayStatus={band}
+                        intervals={daypartScores}
+                        selectedDate={new Date()}
+                    />
                     <RecommendationCard 
-                        recommendations={chances.recommendations}
-                        factors={chances.factors}
+                        recommendations={recommendations}
+                        factors={factors}
                     />
                 </CollapsibleContent>
 
@@ -85,3 +104,5 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
     );
 }
 
+// Add these imports to the top of the file
+import { addHours, parseISO } from 'date-fns';

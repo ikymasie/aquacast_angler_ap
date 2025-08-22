@@ -1,3 +1,4 @@
+
 export type Species = 'Bream' | 'Bass' | 'Carp';
 export type LureFamily = 'Live' | 'Crank/Swim' | 'Spinner' | 'Soft';
 
@@ -163,7 +164,8 @@ export interface TodaysChances {
     location: string;
     todayScore: number;
     band: ScoreStatus;
-    windows: Window[];
+    windows: Window[]; // Can be deprecated if not used in new UI
+    bestOverallWindow: RecommendedWindow | null;
     factors: {
         windKphNow: number;
         pressureTrend6h_hPa: number;
@@ -171,6 +173,7 @@ export interface TodaysChances {
         tempNowC: number;
     };
     recommendations: string[];
+    daypartScores: ThreeHourIntervalScore[];
 }
 
 
