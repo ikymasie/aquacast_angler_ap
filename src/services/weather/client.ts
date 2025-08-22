@@ -9,13 +9,13 @@ const CACHE_KEY_PREFIX = 'weather-cache-';
 
 const HOURLY_FORECAST_VARS = [
     "temperature_2m", "relative_humidity_2m", "precipitation_probability", "precipitation",
-    "cloud_cover", "surface_pressure", "wind_speed_10m", "wind_direction_10m",
+    "cloud_cover", "pressure_msl", "wind_speed_10m", "wind_direction_10m",
     "dew_point_2m", "uv_index", "shortwave_radiation", "is_day"
-].join(",");
+];
 
 const DAILY_FORECAST_VARS = [
     "sunrise", "sunset", "uv_index_max", "moon_phase", "precipitation_sum"
-].join(",");
+];
 
 
 interface CachedWeatherData {
@@ -41,15 +41,17 @@ function getCacheKey(location: Location): string {
 async function fetchWeatherDataFromServer(location: Location): Promise<WeatherApiResponse> {
     const { latitude, longitude } = location;
     
-    const forecastParams = new URLSearchParams({
+    const params = new URLSearchParams({
         latitude: latitude.toString(),
         longitude: longitude.toString(),
-        hourly: HOURLY_FORECAST_VARS,
-        daily: DAILY_FORECAST_VARS,
         timezone: "auto",
         forecast_days: "7"
     });
-    const forecastUrl = `${FORECAST_API_URL}?${forecastParams.toString()}`;
+
+    HOURLY_FORECAST_VARS.forEach(v => params.append('hourly', v));
+    DAILY_FORECAST_VARS.forEach(v => params.append('daily', v));
+    
+    const forecastUrl = `${FORECAST_API_URL}?${params.toString()}`;
     
     const response = await fetch(forecastUrl);
     if (!response.ok) {
@@ -71,7 +73,7 @@ async function fetchWeatherDataFromServer(location: Location): Promise<WeatherAp
             precipMm: forecastData.hourly.precipitation[i],
             precipProb: forecastData.hourly.precipitation_probability[i],
             cloudPct: forecastData.hourly.cloud_cover[i],
-            pressureHpa: forecastData.hourly.surface_pressure[i],
+            pressureHpa: forecastData.hourly.pressure_msl[i],
             windKph: forecastData.hourly.wind_speed_10m[i],
             windDeg: forecastData.hourly.wind_direction_10m[i],
             uv: forecastData.hourly.uv_index[i],

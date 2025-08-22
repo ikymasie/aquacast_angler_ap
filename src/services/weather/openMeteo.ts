@@ -8,11 +8,11 @@ const HOURLY_FORECAST_VARS = [
     "temperature_2m", "relative_humidity_2m", "precipitation",
     "cloud_cover", "pressure_msl", "wind_speed_10m", "wind_direction_10m",
     "dew_point_2m", "uv_index", "shortwave_radiation"
-].join(",");
+];
 
 const DAILY_FORECAST_VARS = [
     "sunrise", "sunset", "uv_index_max", "moon_phase", "precipitation_sum"
-].join(",");
+];
 
 
 function calculateEMA(data: number[], span: number): number {
@@ -35,16 +35,18 @@ function calculateStdDev(data: number[]): number {
 export async function fetchWeatherData(location: Location): Promise<WeatherApiResponse> {
     const { latitude, longitude } = location;
     
-    // Fetch 7-day forecast data. Open-Meteo defaults to starting from the current day.
-    const forecastParams = new URLSearchParams({
+    // Build the URL with repeated parameters for array values
+    const params = new URLSearchParams({
         latitude: latitude.toString(),
         longitude: longitude.toString(),
-        hourly: HOURLY_FORECAST_VARS,
-        daily: DAILY_FORECAST_VARS,
         timezone: "auto",
-        forecast_days: "7" 
+        forecast_days: "7"
     });
-    const forecastUrl = `${FORECAST_API_URL}?${forecastParams.toString()}`;
+
+    HOURLY_FORECAST_VARS.forEach(v => params.append('hourly', v));
+    DAILY_FORECAST_VARS.forEach(v => params.append('daily', v));
+    
+    const forecastUrl = `${FORECAST_API_URL}?${params.toString()}`;
     
     const forecastResponse = await fetch(forecastUrl);
     if (!forecastResponse.ok) {
@@ -88,6 +90,7 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
         sunset: forecastData.daily.sunset[i],
         moonPhase: forecastData.daily.moon_phase[i],
         uvMax: forecastData.daily.uv_index_max[i],
+        precipSum: forecastData.daily.precipitation_sum[i],
     }));
     
     // Calculate recent window values from the first 24-48 hours of the forecast
