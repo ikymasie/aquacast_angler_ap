@@ -18,7 +18,8 @@ const pageData = {
   },
   people: [
     { name: "Bob \"Crackberry\" Hirschfeld", blurb: "Champion of Botswana’s growing fishing community and constant source of stoke." },
-    { name: "Henry \"AK\" Segopa", blurb: "Mentor and advocate who keeps our love for angling thriving." }
+    { name: "Henry \"AK\" Segopa", blurb: "Mentor and advocate who keeps our love for angling thriving." },
+    { name: "Fishing Fanatics Botswana", blurb: "A constant source of local knowledge, great community humor, and all-around standup guys. Proud to be a part of it." }
   ],
   about: {
     author: "Ikageng \"Iky\" Masie",
