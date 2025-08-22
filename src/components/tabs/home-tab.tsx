@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { TodaysChancesCard } from '../todays-chances-card';
 import { GreetingBlock } from '../home/greeting-block';
 import { MyLocations } from '../home/my-locations';
+import { isToday } from 'date-fns';
 
 export function HomeTab() {
   const { user, isInitialized, isLoading } = useUser();
@@ -20,6 +21,7 @@ export function HomeTab() {
   const [location, setLocation] = useState<Location | null>(null);
   const [weather, setWeather] = useState<WeatherApiResponse | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
     if (isInitialized && !user) {
@@ -94,8 +96,10 @@ export function HomeTab() {
         <div className="pt-2">
             {isWeatherLoading || !weather || !location ? (
                 <Skeleton className="h-[280px] w-full rounded-xl" />
-            ) : (
+            ) : isToday(selectedDate) ? (
                 <TodaysChancesCard weatherData={weather} location={location} />
+            ) : (
+                 <Skeleton className="h-[280px] w-full rounded-xl" />
             )}
         </div>
         
