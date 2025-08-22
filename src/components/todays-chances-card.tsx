@@ -7,7 +7,6 @@ import { WeatherApiResponse, Location } from '@/lib/types';
 import { computeTodaysChances, type TodaysChances } from '@/lib/scoring';
 import { DayArc } from './todays-chances/day-arc';
 import { ScoreDisplay } from './todays-chances/score-display';
-import { FactorTiles } from './todays-chances/factor-tiles';
 import { RecommendationCard } from './todays-chances/recommendation-card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from './ui/button';
@@ -50,18 +49,18 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
                     <p>{chances.date}</p>
                 </div>
                 
-                 <div className="text-center my-2">
-                     <ScoreDisplay score={chances.todayScore} band={chances.band} />
-                 </div>
-
-                {todaysDaily && <DayArc windows={chances.windows} dailyData={todaysDaily} />}
-
+                <div className="flex items-center justify-between gap-4 my-2">
+                    <ScoreDisplay score={chances.todayScore} band={chances.band} />
+                    <div className="flex-1 relative h-[100px]">
+                       {todaysDaily && <DayArc windows={chances.windows} dailyData={todaysDaily} />}
+                    </div>
+                </div>
+                
                 <div className="mt-4">
                     {bestWindow && <RecommendedTimeCard window={bestWindow} />}
                 </div>
 
                 <CollapsibleContent className="mt-4 space-y-3">
-                    <FactorTiles windows={chances.windows} />
                     <RecommendationCard 
                         recommendations={chances.recommendations}
                         factors={chances.factors}
