@@ -17,9 +17,9 @@ const pageData = {
     progressPct: 41
   },
   people: [
-    { name: "Bob \"Crackberry\" Hirschfeld", blurb: "Champion of Botswana’s growing fishing community and constant source of stoke." },
-    { name: "Henry \"AK\" Segopa", blurb: "Mentor and advocate who keeps our love for angling thriving." },
-    { name: "Fishing Fanatics Botswana", blurb: "A constant source of local knowledge, great community humor, and all-around standup guys. Proud to be a part of it." }
+    { name: "Bob \"Crackberry\" Hirschfeld", blurb: "A true champion of Botswana’s growing fishing community. Your constant source of stoke and encyclopedic knowledge has been a driving force behind this project." },
+    { name: "Henry \"AK\" Segopa", blurb: "Thank you for being a mentor and advocate who keeps our collective love for angling thriving through your tireless community efforts and guidance." },
+    { name: "Fishing Fanatics Botswana", blurb: "To the entire WhatsApp group—thank you for being a constant source of local knowledge, great community humor, and for being all-around standup guys. We're proud to be a part of it." }
   ],
   about: {
     author: "Ikageng \"Iky\" Masie",
