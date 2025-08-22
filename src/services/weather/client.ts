@@ -14,7 +14,7 @@ const HOURLY_FORECAST_VARS = [
 ];
 
 const DAILY_FORECAST_VARS = [
-    "sunrise", "sunset", "uv_index_max", "moon_phase", "precipitation_sum"
+    "sunrise", "sunset", "uv_index_max", "precipitation_sum"
 ];
 
 
@@ -88,7 +88,7 @@ async function fetchWeatherDataFromServer(location: Location): Promise<WeatherAp
         daily: forecastData.daily.time.map((t:string, i:number): DayContext => ({
             sunrise: forecastData.daily.sunrise[i],
             sunset: forecastData.daily.sunset[i],
-            moonPhase: forecastData.daily.moon_phase[i],
+            moonPhase: 0.5, // Default placeholder, server calculates accurately
             uvMax: forecastData.daily.uv_index_max[i],
             precipSum: forecastData.daily.precipitation_sum[i],
         })),
