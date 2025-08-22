@@ -12,11 +12,14 @@ export function AboutCard({ about }: { about: { author: string; company: string;
     return (
         <Card className="p-4 rounded-xl shadow-card">
             <h2 className="font-headline text-lg font-semibold mb-2">About the Project</h2>
-            <p className="text-sm text-muted-foreground space-y-2">
-                <span>This project helps anglers plan smarter sessions with species-aware forecasts and practice drills.</span>
-                <span>The solution was developed by **{about.author}** at **{about.company}**, a local software development house.</span>
-                <span>It’s **free** and sustained by community donations to keep **code, servers, and coffee** flowing.</span>
-            </p>
+            <div className="text-sm text-muted-foreground space-y-3">
+                <p>
+                    Built in Botswana by <span className="font-semibold text-foreground">{about.author}</span> at <span className="font-semibold text-foreground">{about.company}</span>, this app helps anglers plan smarter sessions and practice the skills that catch more fish.
+                </p>
+                <p>
+                    Our goal is to combine local knowledge with AI-powered forecasts to give you the best chance of success on the water. The project is free, open-source, and sustained by community donations to keep the code, servers, and coffee flowing.
+                </p>
+            </div>
             <div className="mt-4 flex flex-wrap gap-2">
                 <Badge variant="secondary">Open Source</Badge>
                 <Badge variant="secondary">Community-funded</Badge>
