@@ -1,11 +1,8 @@
+
 'use client';
 
 import { Header } from '@/components/header';
-import { LocationsRail } from '@/components/locations-rail';
 import { SearchBar } from '@/components/search-bar';
-import { SectionHeader } from '@/components/section-header';
-import { FavoritesRecents } from '@/components/favorites-recents';
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from 'react';
 import type { Location, WeatherApiResponse } from '@/lib/types';
 import { getCachedWeatherData } from '@/services/weather/client';
@@ -14,31 +11,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/navigation';
 import { TodaysChancesCard } from '../todays-chances-card';
-
-function GreetingBlock() {
-    const { user, isLoading } = useUser();
-    
-    if (isLoading && !user) {
-        return (
-            <div>
-                <Skeleton className="h-8 w-48 mb-2" />
-                <Skeleton className="h-5 w-64" />
-            </div>
-        )
-    }
-
-    return (
-        <div>
-             <h1 className="font-headline text-h1 font-bold text-ink-900">Hello {user?.displayName || 'Angler'}</h1>
-             <p className="font-body text-body text-ink-700">Here's your personalized fishing forecast.</p>
-        </div>
-    )
-}
+import { GreetingBlock } from '../home/greeting-block';
+import { MyLocations } from '../home/my-locations';
 
 export function HomeTab() {
   const { user, isInitialized, isLoading } = useUser();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("recents");
   const [location, setLocation] = useState<Location | null>(null);
   const [weather, setWeather] = useState<WeatherApiResponse | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(true);
@@ -98,7 +76,7 @@ export function HomeTab() {
     }
   }, [location]);
 
-  if (!isInitialized || !user) {
+  if (!isInitialized || isLoading || !user) {
     return (
       <div className="flex flex-col min-h-screen bg-background items-center justify-center">
         <Skeleton className="h-screen w-screen" />
@@ -115,35 +93,21 @@ export function HomeTab() {
 
         <div className="pt-2">
             {isWeatherLoading || !weather || !location ? (
+                <Skeleton className="h-[280px] w-full rounded-xl" />
+            ) : (
+                <TodaysChancesCard weatherData={weather} location={location} />
+            )}
+        </div>
+        
+        <div className="pt-2">
+            {isWeatherLoading || !weather || !location ? (
                 <Skeleton className="h-[180px] w-full rounded-xl" />
             ) : (
                 <ConditionsPanel location={location} initialData={weather} />
             )}
         </div>
         
-        <div className="pt-2">
-            {isWeatherLoading || !weather || !location ? (
-                <Skeleton className="h-[280px] w-full rounded-xl" />
-            ) : (
-                <TodaysChancesCard weatherData={weather} location={location} />
-            )}
-        </div>
-
-        <div className="space-y-3 pt-4">
-            <div>
-                <SectionHeader title="My Locations" />
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-2">
-                  <TabsList className="bg-transparent p-0 justify-start gap-2 h-auto">
-                    <TabsTrigger value="all_spots">All Spots</TabsTrigger>
-                    <TabsTrigger value="recents">Recents</TabsTrigger>
-                    <TabsTrigger value="favorites">Favorites</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-            </div>
-            <div>
-                <FavoritesRecents tab={activeTab as any} />
-            </div>
-        </div>
+        <MyLocations />
       </main>
     </>
   );
