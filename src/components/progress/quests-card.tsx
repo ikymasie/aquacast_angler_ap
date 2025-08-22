@@ -5,23 +5,39 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { SectionHeader } from '../section-header';
-import { Badge } from '../ui/badge';
+import { Skeleton } from '../ui/skeleton';
+
+interface Quest {
+    label: string;
+    isComplete: boolean;
+}
+
+interface QuestsCardProps {
+    quests: Quest[];
+    isLoading: boolean;
+}
 
 
-const MOCK_QUESTS = [
-  { label: "Hit 80% quiet-entry in a Soft Skip drill", isComplete: true },
-  { label: "Practice with 2 different species in one day", isComplete: true },
-  { label: "Run an Edge Lane drill in wind > 8 kph", isComplete: false },
-];
+export function QuestsCard({ quests, isLoading }: QuestsCardProps) {
+  
+  if (isLoading) {
+      return (
+          <Card className="rounded-xl p-4 space-y-4">
+              <SectionHeader title="Weekly Quests" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+          </Card>
+      )
+  }
 
-export function QuestsCard() {
   return (
     <Card className="rounded-xl p-4 space-y-4">
       <SectionHeader title="Weekly Quests" />
       <div className="space-y-2">
-        {MOCK_QUESTS.map((quest, index) => (
+        {quests.map((quest, index) => (
           <div key={index} className="flex items-center gap-2 text-sm">
-            <CheckCircle className={`w-5 h-5 ${quest.isComplete ? 'text-score-good' : 'text-muted-foreground'}`} />
+            <CheckCircle className={`w-5 h-5 flex-shrink-0 ${quest.isComplete ? 'text-score-good' : 'text-muted-foreground/50'}`} />
             <span className={quest.isComplete ? 'text-foreground' : 'text-muted-foreground'}>
               {quest.label}
             </span>

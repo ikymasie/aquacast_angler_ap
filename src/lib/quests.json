@@ -1,0 +1,69 @@
+
+{
+    "schemaVersion": "1.0",
+    "quests": [
+        {
+            "key": "DIVERSE_SPECIES_WEEK",
+            "label": "Practice with 2 different species in one week",
+            "criteria": {
+                "metric": "practice_species",
+                "target": 2,
+                "scope": "week"
+            }
+        },
+        {
+            "key": "QUIET_ENTRY_MASTERY_SOFT_SKIP",
+            "label": "Achieve over 80% on a Soft Skip drill",
+            "criteria": {
+                "metric": "final_score",
+                "target": 80,
+                "scope": {
+                    "drillKey": "soft_skip_precision"
+                }
+            }
+        },
+        {
+            "key": "WINDY_DAY_WARRIOR",
+            "label": "Run an Edge Lane drill in wind > 8 kph",
+            "criteria": {
+                "metric": "session_in_wind",
+                "target": 1,
+                "scope": {
+                    "drillKey": "lane_cadence",
+                    "min_wind_kph": 8
+                }
+            }
+        },
+        {
+            "key": "THREE_SESSIONS_WEEK",
+            "label": "Complete 3 practice sessions this week",
+            "criteria": {
+                "metric": "session_count",
+                "target": 3,
+                "scope": "week"
+            }
+        },
+        {
+            "key": "BASS_MASTER_CADENCE",
+            "label": "Score over 75 on a Bass Spinner Lane Cadence drill",
+            "criteria": {
+                "metric": "final_score",
+                "target": 75,
+                "scope": {
+                    "drillKey": "bass_spinner_lane_cadence"
+                }
+            }
+        },
+        {
+            "key": "BREAM_FLOAT_PRO",
+            "label": "Achieve an 'A' grade on a Float Hookset Timing drill",
+            "criteria": {
+                "metric": "final_grade",
+                "target": "A",
+                "scope": {
+                    "drillKey": "bream_float_hookset_timing"
+                }
+            }
+        }
+    ]
+}

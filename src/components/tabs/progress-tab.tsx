@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SessionSetupSheet } from '@/components/practice/session-setup-sheet';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
-import { startPracticeSessionAction, getPracticeSessionsAction } from '@/app/actions';
+import { startPracticeSessionAction, getPracticeSessionsAction, getOrGenerateWeeklyQuestsAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { usePracticeState } from '@/hooks/use-practice-state';
 import { RankBanner } from '../progress/rank-banner';
@@ -41,6 +41,9 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
 
   const [sessions, setSessions] = useState<any[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
+  const [quests, setQuests] = useState<any[]>([]);
+  const [isLoadingQuests, setIsLoadingQuests] = useState(true);
+
 
   useEffect(() => {
     if (user) {
@@ -50,7 +53,14 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
         setSessions(data || []);
         setIsLoadingSessions(false);
       };
+      const fetchQuests = async () => {
+          setIsLoadingQuests(true);
+          const { data } = await getOrGenerateWeeklyQuestsAction(user.uid);
+          setQuests(data || []);
+          setIsLoadingQuests(false);
+      };
       fetchSessions();
+      fetchQuests();
     }
   }, [user]);
 
@@ -419,7 +429,7 @@ export function ProgressTab({ isInsideSpotDetails = false }: { isInsideSpotDetai
       />
       <TrendsChart trends={sevenDayTrends} />
       <AiCoachCard />
-      <QuestsCard />
+      <QuestsCard quests={quests} isLoading={isLoadingQuests} />
       <HistoryCard />
       
       <div className={cn(!isInsideSpotDetails && "sticky top-[56px] z-10 bg-background/95 backdrop-blur-sm py-4 -mx-4 px-4 border-b")}>

@@ -4,7 +4,7 @@
 import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalScore, LureFamily, DayContext, HourPoint, RecentWindow, UserSpot, WeatherApiResponse } from "@/lib/types";
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
-import { format, parseISO, startOfToday, endOfDay, isWithinInterval, isToday, startOfHour, isBefore, addHours } from "date-fns";
+import { format, parseISO, startOfToday, endOfDay, isWithinInterval, isToday, startOfHour, isBefore, addHours, startOfWeek, isSameWeek } from "date-fns";
 import type { CastingAdviceInput } from "@/ai/flows/casting-advice-flow";
 import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
 import { getLureAdvice } from "@/ai/flows/lure-advice-flow";
@@ -13,6 +13,7 @@ import { analyzePhoto, type PhotoAnalysisInput } from "@/ai/flows/photo-analysis
 import { db } from "@/lib/firebase";
 import { collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp, query, orderBy, limit, where } from "firebase/firestore";
 import { getDrillAnalysis } from '@/ai/flows/drill-analysis-flow';
+import allQuests from '@/lib/quests.json';
 
 
 const LureAdviceInputSchema = z.object({
@@ -477,6 +478,76 @@ export async function getPracticeSessionsAction(userId: string): Promise<{ data:
 
     } catch (err) {
         console.error("Failed to fetch practice sessions:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+        return { data: null, error: errorMessage };
+    }
+}
+
+// --- Weekly Quests Actions ---
+
+function checkQuestCompletion(quest: any, sessions: any[]): boolean {
+    // This is a simplified checker. A real implementation would be more robust.
+    const { metric, target, scope } = quest.criteria;
+    
+    if (metric === "practice_species") {
+        const practicedSpecies = new Set(sessions.map(s => s.speciesKey));
+        return practicedSpecies.size >= target;
+    }
+    
+    if (metric === "quiet_entry_pct" && scope?.drillKey) {
+        const relevantSessions = sessions.filter(s => s.drillKey.includes(scope.drillKey));
+        if (relevantSessions.length === 0) return false;
+        // In a real app, you'd calculate this KPI from attempt data.
+        // For now, we'll use the final score as a proxy.
+        return relevantSessions.some(s => (s.finalScore || 0) >= target);
+    }
+    
+     if (metric === "session_in_wind" && scope?.min_wind_kph) {
+        // This requires weather data per session, which we don't store yet.
+        // We'll simulate it for now.
+        return sessions.length > 2; // Simulate completion
+    }
+
+    return false;
+}
+
+export async function getOrGenerateWeeklyQuestsAction(userId: string): Promise<{ data: any[] | null, error: string | null }> {
+    if (!userId) return { data: null, error: "User not authenticated." };
+
+    try {
+        const questsRef = doc(db, 'users', userId, 'quests', 'weekly');
+        const questsSnap = await getDoc(questsRef);
+        const now = new Date();
+        
+        let activeQuests = [];
+
+        if (questsSnap.exists() && isSameWeek(questsSnap.data().generatedAt.toDate(), now, { weekStartsOn: 1 })) {
+            activeQuests = questsSnap.data().quests;
+        } else {
+            // Generate new quests for the week
+            const shuffled = allQuests.quests.sort(() => 0.5 - Math.random());
+            activeQuests = shuffled.slice(0, 3).map(q => ({ ...q, isComplete: false }));
+            await setDoc(questsRef, { quests: activeQuests, generatedAt: serverTimestamp() });
+        }
+
+        // Check completion status against recent sessions
+        const { data: sessions } = await getPracticeSessionsAction(userId);
+        const thisWeeksSessions = (sessions || []).filter(s => s.startTime && isSameWeek(parseISO(s.startTime), now, { weekStartsOn: 1 }));
+
+        const checkedQuests = activeQuests.map((quest: any) => ({
+            ...quest,
+            isComplete: checkQuestCompletion(quest, thisWeeksSessions)
+        }));
+        
+        // Update Firestore with the latest completion status (optional but good practice)
+        if (JSON.stringify(checkedQuests) !== JSON.stringify(activeQuests)) {
+            await updateDoc(questsRef, { quests: checkedQuests });
+        }
+
+        return { data: checkedQuests, error: null };
+
+    } catch (err) {
+        console.error("Failed to fetch or generate quests:", err);
         const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
         return { data: null, error: errorMessage };
     }
