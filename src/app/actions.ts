@@ -14,6 +14,7 @@ import { db } from "@/lib/firebase";
 import { collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp, query, orderBy, limit, where } from "firebase/firestore";
 import { getDrillAnalysis } from '@/ai/flows/drill-analysis-flow';
 import allQuests from '@/lib/quests.json';
+import { getSuggestedDrill } from "@/ai/flows/suggest-drill-flow";
 
 
 const LureAdviceInputSchema = z.object({
@@ -494,7 +495,7 @@ function checkQuestCompletion(quest: any, sessions: any[]): boolean {
         return practicedSpecies.size >= target;
     }
     
-    if (metric === "quiet_entry_pct" && scope?.drillKey) {
+    if (metric === "final_score" && scope?.drillKey) {
         const relevantSessions = sessions.filter(s => s.drillKey.includes(scope.drillKey));
         if (relevantSessions.length === 0) return false;
         // In a real app, you'd calculate this KPI from attempt data.
@@ -532,6 +533,10 @@ export async function getOrGenerateWeeklyQuestsAction(userId: string): Promise<{
 
         // Check completion status against recent sessions
         const { data: sessions } = await getPracticeSessionsAction(userId);
+        if (!sessions) {
+            return { data: activeQuests.map(q => ({ ...q, isComplete: false })), error: null };
+        }
+        
         const thisWeeksSessions = (sessions || []).filter(s => s.startTime && isSameWeek(parseISO(s.startTime), now, { weekStartsOn: 1 }));
 
         const checkedQuests = activeQuests.map((quest: any) => ({
@@ -552,6 +557,20 @@ export async function getOrGenerateWeeklyQuestsAction(userId: string): Promise<{
         return { data: null, error: errorMessage };
     }
 }
-    
 
+interface GetSuggestedDrillPayload {
+    quests: any[];
+    availableDrills: any[];
+}
+
+export async function getSuggestedDrillAction(payload: GetSuggestedDrillPayload): Promise<{ data: { drillKey: string } | null, error: string | null }> {
+    try {
+        const result = await getSuggestedDrill(payload);
+        return { data: result, error: null };
+    } catch (err) {
+        console.error("Failed to get suggested drill:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+        return { data: null, error: errorMessage };
+    }
+}
     
