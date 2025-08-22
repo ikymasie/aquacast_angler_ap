@@ -58,9 +58,10 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
                     <div className="flex-1">
                        {todaysDaily && <DayArc windows={chances.windows} dailyData={todaysDaily} />}
                     </div>
-                    <div className="w-1/3">
-                        <RecommendedTimeCard window={bestWindow} fallbackWindow={fallbackWindow} />
-                    </div>
+                </div>
+
+                <div className="mt-2">
+                    <RecommendedTimeCard window={bestWindow} fallbackWindow={fallbackWindow} />
                 </div>
 
                 <CollapsibleContent className="mt-4 space-y-3">
@@ -83,3 +84,4 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
         </Collapsible>
     );
 }
+
