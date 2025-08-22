@@ -36,6 +36,7 @@ interface UserContextType {
   isInitialized: boolean;
   signOut: () => Promise<void>;
   createAndSignInUser: (profileData: { displayName: string, email: string, phone: string }) => Promise<void>;
+  signInUser: (email: string) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -74,6 +75,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const signInUser = async (email: string) => {
+    const password = '123456'; // Default password
+    await signInWithEmailAndPassword(auth, email, password);
+    // onAuthStateChanged will handle setting the user state
+  };
+
   const createAndSignInUser = async (profileData: { displayName: string, email: string, phone: string }) => {
     const { displayName, email, phone } = profileData;
     const password = '123456'; // Default password
@@ -106,6 +113,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                 };
                 await setDoc(userRef, newUserProfile);
                 
+                // Manually set user state as onAuthStateChanged might not fire immediately
                 setUser({ uid: firebaseUser.uid, ...newUserProfile });
             } catch (createError) {
                 console.error("Error creating user after sign-in failed:", createError);
@@ -123,7 +131,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
-  const value = { user, isLoading, isInitialized, signOut, createAndSignInUser };
+  const value = { user, isLoading, isInitialized, signOut, createAndSignInUser, signInUser };
 
   return (
     <UserContext.Provider value={value}>
@@ -139,3 +147,5 @@ export const useUser = () => {
   }
   return context;
 };
+
+    

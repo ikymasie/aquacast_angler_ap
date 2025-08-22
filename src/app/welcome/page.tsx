@@ -20,7 +20,7 @@ export default function WelcomePage() {
             <main className="relative z-10 flex flex-col flex-1 h-full px-6">
                 <div className="flex-1 flex flex-col justify-center">
                     <div className="mt-16">
-                        <LogoRow width={250} height={250} />
+                        <LogoRow />
                     </div>
 
                     <div className="text-center mt-12 space-y-3">
@@ -45,7 +45,7 @@ export default function WelcomePage() {
                         size="xl" 
                         variant="outline" 
                         className="w-full"
-                        onClick={() => router.push('#')} // To be implemented: /auth/recover
+                        onClick={() => router.push('/auth/recover')}
                     >
                         Recover Account
                     </Button>
@@ -59,3 +59,5 @@ export default function WelcomePage() {
         </div>
     );
 }
+
+    

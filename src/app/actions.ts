@@ -15,6 +15,7 @@ import { collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, serverTime
 import { getDrillAnalysis } from '@/ai/flows/drill-analysis-flow';
 import allQuests from '@/lib/quests.json';
 import { getSuggestedDrill } from "@/ai/flows/suggest-drill-flow";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 
 const LureAdviceInputSchema = z.object({
@@ -595,4 +596,73 @@ export async function toggleFavoriteSpotAction(payload: ToggleFavoriteSpotPayloa
     return { success: false, error: errorMessage };
   }
 }
+
+// --- Account Recovery Actions ---
+
+async function findUserByEmail(email: string): Promise<{ uid: string; phone: string } | null> {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("email", "==", email));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+        return null;
+    }
+    
+    const userDoc = querySnapshot.docs[0];
+    const userData = userDoc.data();
+    
+    return {
+        uid: userDoc.id,
+        phone: userData.phone || '',
+    };
+}
+
+
+export async function getMaskedPhoneForUserAction(email: string): Promise<{ data: { maskedPhone: string } | null, error: string | null }> {
+    try {
+        const userInfo = await findUserByEmail(email);
+
+        if (!userInfo || !userInfo.phone) {
+            return { data: null, error: "No account found with that email, or the account has no phone number." };
+        }
+
+        const { phone } = userInfo;
+        if (phone.length < 4) {
+            return { data: { maskedPhone: '****' }, error: null };
+        }
+        
+        const maskedPhone = `+...${phone.slice(-3)}`;
+        return { data: { maskedPhone }, error: null };
+
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "An unknown server error occurred.";
+        return { data: null, error: errorMessage };
+    }
+}
+
+export async function recoverAccountAction(email: string, submittedPhone: string): Promise<{ success: boolean, error: string | null }> {
+    try {
+        const userInfo = await findUserByEmail(email);
+        
+        if (!userInfo) {
+            return { success: false, error: "No account found with that email." };
+        }
+        
+        if (userInfo.phone !== submittedPhone) {
+            return { success: false, error: "The phone number you entered does not match our records." };
+        }
+
+        // If phone matches, attempt to sign in the user.
+        // This part is tricky without admin SDK. We assume client-side handles sign-in.
+        // For server-side, you'd typically generate a custom token.
+        // Here, we just validate. The client will use the password to sign in.
+        return { success: true, error: null };
+
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "An unknown server error occurred during recovery.";
+        return { success: false, error: errorMessage };
+    }
+}
+    
+
     
