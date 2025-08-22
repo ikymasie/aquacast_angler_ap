@@ -5,7 +5,7 @@
 Built with Next.js, Firebase, and Google's Genkit, this application is a powerful demonstration of how AI can transform a traditional hobby into a data-driven pursuit.
 
 ---
-
+ 
 ## ✨ Key Features
 
 ### 🎣 AI-Powered Fishing Forecasts
