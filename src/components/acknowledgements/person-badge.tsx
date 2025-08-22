@@ -17,8 +17,8 @@ export function PersonBadge({ name, blurb }: PersonBadgeProps) {
                 <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div>
-                <p className="font-semibold text-foreground">{name}</p>
-                <p className="text-sm text-muted-foreground">{blurb}</p>
+                <p className="font-semibold text-foreground text-lg">{name}</p>
+                <p className="text-base text-muted-foreground">{blurb}</p>
             </div>
         </div>
     );
