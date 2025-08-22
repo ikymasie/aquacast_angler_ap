@@ -23,7 +23,7 @@ export function HeroHeader() {
   };
 
   return (
-    <header className="relative h-[180px] w-full overflow-hidden rounded-b-2xl bg-gradient-to-br from-primary to-primary-dark p-4 flex flex-col justify-between">
+    <header className="relative h-[180px] w-full overflow-hidden rounded-b-2xl gradient-fishing-panel p-4 flex flex-col justify-between">
       <div className="absolute inset-0 bg-black/10" />
       <div className="relative z-10 flex justify-between items-center">
          <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-white hover:bg-white/10">
