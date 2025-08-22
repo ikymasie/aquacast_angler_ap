@@ -342,6 +342,8 @@ function SpotDetailsContent() {
                 advice={advice}
                 selectedLure={selectedLure}
                 onLureSelect={setSelectedLure}
+                selectedSpecies={selectedSpecies}
+                onSelectSpecies={setSelectedSpecies}
               />
           </TabsContent>
           
