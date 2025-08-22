@@ -40,6 +40,8 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
         return (!best || current.score > best.score) ? current : best;
     }, null as any);
 
+    const todaysDaily = weatherData.daily.find(d => d.sunrise.startsWith(chances.date));
+
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <Card className="w-full rounded-xl shadow-card border-0 p-4 gradient-fishing-panel text-white overflow-hidden">
@@ -48,14 +50,18 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
                     <p>{chances.date}</p>
                 </div>
                 
-                 <div className="grid grid-cols-2 gap-4 items-center my-4">
+                 <div className="text-center my-2">
                      <ScoreDisplay score={chances.todayScore} band={chances.band} />
-                     {bestWindow && <RecommendedTimeCard window={bestWindow} />}
                  </div>
 
-                 <FactorTiles windows={chances.windows} />
-                
+                {todaysDaily && <DayArc windows={chances.windows} dailyData={todaysDaily} />}
+
+                <div className="mt-4">
+                    {bestWindow && <RecommendedTimeCard window={bestWindow} />}
+                </div>
+
                 <CollapsibleContent className="mt-4 space-y-3">
+                    <FactorTiles windows={chances.windows} />
                     <RecommendationCard 
                         recommendations={chances.recommendations}
                         factors={chances.factors}
