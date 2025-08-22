@@ -11,7 +11,7 @@ const HOURLY_FORECAST_VARS = [
 ];
 
 const DAILY_FORECAST_VARS = [
-    "sunrise", "sunset", "uv_index_max", "moon_phase", "precipitation_sum"
+    "sunrise", "sunset", "uv_index_max"
 ];
 
 
@@ -31,6 +31,17 @@ function calculateStdDev(data: number[]): number {
     const mean = data.reduce((a, b) => a + b) / n;
     return Math.sqrt(data.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / (n - 1));
 }
+
+// Helper to get moon phase without an API call
+function getMoonPhase(date: Date = new Date()): number {
+  const JD = date.getTime() / 86400000 + 2440587.5; // Julian day
+  const JD0 = 2451550.1; // Known new moon (2000-01-06 18:14 UTC)
+  const LUNAR_CYCLE = 29.530588853; // Synodic month
+  let phase = ((JD - JD0) / LUNAR_CYCLE) % 1;
+  if (phase < 0) phase += 1;
+  return phase; // Returns a value from 0 (new) to 1 (new)
+}
+
 
 export async function fetchWeatherData(location: Location): Promise<WeatherApiResponse> {
     const { latitude, longitude } = location;
@@ -88,9 +99,9 @@ export async function fetchWeatherData(location: Location): Promise<WeatherApiRe
     const daily: DayContext[] = forecastData.daily.time.map((t:string, i:number): DayContext => ({
         sunrise: forecastData.daily.sunrise[i],
         sunset: forecastData.daily.sunset[i],
-        moonPhase: forecastData.daily.moon_phase[i],
+        moonPhase: getMoonPhase(new Date(t)), // Calculate moon phase here
         uvMax: forecastData.daily.uv_index_max[i],
-        precipSum: forecastData.daily.precipitation_sum[i],
+        precipSum: 0, // No longer fetching this, so default to 0
     }));
     
     // Calculate recent window values from the first 24-48 hours of the forecast
