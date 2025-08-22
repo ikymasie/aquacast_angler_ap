@@ -329,6 +329,7 @@ function SpotDetailsContent() {
               onSelectSpecies={setSelectedSpecies}
               recommendedWindow={recommendedWindow}
               dayContext={dayContext}
+              location={location}
             />
           </TabsContent>
 
@@ -369,5 +370,3 @@ export default function SpotDetailsPage() {
     </div>
   );
 }
-
-    

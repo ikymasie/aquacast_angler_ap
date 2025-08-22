@@ -9,7 +9,7 @@ import { QuickMetricsPanel } from '@/components/quick-metrics-panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import type { WeatherApiResponse, DayContext, ThreeHourIntervalScore, OverallDayScore, Species, RecommendedWindow } from '@/lib/types';
-import { isToday } from 'date-fns';
+import { isToday, startOfDay } from 'date-fns';
 import { TodaysChancesCard } from '../todays-chances-card';
 
 interface ForecastTabProps {
@@ -26,6 +26,7 @@ interface ForecastTabProps {
     onSelectSpecies: (species: Species) => void;
     recommendedWindow: RecommendedWindow | null;
     dayContext: DayContext | undefined;
+    location: { name: string; latitude: number; longitude: number; };
 }
 
 export function ForecastTab({
@@ -42,7 +43,13 @@ export function ForecastTab({
     onSelectSpecies,
     recommendedWindow,
     dayContext,
+    location,
 }: ForecastTabProps) {
+
+    const handleDateSelect = (date: Date) => {
+        onDateSelect(startOfDay(date));
+    };
+
     return (
         <>
             {isWeatherLoading || !weatherData ? (
@@ -51,7 +58,7 @@ export function ForecastTab({
                 <DaySelector 
                     dailyData={weatherData.daily}
                     selectedDate={selectedDate}
-                    onDateSelect={onDateSelect}
+                    onDateSelect={handleDateSelect}
                 />
             )}
             
@@ -62,7 +69,7 @@ export function ForecastTab({
                    <p className="text-center text-destructive-foreground">{forecastError}</p>
                </Card>
             ) : isToday(selectedDate) && weatherData ? (
-                <TodaysChancesCard weatherData={weatherData} location={{ name: spotName, latitude: 0, longitude: 0 }} />
+                <TodaysChancesCard weatherData={weatherData} location={location} />
             ) : (threeHourScores.length > 0 && overallDayScore) ? (
                <DaypartScorePanel
                    speciesKey={selectedSpecies.toLowerCase() as any}
