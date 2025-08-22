@@ -5,7 +5,7 @@ import type { Species, Location, ScoredHour, OverallDayScore, ThreeHourIntervalS
 import { fetchWeatherData } from "@/services/weather/openMeteo";
 import { scoreHour, calculate3HourIntervalScores, getOverallDayScore } from "@/lib/scoring";
 import { format, parseISO, startOfToday, endOfDay, isWithinInterval, isToday, startOfHour, isBefore, addHours, startOfWeek, isSameWeek } from "date-fns";
-import type { CastingAdviceInput } from "@/ai/flows/castingAdvice-flow";
+import type { CastingAdviceInput } from "@/ai/flows/casting-advice-flow";
 import { getCastingAdvice } from "@/ai/flows/casting-advice-flow";
 import { getLureAdvice } from "@/ai/flows/lure-advice-flow";
 import { z } from 'zod';
@@ -142,7 +142,9 @@ export async function addSpotAction(payload: AddSpotPayload) {
             throw new Error("User is not authenticated.");
         }
         
-        const host = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:9002';
+        const host = process.env.NODE_ENV === 'production' 
+            ? 'https://aquacast-angling-31d94260b080.herokuapp.com' 
+            : 'http://localhost:9002';
         const apiUrl = `${host}/api/place-from-latlng?lat=${lat}&lng=${lng}`;
 
 
@@ -662,6 +664,8 @@ export async function recoverAccountAction(email: string, submittedPhone: string
         return { success: false, error: errorMessage };
     }
 }
+    
+
     
 
     
