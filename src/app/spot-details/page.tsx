@@ -10,7 +10,7 @@ import { getCachedWeatherData } from '@/services/weather/client';
 import { getFishingForecastAction, getCastingAdviceAction, getLureAdviceAction, getUserSpotsAction, toggleFavoriteSpotAction } from '@/app/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSearchParams } from 'next/navigation';
-import { startOfToday, isFuture, parseISO, format, isToday } from 'date-fns';
+import { startOfToday, isFuture, parseISO, format, isToday, startOfDay } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUser } from '@/hooks/use-user';
 import type { CastingAdviceInput, CastingAdviceOutput } from '@/ai/flows/casting-advice-flow';
@@ -21,7 +21,6 @@ import { CastingTab } from '@/components/spot-details/casting-tab';
 import { GalleryTab } from '@/components/spot-details/gallery-tab';
 import { ProgressTab } from '@/components/tabs/progress-tab';
 import { useToast } from '@/hooks/use-toast';
-import { TodaysChancesCard } from '@/components/todays-chances-card';
 
 
 // Find a spot by name from a combined list of static and user spots.
