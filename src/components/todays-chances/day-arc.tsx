@@ -1,15 +1,17 @@
+
 'use client';
 
-import type { DayContext, Window } from "@/lib/types";
+import type { DayContext, Window, RecommendedWindow } from "@/lib/types";
 import { parseISO, getHours, getMinutes, differenceInMinutes, format, isAfter } from "date-fns";
 import { useEffect, useState } from "react";
 
 interface DayArcProps {
     windows: Window[];
     dailyData: DayContext;
+    recommendedWindow: RecommendedWindow | null;
 }
 
-export function DayArc({ windows, dailyData }: DayArcProps) {
+export function DayArc({ windows, dailyData, recommendedWindow }: DayArcProps) {
     const [now, setNow] = useState(new Date());
 
     useEffect(() => {
@@ -54,6 +56,7 @@ export function DayArc({ windows, dailyData }: DayArcProps) {
     };
 
     const getWindowAngle = (time: string) => {
+        if (!time) return -180;
         const date = parseISO(time);
         const minutes = differenceInMinutes(date, sunrise);
         const p = totalDayMinutes > 0 ? Math.max(0, Math.min(1, minutes / totalDayMinutes)) : 0;
@@ -79,18 +82,17 @@ export function DayArc({ windows, dailyData }: DayArcProps) {
                     strokeLinecap="round"
                 />
                 
-                {/* Highlighted windows */}
-                {windows.map((win, i) => (
+                {/* Highlighted recommended window */}
+                {recommendedWindow && (
                     <path
-                        key={i}
-                        d={describeArc(getWindowAngle(win.startISO), getWindowAngle(win.endISO))}
+                        d={describeArc(getWindowAngle(recommendedWindow.start), getWindowAngle(recommendedWindow.end))}
                         fill="none"
                         stroke="hsl(var(--primary))"
                         strokeOpacity={0.7}
                         strokeWidth={strokeWidth + 2}
                         strokeLinecap="round"
                     />
-                ))}
+                )}
 
                 {/* Sun dot */}
                 <circle cx={sunX} cy={sunY} r="8" fill="#FBBF24" stroke="white" strokeWidth="2" />

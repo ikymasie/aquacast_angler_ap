@@ -30,7 +30,7 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
         async function calculateChances() {
             setIsLoading(true);
             if (weatherData && location) {
-                const result = await computeTodaysChances(weatherData, 'auto');
+                const result = await computeTodaysChances(weatherData, 'Bream');
                 setChances(result);
             }
             setIsLoading(false);
@@ -68,7 +68,7 @@ export function TodaysChancesCard({ weatherData, location }: TodaysChancesCardPr
                        <ScoreDisplay score={todayScore} band={band} />
                     </div>
                     <div className="flex-1">
-                       {todaysDaily && <DayArc windows={chances.windows} dailyData={todaysDaily} />}
+                       {todaysDaily && <DayArc windows={chances.windows} dailyData={todaysDaily} recommendedWindow={chances.bestOverallWindow} />}
                     </div>
                 </div>
 
